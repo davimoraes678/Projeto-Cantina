@@ -36,3 +36,10 @@ class Professor(db.Model):
     @staticmethod
     def buscar_por_id(id):
         return Professor.query.get(id)
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'email': self.email,
+            'disciplina': self.disciplina
+    }

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão da Cantina - COTEMIG</title>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <header>
+        <h1>Gestão da Cantina - COTEMIG</h1>
+    </header>
+    <main class="container">
+        <!-- Seção de Alunos -->
+        <section class="card">
+            <h2>Alunos</h2>
+            <form id="form-aluno">
+                <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
+                <input type="email" id="aluno-email" placeholder="E-mail" required>
+                <input type="password" id="aluno-senha" placeholder="Senha" required>
+                <button type="submit">Cadastrar Aluno</button>
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Saldo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-alunos"></tbody>
+            </table>
+        </section>
+
+        <!-- Seção de Produtos -->
+        <section class="card">
+            <h2>Produtos</h2>
+            <form id="form-produto">
+                <input type="text" id="produto-nome" placeholder="Nome do Produto" required>
+                <input type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required>
+                <input type="number" id="produto-estoque" placeholder="Qtd. Estoque" required>
+                <select id="produto-categoria" required>
+                    <option value="">Selecione a Categoria...</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Lanche">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select>
+                <button type="submit">Cadastrar Produto</button>
+            </form>
+
+            <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
+            <form id="form-busca-produto" class="busca-form">
+                <select id="busca-categoria">
+                    <option value="">Todas as categorias</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Lanche">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select>
+                <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
+                <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
+                <select id="busca-ordenar">
+                    <option value="">Sem ordenação</option>
+                    <option value="nome">Ordenar por nome</option>
+                    <option value="preco">Ordenar por preço</option>
+                </select>
+                <button type="submit">Buscar</button>
+                <button type="button" id="btn-limpar-busca">Limpar</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Categoria</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-produtos"></tbody>
+            </table>
+        </section>
+
+        <!-- Seção de Pedidos -->
+        <section class="card">
+            <h2>Pedidos</h2>
+
+            <select id="select-aluno" required>
+                <option value="">Selecione o Aluno...</option>
+            </select>
+
+            <!-- Monta o carrinho: adiciona vários produtos antes de fechar o pedido -->
+            <form id="form-item-pedido">
+                <select id="select-produto" required>
+                    <option value="">Selecione o Produto...</option>
+                </select>
+                <input type="number" id="pedido-quantidade" placeholder="Qtd" value="1" min="1" required>
+                <button type="submit">Adicionar ao pedido</button>
+            </form>
+
+            <table class="carrinho-tabela">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-carrinho"></tbody>
+            </table>
+            <p id="carrinho-total">Total: R$ 0,00</p>
+            <button type="button" id="btn-finalizar-pedido">Finalizar Pedido</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Aluno</th>
+                        <th>Produtos</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-pedidos"></tbody>
+            </table>
+        </section>
+    </main>
+    <script src="js/alunos.js"></script>
+</body>
+</html>

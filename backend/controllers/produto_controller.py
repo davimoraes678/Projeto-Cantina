@@ -16,14 +16,17 @@ def listar_produtos():
 
 @bp_produto.route('/buscar', methods=['GET'])
 def buscar_produtos():
-    """Busca/filtra/ordena produtos. Substitui, do lado da aplicação, as
-    procedures buscar_por_categoria, ordenar_por_preco, ordenar_por_nome e
-    buscar_por_faixa_de_preco definidas em create-database.sql.
+    """Busca/filtra/ordena produtos.
 
-    Query params aceitos (todos opcionais e combináveis):
-      categoria=Bebida
-      preco_min=2&preco_max=10
-      ordenar=preco | ordenar=nome
+    O controller só repassa os query params pro service; quem sabe que isso
+    vira `CALL sp_...` no MySQL é o backend/repositories/produto_repository.py
+    (Controller -> Service -> Repository -> CALL sp_...(...) -> MySQL).
+
+    Query params aceitos:
+      categoria=Bebida                  -> CALL sp_produtos_por_categoria
+      preco_min=2&preco_max=10          -> CALL sp_produtos_por_faixa_de_preco
+      ordenar=preco                     -> CALL sp_produtos_ordenar_por_preco
+      ordenar=nome                      -> CALL sp_produtos_ordenar_por_nome
     """
     filtros = {
         'categoria': request.args.get('categoria') or None,

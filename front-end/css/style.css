@@ -102,6 +102,30 @@ button.concluir:hover {
     background-color: #146c43;
 }
 
+button.editar {
+    background-color: #6c757d;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9em;
+    margin-right: 0.3rem;
+}
+
+button.editar:hover {
+    background-color: #565e64;
+}
+
+#form-editar-pedido {
+    background: var(--bg-color);
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+}
+
+#aviso-edicao-aluno {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin: -1rem 0 1rem;
+}
+
 .busca-form {
     background: var(--bg-color);
     padding: 1rem;

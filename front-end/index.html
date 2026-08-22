@@ -18,9 +18,11 @@
             <form id="form-aluno">
                 <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
                 <input type="email" id="aluno-email" placeholder="E-mail" required>
-                <input type="password" id="aluno-senha" placeholder="Senha" required>
-                <button type="submit">Cadastrar Aluno</button>
+                <input type="password" id="aluno-senha" placeholder="Senha">
+                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+                <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
             </form>
+            <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
             <table>
                 <thead>
                     <tr>
@@ -48,7 +50,8 @@
                     <option value="Lanche">Salgado</option>
                     <option value="Doce">Doce</option>
                 </select>
-                <button type="submit">Cadastrar Produto</button>
+                <button type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
+                <button type="button" id="btn-cancelar-edicao-produto" style="display:none;">Cancelar edição</button>
             </form>
 
             <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
@@ -115,6 +118,21 @@
             </table>
             <p id="carrinho-total">Total: R$ 0,00</p>
             <button type="button" id="btn-finalizar-pedido">Finalizar Pedido</button>
+
+            <!-- Edição de pedido (status / horário de retirada) - aparece ao clicar em "Editar" -->
+            <form id="form-editar-pedido" style="display:none;">
+                <input type="hidden" id="editar-pedido-id">
+                <select id="editar-pedido-status" required>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Preparo">Em Preparo</option>
+                    <option value="Pronto">Pronto</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+                <input type="datetime-local" id="editar-pedido-horario">
+                <button type="submit">Salvar Pedido</button>
+                <button type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
+            </form>
 
             <table>
                 <thead>

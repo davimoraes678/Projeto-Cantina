@@ -3,6 +3,23 @@ from backend.models.item_pedido import ItemPedido
 from backend.models.produto_model import Produto
 from backend.models.aluno_model import Aluno
 from backend.extensions import db
+from datetime import datetime
+
+
+def _parse_datetime(valor):
+    """Converte string ISO (ex.: vinda de <input type="datetime-local">, no
+    formato 'YYYY-MM-DDTHH:MM') em datetime de verdade. O SQLite (e o
+    SQLAlchemy) recusam strings cruas em colunas DateTime - precisa ser um
+    objeto datetime. Retorna None se vier vazio/None."""
+    if not valor:
+        return None
+    if isinstance(valor, datetime):
+        return valor
+    try:
+        return datetime.fromisoformat(valor)
+    except ValueError:
+        return None
+
 
 class PedidoService:
     @staticmethod
@@ -23,7 +40,7 @@ class PedidoService:
                 id_aluno=id_aluno,
                 nome_aluno=aluno.nome,
                 status="Pendente",
-                horario_agendado_retirada=data.get('horario_agendado_retirada')
+                horario_agendado_retirada=_parse_datetime(data.get('horario_agendado_retirada'))
             )
             db.session.add(novo_pedido)
             db.session.flush() # Gera o id_pedido antes do commit definitivo
@@ -79,9 +96,10 @@ class PedidoService:
         pedido = Pedido.buscar_por_id(id_pedido)
         if not pedido:
             return {"erro": "Pedido não encontrado"}, 404
-            
+
         pedido.atualizar(
             status=data.get('status'),
-            data_hora_retirada=data.get('data_hora_retirada')
+            data_hora_retirada=_parse_datetime(data.get('data_hora_retirada')),
+            horario_agendado_retirada=_parse_datetime(data.get('horario_agendado_retirada'))
         )
         return pedido.to_dict(), 200

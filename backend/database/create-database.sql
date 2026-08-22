@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS produto (
     status BOOLEAN DEFAULT TRUE
 );
 
+-- id_aluno é NULLABLE de propósito: permite apagar o aluno sem apagar o pedido.
+-- nome_aluno guarda uma "foto" do nome no momento do pedido, usada quando o
+-- aluno já não existe mais.
 CREATE TABLE IF NOT EXISTS pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
     data_hora_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -31,18 +34,22 @@ CREATE TABLE IF NOT EXISTS pedido (
     valor_total DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     horario_agendado_retirada DATETIME DEFAULT NULL,
     data_hora_retirada DATETIME DEFAULT NULL,
-    id_aluno INT NOT NULL,
-    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno)
+    id_aluno INT NULL,
+    nome_aluno VARCHAR(100) NULL,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE SET NULL
 );
 
+-- id_produto é NULLABLE de propósito: permite apagar o produto sem apagar o item já pedido.
+-- nome_produto guarda uma "foto" do nome no momento do pedido.
 CREATE TABLE IF NOT EXISTS itens_pedido (
     id_item_pedido INT AUTO_INCREMENT PRIMARY KEY,
     quantidade INT NOT NULL DEFAULT 1,
     preco_unitario_cobrado DECIMAL(10, 2) NOT NULL,
     id_pedido INT NOT NULL,
-    id_produto INT NOT NULL,
-    FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
-    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
+    id_produto INT NULL,
+    nome_produto VARCHAR(100) NULL,
+    FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido) ON DELETE CASCADE,
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS avaliacao (
@@ -58,80 +65,92 @@ CREATE TABLE IF NOT EXISTS rateio (
     id_rateio INT AUTO_INCREMENT PRIMARY KEY,
     valor_parte DECIMAL(10, 2) NOT NULL,
     status_pagamento VARCHAR(50) DEFAULT 'Pendente',
-    id_aluno INT NOT NULL,
+    id_aluno INT NULL,
     id_pedido INT NOT NULL,
-    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE SET NULL,
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 
-delimiter $
-create or replace procedure buscar_por_categoria (in p_categoria varchar(100))
-begin
-    select 
-        nome, 
-        quantidade_estoque, 
-        preco_atual, 
-        preco_promocional, 
-        ingredientes, 
-        categoria, 
+-- =========================================================================
+-- PROCEDURES DE BUSCA DE PRODUTO
+-- Chamadas apenas pelo ProdutoRepository (backend/repositories/produto_repository.py)
+-- via `CALL sp_...`. Controller e Service nunca as chamam diretamente.
+-- =========================================================================
+
+DELIMITER $
+
+DROP PROCEDURE IF EXISTS sp_produtos_por_categoria $
+CREATE PROCEDURE sp_produtos_por_categoria (IN p_categoria VARCHAR(100))
+BEGIN
+    SELECT
+        id_produto,
+        nome,
+        quantidade_estoque,
+        preco_atual,
+        preco_promocional,
+        ingredientes,
+        categoria,
         status
-    from
+    FROM
         produto
-    where
+    WHERE
         categoria = p_categoria;
 END $
-DELIMITER ;
 
-delimiter $
-create or replace procedure ordenar_por_preco (in p_categoria varchar(100))
-begin
-    select 
-        nome, 
-        quantidade_estoque, 
-        preco_atual, 
-        preco_promocional, 
-        ingredientes, 
-        categoria, 
+DROP PROCEDURE IF EXISTS sp_produtos_por_faixa_de_preco $
+CREATE PROCEDURE sp_produtos_por_faixa_de_preco (IN p_min DECIMAL(10,2), IN p_max DECIMAL(10,2))
+BEGIN
+    SELECT
+        id_produto,
+        nome,
+        quantidade_estoque,
+        preco_atual,
+        preco_promocional,
+        ingredientes,
+        categoria,
         status
-    from
+    FROM
         produto
-    order by
+    WHERE
+        preco_atual BETWEEN p_min AND p_max;
+END $
+
+DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_preco $
+CREATE PROCEDURE sp_produtos_ordenar_por_preco ()
+BEGIN
+    SELECT
+        id_produto,
+        nome,
+        quantidade_estoque,
+        preco_atual,
+        preco_promocional,
+        ingredientes,
+        categoria,
+        status
+    FROM
+        produto
+    ORDER BY
         preco_atual, preco_promocional;
 END $
-DELIMITER ;
-delimiter $
-create or replace procedure ordenar_por_nome ()
-begin
-    select 
-        nome, 
-        quantidade_estoque, 
-        preco_atual, 
-        preco_promocional, 
-        ingredientes, 
-        categoria, 
+
+DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_nome $
+CREATE PROCEDURE sp_produtos_ordenar_por_nome ()
+BEGIN
+    SELECT
+        id_produto,
+        nome,
+        quantidade_estoque,
+        preco_atual,
+        preco_promocional,
+        ingredientes,
+        categoria,
         status
-    from
+    FROM
         produto
-    order by
+    ORDER BY
         nome;
 END $
-DELIMITER ;
-delimiter $
-create or replace procedure buscar_por_faixa_de_preco (in p_min int, in p_max int)
-begin
-    select 
-        nome, 
-        quantidade_estoque, 
-        preco_atual, 
-        preco_promocional, 
-        ingredientes, 
-        categoria, 
-        status
-    from
-        produto
-    where
-        preco between p_min and p_max;
-END $
+
 DELIMITER ;
 
 INSERT INTO aluno (nome, email, senha, saldo) VALUES
@@ -140,8 +159,8 @@ INSERT INTO aluno (nome, email, senha, saldo) VALUES
 ('Pedro Santos', 'pedro.santos@example.com', 'hashed_password_3', 200.00),
 ('Ana Costa', 'ana.costa@example.com', 'hashed_password_4', 250.00);
 
-INSERT INTO produto (nome, preco_atual, quantidade_estoque) VALUES
-('Sanduíche Natural', 10.00, 20),
-('Suco de Laranja', 5.00, 30),
-('Salada de Frutas', 7.50, 15),
-('Água Mineral', 2.00, 50);
+INSERT INTO produto (nome, preco_atual, quantidade_estoque, categoria) VALUES
+('Sanduíche Natural', 10.00, 20, 'Lanche'),
+('Suco de Laranja', 5.00, 30, 'Bebida'),
+('Salada de Frutas', 7.50, 15, 'Doce'),
+('Água Mineral', 2.00, 50, 'Bebida');

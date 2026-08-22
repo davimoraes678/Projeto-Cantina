@@ -20,7 +20,7 @@ class Produto(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, status=None):
+    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None):
         if nome is not None:
             self.nome = nome
         if quantidade_estoque is not None:
@@ -29,6 +29,8 @@ class Produto(db.Model):
             self.preco_atual = preco_atual
         if preco_promocional is not None:
             self.preco_promocional = preco_promocional
+        if categoria is not None:
+            self.categoria = categoria
         if status is not None:
             self.status = status
         db.session.commit()

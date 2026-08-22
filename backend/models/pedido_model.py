@@ -30,11 +30,13 @@ class Pedido(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, status=None, data_hora_retirada=None):
+    def atualizar(self, status=None, data_hora_retirada=None, horario_agendado_retirada=None):
         if status is not None:
             self.status = status
         if data_hora_retirada is not None:
             self.data_hora_retirada = data_hora_retirada
+        if horario_agendado_retirada is not None:
+            self.horario_agendado_retirada = horario_agendado_retirada
         db.session.commit()
 
     def deletar(self):

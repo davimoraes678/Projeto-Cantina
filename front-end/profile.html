@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Meu Perfil</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app has-bottom-nav">
+  <div class="topbar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <span class="title">Meu Perfil</span>
+    <span style="width:24px;"></span>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <h3>🍽️ Cantina Real</h3>
+    <a href="home.html">🏠 Início</a>
+    <a href="promotions.html">🔥 Promoções</a>
+    <a href="budget.html">💰 Cardápio por Orçamento</a>
+    <a href="orders.html">📋 Meus Pedidos</a>
+    <a href="kitchen.html">👩‍🍳 Painel da Cozinha</a>
+    <a href="profile.html">👤 Meu Perfil</a>
+    <a href="#" class="sair" onclick="logout()">🚪 Sair</a>
+  </div>
+
+  <div class="profile-avatar" id="avatarIniciais">?</div>
+  <div class="profile-info">
+    <h2 id="nomeAluno">Carregando...</h2>
+    <span class="muted">Aluno(a) da Cantina Real</span>
+  </div>
+
+  <div class="card">
+    <div class="info-row"><span>Matrícula</span><span id="matriculaAluno">-</span></div>
+    <div class="info-row"><span>Email</span><span id="emailAluno">-</span></div>
+  </div>
+
+  <button class="btn btn-outline" onclick="logout()">🚪 Sair da conta</button>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html">🏠</a>
+  <a href="orders.html">📋</a>
+  <a href="profile.html" class="active">👤</a>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  exigirLogin();
+
+  async function carregarPerfil() {
+    try {
+      const { aluno } = await apiFetch('/api/auth/me');
+      document.getElementById('nomeAluno').textContent = aluno.nome;
+      document.getElementById('matriculaAluno').textContent = aluno.matricula;
+      document.getElementById('emailAluno').textContent = aluno.email;
+      document.getElementById('avatarIniciais').textContent = aluno.nome.trim().charAt(0).toUpperCase();
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  carregarPerfil();
+</script>
+</body>
+</html>

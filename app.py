@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
-from backend.controllers import aluno_controller, pedido_controller, produto_controller
+from backend.controllers import aluno_controller, pedido_controller, produto_controller, cantina_controller
 from backend.extensions import db
 
 from backend.models.aluno_model import Aluno
@@ -18,6 +18,7 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "front-e
 def create_app():
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
+    app.config["SECRET_KEY"] = os.getenv("AUTH_SECRET_KEY", "dev-change-this-secret")
 
     # Permite que o front-end (servido de outra origem/porta) consuma a API
     CORS(app)
@@ -30,6 +31,7 @@ def create_app():
     app.register_blueprint(aluno_controller.bp_aluno)
     app.register_blueprint(produto_controller.bp_produto)
     app.register_blueprint(pedido_controller.bp_pedido)
+    app.register_blueprint(cantina_controller.bp_cantina)
 
     @app.get('/')
     def home():
@@ -63,5 +65,5 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    debug = os.getenv("FLASK_DEBUG", "True") == "True"
+    debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
     app.run(debug=debug, host="0.0.0.0", port=5000)

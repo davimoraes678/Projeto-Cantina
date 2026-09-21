@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Pedido Confirmado</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="confetti">🎉 🎊 🎉</div>
+  <div class="check-circle">✔️</div>
+  <div class="status-title">Pedido Confirmado!</div>
+  <div class="status-sub">Seu Pedido já Está sendo Preparado.</div>
+
+  <div class="code-box">
+    <div>Seu código De Retirada é:</div>
+    <div class="code" id="codigoPedido">------</div>
+    <div class="crown-small">👑</div>
+    <div class="subinfo">Retirada Prevista</div>
+    <div>🕐 <span id="horarioPedido">--:--</span></div>
+  </div>
+
+  <div class="instructions-box">
+    Apresente este código<br />na retirada do seu pedido.
+  </div>
+
+  <a href="home.html" class="btn btn-icon">🏠 Voltar ao início</a>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  exigirLogin();
+  const params = new URLSearchParams(window.location.search);
+  const codigo = params.get('codigo');
+  if (!codigo) window.location.href = 'home.html';
+
+  document.getElementById('codigoPedido').textContent = codigo;
+
+  apiFetch('/api/orders/' + encodeURIComponent(codigo))
+    .then(({ pedido }) => {
+      document.getElementById('horarioPedido').textContent = pedido.horario;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Meu Pedido</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a href="home.html" class="icon-btn" style="text-decoration:none;">←</a>
+    <span class="title">Meu Pedido</span>
+    <a href="cart.html" class="icon-btn cart-wrap" style="text-decoration:none;">
+      🛒<span class="badge cart-badge">0</span>
+    </a>
+  </div>
+
+  <div id="listaCarrinho"></div>
+
+  <div class="total-row">
+    <span>Total</span>
+    <span id="totalCarrinho">R$ 0,00</span>
+  </div>
+
+  <div class="pickup-row">
+    🕐 Horário Estimado da Retirada:<br />
+    <strong id="horarioEstimado">a definir</strong>
+  </div>
+
+  <div class="error-msg center" id="erroCarrinho"></div>
+  <button class="btn" id="btnConfirmar">Confirmar Pedido</button>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  exigirLogin();
+
+  function renderCarrinho() {
+    const cart = getCart();
+    const lista = document.getElementById('listaCarrinho');
+    const btn = document.getElementById('btnConfirmar');
+
+    if (!cart.length) {
+      lista.innerHTML = '<div class="empty-msg">Seu carrinho está vazio. Volte ao cardápio para adicionar itens.</div>';
+      btn.disabled = true;
+    } else {
+      btn.disabled = false;
+      lista.innerHTML = cart
+        .map(
+          (item) => `
+        <div class="order-row">
+          <div class="food-emoji" style="width:72px;height:72px;font-size:2rem;margin:0;">${item.emoji || '🍽️'}</div>
+          <div class="order-row-info">
+            <div class="order-row-nome">${item.nome}</div>
+            <div class="order-row-preco">${formatMoney(item.preco)}</div>
+            <div class="qty-control">
+              <button onclick="alterarQtd('${item.itemId}', -1)">-</button>
+              <span>${item.qtd}</span>
+              <button onclick="alterarQtd('${item.itemId}', 1)">+</button>
+            </div>
+          </div>
+          <button class="trash-btn" onclick="excluirItem('${item.itemId}')">🗑️</button>
+        </div>`
+        )
+        .join('');
+    }
+    document.getElementById('totalCarrinho').textContent = formatMoney(cartTotal());
+  }
+
+  function alterarQtd(itemId, delta) {
+    updateQty(itemId, delta);
+    renderCarrinho();
+  }
+  function excluirItem(itemId) {
+    removeFromCart(itemId);
+    renderCarrinho();
+  }
+
+  document.getElementById('btnConfirmar').addEventListener('click', () => {
+    if (!getCart().length) return;
+    // leva o carrinho para a tela de escolha do horário de retirada
+    window.location.href = 'schedule.html';
+  });
+
+  renderCarrinho();
+</script>
+</body>
+</html>

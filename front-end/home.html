@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Início</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <h3>🍽️ Cantina Real</h3>
+  <a href="home.html">🏠 Início</a>
+  <a href="promotions.html">🔥 Promoções</a>
+  <a href="budget.html">💰 Cardápio por Orçamento</a>
+  <a href="orders.html">📋 Meus Pedidos</a>
+  <a href="kitchen.html">👩‍🍳 Painel da Cozinha</a>
+  <a href="profile.html">👤 Meu Perfil</a>
+  <a href="#" class="sair" onclick="logout()">🚪 Sair</a>
+</div>
+
+<div class="app has-bottom-nav">
+  <div class="topbar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <span class="title" id="saudacao">Olá, Usuário 👋</span>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <div style="position:relative;">
+        <button class="icon-btn" id="bellBtn" onclick="toggleNotif()">🔔</button>
+      </div>
+      <a href="cart.html" class="icon-btn cart-wrap" style="text-decoration:none;">
+        🛒<span class="badge cart-badge">0</span>
+      </a>
+    </div>
+  </div>
+  <div class="notif-dropdown" id="notifDropdown"></div>
+
+  <div class="search-bar">
+    <input type="text" id="busca" placeholder="Busca no Cardápio..." />
+  </div>
+
+  <div class="tabs" id="tabsCategoria">
+    <button class="tab active" data-cat="Todos">Todos</button>
+    <button class="tab" data-cat="Salgados">Salgados</button>
+    <button class="tab" data-cat="Bebidas">Bebidas</button>
+    <button class="tab" data-cat="Doces">Doces</button>
+  </div>
+
+  <div class="grid-2" id="grid"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="active">🏠</a>
+  <a href="orders.html">📋</a>
+  <a href="profile.html">👤</a>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  exigirLogin();
+  const aluno = getAluno();
+  if (aluno) document.getElementById('saudacao').textContent = `Olá, ${aluno.nome.split(' ')[0]} 👋`;
+
+  let categoriaAtual = 'Todos';
+
+  function renderGrid(itens) {
+    const grid = document.getElementById('grid');
+    if (!itens.length) {
+      grid.innerHTML = '<div class="empty-msg" style="grid-column:1/-1;">Nenhum item encontrado.</div>';
+      return;
+    }
+    grid.innerHTML = itens
+      .map(
+        (item) => `
+      <div class="food-card">
+        <div class="food-emoji">${item.emoji}</div>
+        <div class="food-nome">${item.nome}</div>
+        <div class="food-preco">${formatMoney(item.preco)}</div>
+        <div class="food-add-row">
+          ${
+            item.estoque
+              ? `<button class="fab-add" onclick='adicionar(${JSON.stringify(item)})'>+</button>`
+              : `<button class="btn-esgotado" disabled>Esgotado</button>`
+          }
+        </div>
+      </div>`
+      )
+      .join('');
+  }
+
+  function adicionar(item) {
+    addToCart(item);
+    mostrarToast(`${item.nome} adicionado ao carrinho`);
+  }
+
+  async function carregarMenu() {
+    const busca = document.getElementById('busca').value.trim();
+    const params = new URLSearchParams();
+    if (categoriaAtual !== 'Todos') params.set('categoria', categoriaAtual);
+    if (busca) params.set('busca', busca);
+    try {
+      const { itens } = await apiFetch('/api/menu?' + params.toString());
+      renderGrid(itens);
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  document.querySelectorAll('#tabsCategoria .tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#tabsCategoria .tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      categoriaAtual = tab.dataset.cat;
+      carregarMenu();
+    });
+  });
+
+  let buscaTimeout;
+  document.getElementById('busca').addEventListener('input', () => {
+    clearTimeout(buscaTimeout);
+    buscaTimeout = setTimeout(carregarMenu, 250);
+  });
+
+  document.getElementById('bellBtn').addEventListener('click', carregarNotificacoes);
+
+  carregarMenu();
+</script>
+</body>
+</html>

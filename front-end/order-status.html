@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Status do Pedido</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="check-circle" id="circulo">🕐</div>
+  <div class="status-title" id="titulo">Carregando...</div>
+  <div class="status-sub" id="subtitulo"></div>
+
+  <div class="code-box">
+    <div class="code" id="codigoPedido">------</div>
+    <div class="subinfo">Retirada às <span id="horarioPedido">--:--</span></div>
+  </div>
+
+  <div class="card" id="itensPedido"></div>
+
+  <a href="home.html" class="btn btn-icon">🏠 Voltar ao início</a>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  exigirLogin();
+  const params = new URLSearchParams(window.location.search);
+  const codigo = params.get('codigo');
+  if (!codigo) window.location.href = 'orders.html';
+  document.getElementById('codigoPedido').textContent = codigo;
+
+  const CONFIG_STATUS = {
+    preparando: { icone: '🕐', cor: '', titulo: 'Seu Pedido Está Sendo Preparado', sub: 'Aguarde, a cantina já começou o preparo do seu lanche.' },
+    pronto: { icone: '✔️', cor: 'green', titulo: 'Pronto', sub: 'Seu Lanche está Pronto Para Retirada.' },
+    entregue: { icone: '✔️', cor: 'gray', titulo: 'Pedido Entregue', sub: 'Bom apetite! Esse pedido já foi retirado.' }
+  };
+
+  function renderStatus(pedido) {
+    const cfg = CONFIG_STATUS[pedido.statusGeral] || CONFIG_STATUS.preparando;
+    const circulo = document.getElementById('circulo');
+    circulo.textContent = cfg.icone;
+    circulo.className = 'check-circle ' + cfg.cor;
+    document.getElementById('titulo').textContent = cfg.titulo;
+    document.getElementById('titulo').className = 'status-title ' + cfg.cor;
+    document.getElementById('subtitulo').textContent = cfg.sub;
+    document.getElementById('horarioPedido').textContent = pedido.horario;
+
+    document.getElementById('itensPedido').innerHTML =
+      '<div style="font-weight:800; margin-bottom:8px;">Itens do pedido</div>' +
+      pedido.itens
+        .map(
+          (i) =>
+            `<div style="display:flex; justify-content:space-between; padding:6px 0;">
+              <span>${i.qtd}x ${i.nome}</span>
+              <span class="status-pill ${i.status}">${i.status}</span>
+            </div>`
+        )
+        .join('');
+  }
+
+  async function carregar() {
+    try {
+      const { pedido } = await apiFetch('/api/orders/' + encodeURIComponent(codigo));
+      renderStatus(pedido);
+    } catch (e) {
+      document.getElementById('titulo').textContent = 'Pedido não encontrado';
+      document.getElementById('subtitulo').textContent = e.message;
+    }
+  }
+
+  carregar();
+  setInterval(carregar, 6000); // atualiza status automaticamente (retirada sem precisar recarregar)
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Cozinha</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <h3>🍽️ Cantina Real</h3>
+  <a href="home.html">🏠 Início</a>
+  <a href="promotions.html">🔥 Promoções</a>
+  <a href="budget.html">💰 Cardápio por Orçamento</a>
+  <a href="orders.html">📋 Meus Pedidos</a>
+  <a href="kitchen.html">👩‍🍳 Painel da Cozinha</a>
+  <a href="profile.html">👤 Meu Perfil</a>
+  <a href="#" class="sair" onclick="logout()">🚪 Sair</a>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <span class="title">Cozinha</span>
+    <button class="icon-btn" onclick="carregarFila()">🔔</button>
+  </div>
+
+  <div class="tabs" id="tabsStatus">
+    <button class="tab active" data-status="Todos">Todos</button>
+    <button class="tab" data-status="preparando">Preparando</button>
+    <button class="tab" data-status="pronto">Pronto</button>
+    <button class="tab" data-status="entregue">Entregue</button>
+  </div>
+
+  <p class="center muted" style="margin:10px 20px 0; font-size:0.85rem;">
+    Toque no status para avançar a etapa de preparo do item.
+  </p>
+
+  <div id="filaCozinha"></div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  exigirLogin();
+  let statusAtual = 'Todos';
+  const TEXTOS = { preparando: 'Preparando', pronto: 'Pronto', entregue: 'Entregue' };
+
+  async function carregarFila() {
+    try {
+      const params = statusAtual !== 'Todos' ? '?status=' + statusAtual : '';
+      const { linhas } = await apiFetch('/api/kitchen/orders' + params);
+      const container = document.getElementById('filaCozinha');
+      if (!linhas.length) {
+        container.innerHTML = '<div class="empty-msg">Nenhum pedido nessa etapa.</div>';
+        return;
+      }
+      container.innerHTML = linhas
+        .map(
+          (l) => `
+        <div class="kitchen-card ${l.status}">
+          <div>
+            <div class="kitchen-codigo">${l.codigo}</div>
+            <div class="kitchen-nome">${l.nome}</div>
+            <div class="kitchen-time">🕐 ${l.horario}</div>
+          </div>
+          <button class="status-pill ${l.status}" onclick="avancarStatus('${l.orderId}', ${l.itemIndex})">${TEXTOS[l.status]}</button>
+        </div>`
+        )
+        .join('');
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  async function avancarStatus(orderId, itemIndex) {
+    try {
+      await apiFetch(`/api/kitchen/orders/${orderId}/items/${itemIndex}`, { method: 'PATCH', body: JSON.stringify({}) });
+      carregarFila();
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  document.querySelectorAll('#tabsStatus .tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#tabsStatus .tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      statusAtual = tab.dataset.status;
+      carregarFila();
+    });
+  });
+
+  carregarFila();
+  setInterval(carregarFila, 8000);
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Cadastro de Aluno</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="brand-header" style="padding-bottom:36px;">
+    <div class="crown-icon">🍽️👑</div>
+    <h1 style="font-size:1.9rem;">CANTINA <span class="gold">REAL</span></h1>
+    <p>Cadastre-se para pedir<br />sem enfrentar filas.</p>
+  </div>
+
+  <div class="form-wrap">
+    <h2 class="center">Cadastro do Aluno</h2>
+    <p class="center muted" style="margin-top:-8px;">Preencha seus dados para criar sua conta</p>
+
+    <form id="formCadastro">
+      <div class="field-icon-wrap">
+        <span class="field-icon">🙂</span>
+        <input class="form-input" type="text" id="nome" placeholder="Nome completo" required />
+      </div>
+      <div class="field-icon-wrap">
+        <span class="field-icon">🎓</span>
+        <input class="form-input" type="text" id="matricula" placeholder="Número de matrícula" required />
+      </div>
+      <div class="field-icon-wrap">
+        <span class="field-icon">✉️</span>
+        <input class="form-input" type="email" id="email" placeholder="Email" required />
+      </div>
+      <div class="field-icon-wrap">
+        <span class="field-icon">🔒</span>
+        <input class="form-input" type="password" id="senha" placeholder="Crie uma senha" minlength="4" required />
+      </div>
+      <div class="field-icon-wrap">
+        <span class="field-icon">🔒</span>
+        <input class="form-input" type="password" id="confirmarSenha" placeholder="Confirme a senha" minlength="4" required />
+      </div>
+      <div class="error-msg" id="erro"></div>
+      <button type="submit" class="btn" id="btnCadastrar">Criar minha conta</button>
+    </form>
+
+    <p class="center" style="margin-top:10px;">
+      Já tem cadastro?
+      <a href="login.html" class="link-red">Fazer login</a>
+    </p>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  if (getToken()) window.location.href = 'home.html';
+
+  document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const erroEl = document.getElementById('erro');
+    const btn = document.getElementById('btnCadastrar');
+    erroEl.textContent = '';
+
+    const nome = document.getElementById('nome').value.trim();
+    const matricula = document.getElementById('matricula').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+    if (senha !== confirmarSenha) {
+      erroEl.textContent = 'As senhas não coincidem.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Criando conta...';
+    try {
+      const { token, aluno } = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ nome, matricula, email, senha })
+      });
+      setSession(token, aluno);
+      window.location.href = 'home.html';
+    } catch (err) {
+      erroEl.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Criar minha conta';
+    }
+  });
+</script>
+</body>
+</html>

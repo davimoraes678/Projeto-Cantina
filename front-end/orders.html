@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Meus Pedidos</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app has-bottom-nav">
+  <div class="topbar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <span class="title">Meus Pedidos</span>
+    <a href="cart.html" class="icon-btn cart-wrap" style="text-decoration:none;">
+      🛒<span class="badge cart-badge">0</span>
+    </a>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <h3>🍽️ Cantina Real</h3>
+    <a href="home.html">🏠 Início</a>
+    <a href="promotions.html">🔥 Promoções</a>
+    <a href="budget.html">💰 Cardápio por Orçamento</a>
+    <a href="orders.html">📋 Meus Pedidos</a>
+    <a href="kitchen.html">👩‍🍳 Painel da Cozinha</a>
+    <a href="profile.html">👤 Meu Perfil</a>
+    <a href="#" class="sair" onclick="logout()">🚪 Sair</a>
+  </div>
+
+  <div id="listaPedidos"></div>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html">🏠</a>
+  <a href="orders.html" class="active">📋</a>
+  <a href="profile.html">👤</a>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  exigirLogin();
+
+  const CORES = { preparando: 'preparando', pronto: 'pronto', entregue: 'entregue' };
+  const TEXTOS = { preparando: 'Preparando', pronto: 'Pronto', entregue: 'Entregue' };
+
+  async function carregarPedidos() {
+    const lista = document.getElementById('listaPedidos');
+    try {
+      const { pedidos } = await apiFetch('/api/orders/me');
+      if (!pedidos.length) {
+        lista.innerHTML = '<div class="empty-msg">Você ainda não fez nenhum pedido.<br /><a class="link-red" href="home.html">Ver cardápio</a></div>';
+        return;
+      }
+      lista.innerHTML = pedidos
+        .map(
+          (p) => `
+        <div class="kitchen-card ${CORES[p.statusGeral]}" onclick="location.href='order-status.html?codigo=${p.codigo}'">
+          <div>
+            <div class="kitchen-codigo">${p.codigo}</div>
+            <div class="kitchen-nome">${p.itens.map((i) => `${i.qtd}x ${i.nome}`).join(', ')}</div>
+            <div class="kitchen-time">🕐 ${p.horario}</div>
+          </div>
+          <span class="status-pill ${CORES[p.statusGeral]}">${TEXTOS[p.statusGeral]}</span>
+        </div>`
+        )
+        .join('');
+    } catch (e) {
+      lista.innerHTML = `<div class="empty-msg">${e.message}</div>`;
+    }
+  }
+
+  carregarPedidos();
+</script>
+</body>
+</html>

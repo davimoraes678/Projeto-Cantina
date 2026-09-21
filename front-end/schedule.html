@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Horário de Retirada</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="brand-header" style="padding-bottom:24px; border-radius:0 0 30px 30px;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+      <h1 style="font-size:1.9rem; margin:0;">Cantina <span class="gold" style="display:inline;">Real</span></h1>
+    </div>
+  </div>
+
+  <div class="schedule-title">Escolha o Horário Da Retirada 📅</div>
+
+  <div class="date-tabs" id="dateTabs"></div>
+  <div class="time-grid" id="timeGrid"></div>
+
+  <div class="error-msg center" id="erro"></div>
+  <button class="btn" id="btnConfirmarHorario">Conformar Horário</button>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  exigirLogin();
+  if (!getCart().length) window.location.href = 'cart.html';
+
+  const DIAS_SEMANA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  const HORARIOS = ['09:30', '10:00', '10:30', '11:00', '11:30', '12:00'];
+
+  function formatarData(d) {
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  const hoje = new Date();
+  const amanha = new Date(hoje);
+  amanha.setDate(hoje.getDate() + 1);
+  const depois = new Date(hoje);
+  depois.setDate(hoje.getDate() + 2);
+
+  const datas = [
+    { label: 'Hoje', sub: formatarData(hoje), iso: hoje.toISOString().slice(0, 10) },
+    { label: 'Amanhã', sub: formatarData(amanha), iso: amanha.toISOString().slice(0, 10) },
+    { label: DIAS_SEMANA[depois.getDay()], sub: formatarData(depois), iso: depois.toISOString().slice(0, 10) }
+  ];
+
+  let dataSelecionada = datas[0].iso;
+  let horarioSelecionado = HORARIOS[0];
+
+  function renderDatas() {
+    document.getElementById('dateTabs').innerHTML = datas
+      .map(
+        (d) => `<button class="date-tab ${d.iso === dataSelecionada ? 'active' : ''}" data-iso="${d.iso}">${d.label}<br />${d.sub}</button>`
+      )
+      .join('');
+    document.querySelectorAll('.date-tab').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        dataSelecionada = btn.dataset.iso;
+        renderDatas();
+      });
+    });
+  }
+
+  function renderHorarios() {
+    document.getElementById('timeGrid').innerHTML = HORARIOS.map(
+      (h) => `<button class="time-slot ${h === horarioSelecionado ? 'active' : ''}" data-h="${h}">${h}</button>`
+    ).join('');
+    document.querySelectorAll('.time-slot').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        horarioSelecionado = btn.dataset.h;
+        renderHorarios();
+      });
+    });
+  }
+
+  renderDatas();
+  renderHorarios();
+
+  document.getElementById('btnConfirmarHorario').addEventListener('click', async () => {
+    const erroEl = document.getElementById('erro');
+    const btn = document.getElementById('btnConfirmarHorario');
+    erroEl.textContent = '';
+
+    const cart = getCart();
+    if (!cart.length) {
+      window.location.href = 'cart.html';
+      return;
+    }
+
+    const itens = cart.map((i) => ({ itemId: i.itemId, nome: i.nome, preco: i.preco, qtd: i.qtd }));
+
+    btn.disabled = true;
+    btn.textContent = 'Confirmando...';
+    try {
+      const { pedido } = await apiFetch('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({ itens, horario: horarioSelecionado, data: dataSelecionada })
+      });
+      clearCart();
+      window.location.href = 'confirm.html?codigo=' + encodeURIComponent(pedido.codigo);
+    } catch (err) {
+      erroEl.textContent = err.message;
+      btn.disabled = false;
+      btn.textContent = 'Conformar Horário';
+    }
+  });
+</script>
+</body>
+</html>

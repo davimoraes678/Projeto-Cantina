@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Promoções</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <h3>🍽️ Cantina Real</h3>
+  <a href="home.html">🏠 Início</a>
+  <a href="promotions.html">🔥 Promoções</a>
+  <a href="budget.html">💰 Cardápio por Orçamento</a>
+  <a href="orders.html">📋 Meus Pedidos</a>
+  <a href="kitchen.html">👩‍🍳 Painel da Cozinha</a>
+  <a href="profile.html">👤 Meu Perfil</a>
+  <a href="#" class="sair" onclick="logout()">🚪 Sair</a>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <span class="title">Promoções</span>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <button class="icon-btn" id="bellBtn" onclick="toggleNotif()">🔔</button>
+    </div>
+  </div>
+  <div class="notif-dropdown" id="notifDropdown"></div>
+
+  <div id="listaPromocoes"></div>
+
+  <a href="home.html" class="btn btn-outline">← Ver cardápio completo</a>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  exigirLogin();
+  document.getElementById('bellBtn').addEventListener('click', carregarNotificacoes);
+
+  async function carregarPromocoes() {
+    try {
+      const { promocoes } = await apiFetch('/api/promotions');
+      document.getElementById('listaPromocoes').innerHTML = promocoes
+        .map(
+          (p) => `
+        <div class="promo-card">
+          <div class="promo-header">${p.titulo}</div>
+          <div class="promo-body">
+            <div class="promo-emoji">${p.emoji}</div>
+            <div class="promo-info">
+              <div>${p.descricao}</div>
+              <div class="promo-preco">${formatMoney(p.preco)}</div>
+            </div>
+            <div class="promo-add-row">
+              <button class="fab-add" onclick='adicionarPromo(${JSON.stringify(p)})'>+</button>
+            </div>
+          </div>
+        </div>`
+        )
+        .join('');
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  function adicionarPromo(promo) {
+    addToCart({ itemId: promo.id, nome: promo.titulo, preco: promo.preco, emoji: promo.emoji });
+    mostrarToast(`Combo "${promo.titulo}" adicionado ao carrinho`);
+  }
+
+  carregarPromocoes();
+</script>
+</body>
+</html>

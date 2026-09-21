@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cantina Real - Cardápio por Orçamento</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <div class="brand-header" style="padding-bottom:28px; border-radius:0 0 30px 30px;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+      <span style="font-size:2rem;">👑</span>
+      <h1 style="font-size:1.9rem; margin:0;">Cantina <span class="gold" style="display:inline;">Real</span></h1>
+    </div>
+  </div>
+
+  <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div class="muted">Meu Orçamento</div>
+      <div style="font-size:1.8rem; font-weight:900;" id="valorOrcamento">R$ 10,00</div>
+    </div>
+    <a href="#" class="link-red" id="btnAlterar">Alterar</a>
+  </div>
+
+  <div class="card">
+    <div style="font-size:1.2rem; font-weight:700; margin-bottom:10px;" id="tituloLista">Lanches até R$10,00</div>
+    <div id="listaOrcamento"></div>
+  </div>
+
+  <div class="card center muted" id="rodapeOrcamento">Mostrando porções até R$10,00...</div>
+
+  <a href="home.html" class="btn btn-outline">← Voltar ao cardápio</a>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  exigirLogin();
+  let orcamento = 10;
+
+  async function carregarOrcamento() {
+    document.getElementById('valorOrcamento').textContent = formatMoney(orcamento);
+    document.getElementById('tituloLista').textContent = `Lanches até R$${orcamento.toFixed(2).replace('.', ',')}`;
+    document.getElementById('rodapeOrcamento').textContent = `Mostrando porções até R$${orcamento
+      .toFixed(2)
+      .replace('.', ',')}...`;
+
+    try {
+      const { itens } = await apiFetch('/api/menu/orcamento?max=' + orcamento);
+      const lista = document.getElementById('listaOrcamento');
+      if (!itens.length) {
+        lista.innerHTML = '<div class="empty-msg">Nenhum item dentro desse orçamento.</div>';
+        return;
+      }
+      lista.innerHTML = itens
+        .map(
+          (item, idx) => `
+        <div class="order-row" style="border-bottom:${idx === itens.length - 1 ? 'none' : '1px solid #ddd'}; padding:14px 0;">
+          <div class="food-emoji" style="width:64px;height:64px;font-size:1.8rem;margin:0;">${item.emoji}</div>
+          <div class="order-row-info">
+            <div class="order-row-nome">${item.nome}</div>
+            <div class="order-row-preco">${formatMoney(item.preco)}</div>
+          </div>
+          ${
+            item.estoque
+              ? `<button class="fab-add" onclick='adicionar(${JSON.stringify(item)})'>+</button>`
+              : `<button class="btn-esgotado" disabled>Esgotado</button>`
+          }
+        </div>`
+        )
+        .join('');
+    } catch (e) {
+      mostrarToast(e.message);
+    }
+  }
+
+  function adicionar(item) {
+    addToCart(item);
+    mostrarToast(`${item.nome} adicionado ao carrinho`);
+  }
+
+  document.getElementById('btnAlterar').addEventListener('click', (e) => {
+    e.preventDefault();
+    const novo = prompt('Qual o seu orçamento para o lanche de hoje? (R$)', orcamento);
+    if (novo === null) return;
+    const valor = parseFloat(String(novo).replace(',', '.'));
+    if (!isNaN(valor) && valor > 0) {
+      orcamento = valor;
+      carregarOrcamento();
+    } else {
+      mostrarToast('Digite um valor válido.');
+    }
+  });
+
+  carregarOrcamento();
+</script>
+</body>
+</html>

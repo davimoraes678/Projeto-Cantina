@@ -5,8 +5,9 @@ class Aluno(db.Model):
 
     id_aluno = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
+    matricula = db.Column(db.String(30), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    senha = db.Column(db.String(40), nullable=False)
+    senha = db.Column(db.String(255), nullable=False)
     saldo = db.Column(db.Float, nullable=False, default=0.0)
 
     # Relacionamentos
@@ -42,6 +43,7 @@ class Aluno(db.Model):
         return {
             'id_aluno': self.id_aluno,
             'nome': self.nome,
+            'matricula': self.matricula,
             'email': self.email,
             'saldo': self.saldo
         }

@@ -1,5 +1,5 @@
 // URL base da API
-const API_BASE_URL = "http://127.0.0.1:5000/api";
+const API_BASE_URL = "/api";
 
 // Carrinho do pedido atual: lista de itens que ainda não foram enviados ao backend.
 // Cada item: { id_produto, nome, preco, quantidade }

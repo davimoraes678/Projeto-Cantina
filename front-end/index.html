@@ -1,8 +1,170 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cantina Real — Cardápio</title><link rel="stylesheet" href="css/style.css"><script src="js/cantina.js" defer></script></head>
-<body data-page="index"><main class="app has-bottom-nav">
-<header class="topbar"><a class="icon-btn" href="index.html" aria-label="Cardápio">⌂</a><span class="title">Cardápio</span><a class="icon-btn cart-wrap" href="cart.html" aria-label="Carrinho">🛒<span class="badge cart-badge">0</span></a></header>
-<p id="mensagem" class="feedback" role="status" aria-live="polite"></p>
-<div class="search-bar"><input type="search" id="busca" placeholder="Busca no Cardápio..." aria-label="Buscar produto"></div>
-<div class="tabs" id="tabsCategoria"><button class="tab active" data-cat="">Todos</button><button class="tab" data-cat="Lanche">Salgados</button><button class="tab" data-cat="Bebida">Bebidas</button><button class="tab" data-cat="Doce">Doces</button></div><div class="grid-2" id="grid"></div>
-</main><nav class="bottom-nav" aria-label="Navegação principal"><a href="index.html" aria-label="Cardápio">🏠</a><a href="orders.html" aria-label="Pedidos">📋</a><a href="gestao.html" aria-label="Gestão">⚙️</a></nav></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cantina Real — COTEMIG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#cardapio">Ir ao cardápio</a>
+<div class="app has-bottom-nav">
+  <header class="topbar">
+    <a href="#inicio" class="brand-link">♛ <span>CANTINA <strong>REAL</strong></span></a>
+    <a href="#meu-pedido" class="cart-link">Meu pedido 🛒</a>
+  </header>
+  <main id="inicio">
+    <section class="brand-header hero" aria-labelledby="hero-title">
+      <p class="eyebrow">COTEMIG · SUA HORA DO INTERVALO</p>
+      <h1 id="hero-title">Seu intervalo merece<span class="gold">um sabor especial.</span></h1>
+      <p>Veja o cardápio, monte seu pedido e aproveite.</p>
+      <a class="hero-action" href="#cardapio">Explorar cardápio ↓</a>
+    </section>
+    <nav class="tabs section-tabs" aria-label="Seções da cantina">
+      <a class="tab" href="#cardapio">Cardápio</a><a class="tab" href="#meu-pedido">Meu pedido</a><a class="tab" href="#pedidos">Pedidos</a><a class="tab" href="#cadastros">Cadastros</a>
+    </nav>
+    <section class="content-section" id="cardapio">
+            <p class="eyebrow">ESCOLHA SEU LANCHE</p><h2>Cardápio da cantina</h2><p class="section-copy">Consulte os produtos e monte seu pedido abaixo.</p>
+
+
+            <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
+            <form id="form-busca-produto" class="busca-form">
+                <div class="field"><label for="busca-categoria">Categoria</label><select id="busca-categoria">
+                    <option value="">Todas as categorias</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Lanche">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select></div>
+                <div class="field"><label for="busca-preco-min">Preço mínimo (R$)</label><input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín."></div>
+                <div class="field"><label for="busca-preco-max">Preço máximo (R$)</label><input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx."></div>
+                <div class="field"><label for="busca-ordenar">Ordenar por</label><select id="busca-ordenar">
+                    <option value="">Sem ordenação</option>
+                    <option value="nome">Ordenar por nome</option>
+                    <option value="preco">Ordenar por preço</option>
+                </select></div>
+                <button type="submit">Buscar</button>
+                <button type="button" id="btn-limpar-busca">Limpar</button>
+            </form>
+
+            <table class="menu-table" role="table" aria-label="Cardápio">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Categoria</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-produtos"></tbody>
+            </table>
+        <a class="btn" href="#meu-pedido">Montar meu pedido →</a></section>
+    <section class="content-section order-section" id="meu-pedido">
+            <p class="eyebrow">SEU LANCHE, DO SEU JEITO</p><h2>Meu pedido</h2><p class="section-copy">Escolha o aluno, selecione um produto e informe a quantidade.</p>
+
+            <div class="field"><label for="select-aluno">Aluno do pedido</label><select id="select-aluno" required>
+                <option value="">Selecione o Aluno...</option>
+            </select></div>
+
+            <!-- Monta o carrinho: adiciona vários produtos antes de fechar o pedido -->
+            <form id="form-item-pedido">
+                <div class="field"><label for="select-produto">Produto</label><select id="select-produto" required>
+                    <option value="">Selecione o Produto...</option>
+                </select></div>
+                <div class="field"><label for="pedido-quantidade">Quantidade</label><input type="number" id="pedido-quantidade" placeholder="Qtd" value="1" min="1" required></div>
+                <button type="submit">Adicionar ao pedido</button>
+            </form>
+
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela; role para ver todas as colunas"><table class="carrinho-tabela">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-carrinho"></tbody>
+            </table></div>
+            <p id="carrinho-total">Total: R$ 0,00</p>
+            <button type="button" id="btn-finalizar-pedido">Finalizar Pedido</button>
+
+            </section>
+    <section class="content-section" id="pedidos"><p class="eyebrow">ACOMPANHAMENTO</p><h2>Pedidos da cantina</h2><!-- Edição de pedido (status / horário de retirada) - aparece ao clicar em "Editar" -->
+            <form id="form-editar-pedido" style="display:none;">
+                <input type="hidden" id="editar-pedido-id">
+                <div class="field"><label for="editar-pedido-status">Status do pedido</label><select id="editar-pedido-status" required>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Preparo">Em Preparo</option>
+                    <option value="Pronto">Pronto</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select></div>
+                <div class="field"><label for="editar-pedido-horario">Horário de retirada</label><input type="datetime-local" id="editar-pedido-horario"></div>
+                <button type="submit">Salvar Pedido</button>
+                <button type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
+            </form>
+
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela; role para ver todas as colunas"><table>
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Aluno</th>
+                        <th>Produtos</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-pedidos"></tbody>
+            </table></div>
+        </section>
+    <section class="content-section" id="cadastros"><p class="eyebrow">GESTÃO DO CARDÁPIO</p><h2>Cadastrar ou editar produto</h2><form id="form-produto">
+                <div class="field"><label for="produto-nome">Nome do produto</label><input type="text" id="produto-nome" placeholder="Nome do Produto" required></div>
+                <div class="field"><label for="produto-preco">Preço (R$)</label><input type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required></div>
+                <div class="field"><label for="produto-estoque">Quantidade em estoque</label><input type="number" id="produto-estoque" placeholder="Qtd. Estoque" required></div>
+                <div class="field"><label for="produto-categoria">Categoria do produto</label><select id="produto-categoria" required>
+                    <option value="">Selecione a Categoria...</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Lanche">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select></div>
+                <button type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
+                <button type="button" id="btn-cancelar-edicao-produto" style="display:none;">Cancelar edição</button>
+            </form></section>
+    <section class="content-section" id="alunos">
+            <p class="eyebrow">CADASTROS</p><h2>Alunos</h2>
+            <form id="form-aluno">
+                <div class="field"><label for="aluno-nome">Nome do aluno</label><input type="text" id="aluno-nome" placeholder="Nome do Aluno" required></div>
+                <div class="field"><label for="aluno-email">E-mail</label><input type="email" id="aluno-email" placeholder="E-mail" required></div>
+                <div class="field"><label for="aluno-senha">Senha</label><input type="password" id="aluno-senha" placeholder="Senha"></div>
+                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+                <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
+            </form>
+            <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela; role para ver todas as colunas"><table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Saldo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-alunos"></tbody>
+            </table></div>
+        </section>
+  </main>
+  <footer class="page-footer">♛ Cantina Real · COTEMIG</footer>
+</div>
+<nav class="bottom-nav" aria-label="Navegação principal">
+  <a href="#cardapio"><span aria-hidden="true">⌂</span><span>Cardápio</span></a>
+  <a href="#meu-pedido"><span aria-hidden="true">🛒</span><span>Meu pedido</span></a>
+  <a href="#pedidos"><span aria-hidden="true">☷</span><span>Pedidos</span></a>
+  <a href="#cadastros"><span aria-hidden="true">⚙</span><span>Gestão</span></a>
+</nav>
+<script src="js/alunos.js"></script>
+</body>
+</html>

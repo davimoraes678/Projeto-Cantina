@@ -177,14 +177,14 @@ async function carregarAlunos() {
 
         const tabela = document.getElementById("tabela-alunos");
         const select = document.getElementById("select-aluno");
-        if (!tabela || !select) return;
+        if (!tabela && !select) return;
 
-        tabela.innerHTML = "";
-        const alunoSelecionado = select.value;
-        select.innerHTML = '<option value="">Selecione o Aluno...</option>';
+        if (tabela) tabela.innerHTML = "";
+        const alunoSelecionado = select ? select.value : "";
+        if (select) select.innerHTML = '<option value="">Selecione o Aluno...</option>';
 
         alunos.forEach(aluno => {
-            tabela.innerHTML += `
+            if (tabela) tabela.innerHTML += `
                 <tr>
                     <td>${aluno.id_aluno}</td>
                     <td>${aluno.nome}</td>
@@ -196,11 +196,11 @@ async function carregarAlunos() {
                     </td>
                 </tr>
             `;
-            select.innerHTML += `<option value="${aluno.id_aluno}">${aluno.nome}</option>`;
+            if (select) select.innerHTML += `<option value="${aluno.id_aluno}">${aluno.nome}</option>`;
         });
 
         // Mantém o aluno selecionado ao recarregar a lista (ex: depois de adicionar um item ao carrinho)
-        if (alunoSelecionado) select.value = alunoSelecionado;
+        if (select && alunoSelecionado) select.value = alunoSelecionado;
     } catch (erro) {
         console.error("Erro ao carregar alunos:", erro);
     }

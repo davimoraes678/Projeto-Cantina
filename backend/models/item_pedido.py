@@ -6,7 +6,6 @@ class ItemPedido(db.Model):
     id_item_pedido = db.Column(db.Integer, primary_key=True)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     preco_unitario_cobrado = db.Column(db.Float, nullable=False)
-
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), nullable=False)
     # nullable=True: permite apagar o produto sem apagar/travar o item do pedido já feito.
     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=True)

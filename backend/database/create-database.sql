@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS produto (
     preco_promocional DECIMAL(10, 2),
     ingredientes VARCHAR(500),
     categoria VARCHAR(100),
+    imagem VARCHAR(100),
     status BOOLEAN DEFAULT TRUE
 );
 

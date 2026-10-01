@@ -13,55 +13,15 @@
     </header>
     <main class="container">
         <!-- Seção de Alunos -->
-        <section class="card">
-            <h2>Alunos</h2>
-            <form id="form-aluno">
-                <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
-                <input type="email" id="aluno-email" placeholder="E-mail" required>
-                <input type="password" id="aluno-senha" placeholder="Senha">
-                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
-                <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
-            </form>
-            <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>E-mail</th>
-                        <th>Saldo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-alunos"></tbody>
-            </table>
-        </section>
+
 
         <!-- Seção de Produtos -->
-        <section class="card">
-            <h2>Produtos</h2>
-            <form id="form-produto">
-                <input type="text" id="produto-nome" placeholder="Nome do Produto" required>
-                <input type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required>
-                <input type="number" id="produto-estoque" placeholder="Qtd. Estoque" required>
-                <select id="produto-categoria" required>
-                    <option value="">Selecione a Categoria...</option>
-                    <option value="Bebida">Bebida</option>
-                    <option value="Lanche">Salgado</option>
-                    <option value="Doce">Doce</option>
-                </select>
-                <button type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
-                <button type="button" id="btn-cancelar-edicao-produto" style="display:none;">Cancelar edição</button>
-            </form>
-
-            <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
-            <form id="form-busca-produto" class="busca-form">
-                <select id="busca-categoria">
-                    <option value="">Todas as categorias</option>
-                    <option value="Bebida">Bebida</option>
-                    <option value="Lanche">Salgado</option>
-                    <option value="Doce">Doce</option>
-                </select>
+        <form id="form-busca-produto" class="busca-form">
+            <input type="hidden" id="busca-categoria" value="">
+                <button onclick="filtrar('')">Todas</button>
+                <button onclick="filtrar('Bebida')">Bebidas</button>
+                <button onclick="filtrar('Lanche')">Salgados</button>
+                <button onclick="filtrar('Doce')">Doces</button>
                 <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
                 <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
                 <select id="busca-ordenar">
@@ -86,7 +46,6 @@
                 </thead>
                 <tbody id="tabela-produtos"></tbody>
             </table>
-        </section>
 
         <!-- Seção de Pedidos -->
         <section class="card">

@@ -9,6 +9,13 @@ let carrinho = [];
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
+function filtrar(categoria) {
+    console.log(categoria);
+}
+function selecionarCategoria(categoria) {
+    document.getElementById("busca-categoria").value = categoria;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     // Carrega as tabelas e selects ao iniciar
@@ -115,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- EVENTO: BUSCA/FILTRO DE PRODUTOS (usa GET /api/produtos/buscar) ---
-    const formBusca = document.getElementById("form-busca-produto");
+    const formBusca = document.getElementById("busca-categoria");
     if (formBusca) {
         formBusca.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -125,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnLimparBusca = document.getElementById("btn-limpar-busca");
     if (btnLimparBusca) {
         btnLimparBusca.addEventListener("click", () => {
-            document.getElementById("busca-categoria").value = "";
+            filtrar().value = "";
             document.getElementById("busca-preco-min").value = "";
             document.getElementById("busca-preco-max").value = "";
             document.getElementById("busca-ordenar").value = "";

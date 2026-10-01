@@ -12,6 +12,7 @@ class Produto(db.Model):
     ingredientes = db.Column(db.String(500), nullable=True)
     categoria = db.Column(db.String(100), nullable=True)
     status = db.Column(db.Boolean, default=True) # ou db.String, dependendo de como você controla status
+    imagem = db.Column(db.String(100), default=True)
 
     # Relacionamento 1:N com ItemPedido
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)
@@ -33,6 +34,8 @@ class Produto(db.Model):
             self.categoria = categoria
         if status is not None:
             self.status = status
+        if imagem is not None:
+            self.imagem = imagem
         db.session.commit()
 
     def deletar(self):
@@ -55,5 +58,6 @@ class Produto(db.Model):
             'preco_atual': self.preco_atual,
             'preco_promocional': self.preco_promocional,
             'categoria': self.categoria,
-            'status': self.status
+            'status': self.status,
+            'imagem': self.imagem
         }

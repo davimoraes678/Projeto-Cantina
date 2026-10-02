@@ -9,11 +9,16 @@
 </head>
 <body>
     <header>
-        <h1>Gestão da Cantina - COTEMIG</h1>
+        <h1>Cantina Real - Cotemig</h1>
+        <button>
+            <a href="front-end/admin.html">Administrador</a>
+        </button>
+        <button>
+            <a href="front-end/cadastro.html">Cadastro</a>
+        </button>
     </header>
     <main class="container">
-        <a href="front-end/admin.html">Administrador</a>
-        <a href="front-end/cadastro.html">Cadastro</a>
+
         
         
         <!-- Seção de Produtos -->
@@ -35,16 +40,6 @@
             </form>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Produto</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
-                        <th>Categoria</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
                 <tbody id="tabela-produtos"></tbody>
             </table>
 
@@ -64,7 +59,7 @@
                 <input type="number" id="pedido-quantidade" placeholder="Qtd" value="1" min="1" required>
                 <button type="submit">Adicionar ao pedido</button>
             </form>
-
+                
             <table class="carrinho-tabela">
                 <thead>
                     <tr>
@@ -109,6 +104,7 @@
             </table>
         </section>
     </main>
+
     <script src="js/alunos.js"></script>
 </body>
 </html>

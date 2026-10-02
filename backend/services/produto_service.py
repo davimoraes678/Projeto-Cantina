@@ -1,6 +1,7 @@
 from backend.extensions import db
 from backend.models.produto_model import Produto
 from backend.repositories.produto_repository import ProdutoRepository
+from backend.services.imagem_service import renomear_imagem
 
 class ProdutoService:
     @staticmethod
@@ -40,6 +41,12 @@ class ProdutoService:
         if not produto:
             return {"erro": "Produto não encontrado"}, 404
             
+        if data.get('nome'):
+            try:
+                renomear_imagem(produto, data['nome'])
+            except ValueError as erro:
+                return {"erro": str(erro)}, 400
+
         produto.atualizar(
             nome=data.get('nome'),
             quantidade_estoque=data.get('quantidade_estoque'),

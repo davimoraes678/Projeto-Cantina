@@ -1,5 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from backend.services.produto_service import ProdutoService
+from backend.models.produto_model import Produto
+from backend.services.imagem_service import salvar_imagem, nome_imagem
 
 bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
 
@@ -52,3 +54,32 @@ def atualizar_produto(id_produto):
 def deletar_produto(id_produto):
     resposta, status = ProdutoService.deletar(id_produto)
     return jsonify(resposta), status
+
+
+@bp_produto.route('/<int:id_produto>/imagem', methods=['POST'])
+def enviar_imagem_produto(id_produto):
+    produto = Produto.buscar_por_id(id_produto)
+    if not produto:
+        return jsonify(erro="Produto não encontrado"), 404
+    arquivo = request.files.get("imagem")
+    if arquivo is None or not arquivo.filename:
+        return jsonify(erro="Selecione uma imagem."), 400
+    try:
+        nome = salvar_imagem(produto, arquivo)
+    except ValueError as erro:
+        return jsonify(erro=str(erro)), 400
+    return jsonify(nome=nome, url=f"/api/produtos/{id_produto}/imagem"), 201
+
+
+@bp_produto.route('/<int:id_produto>/imagem', methods=['GET'])
+def visualizar_imagem_produto(id_produto):
+    produto = Produto.buscar_por_id(id_produto)
+    if not produto:
+        return jsonify(erro="Produto não encontrado"), 404
+    try:
+        nome = nome_imagem(produto.nome)
+    except ValueError:
+        return jsonify(erro="Produto sem imagem"), 404
+    resposta = send_from_directory(current_app.config["ARQUIVOS_DIR"], nome)
+    resposta.headers["Cache-Control"] = "no-cache"
+    return resposta

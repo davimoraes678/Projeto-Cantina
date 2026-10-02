@@ -12,7 +12,7 @@ class Produto(db.Model):
     ingredientes = db.Column(db.String(500), nullable=True)
     categoria = db.Column(db.String(100), nullable=True)
     status = db.Column(db.Boolean, default=True) # ou db.String, dependendo de como você controla status
-    imagem = db.Column(db.String(100), default=True)
+    imagem = db.Column(db.String(100), nullable=True)
 
     # Relacionamento 1:N com ItemPedido
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)
@@ -21,7 +21,7 @@ class Produto(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None):
+    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None, imagem=None):
         if nome is not None:
             self.nome = nome
         if quantidade_estoque is not None:

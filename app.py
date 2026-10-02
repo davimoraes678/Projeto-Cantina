@@ -25,6 +25,13 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///cantina.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    app.config["ARQUIVOS_DIR"] = os.path.join(app.root_path, "arquivos")
+    app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+
+    @app.errorhandler(413)
+    def upload_grande(erro):
+        return jsonify(erro="A imagem deve ter no máximo 5 MB."), 413
+
     db.init_app(app)
 
     app.register_blueprint(aluno_controller.bp_aluno)

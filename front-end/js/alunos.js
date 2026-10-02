@@ -107,11 +107,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
+                const produtoSalvo = await res.json();
+                // Se o upload falhar, mantém o ID para tentar novamente sem duplicar o produto.
+                editarProduto(produtoSalvo.id_produto, produtoSalvo.nome,
+                    produtoSalvo.preco_atual, produtoSalvo.quantidade_estoque, produtoSalvo.categoria || "");
+                await enviarImagem(produtoSalvo.id_produto);
                 sairModoEdicaoProduto();
                 carregarProdutos();
             } catch (erro) {
                 console.error("Erro ao salvar produto:", erro);
-                alert("Ocorreu um erro ao salvar o produto.");
+                alert(erro.message || "Ocorreu um erro ao salvar o produto.");
             }
         });
     }
@@ -242,6 +247,21 @@ async function removerAluno(id) {
 }
 
 // --- LÓGICA DE PRODUTOS ---
+async function enviarImagem(idProduto) {
+    const imagem = document.getElementById("imagem")?.files[0];
+    if (!imagem) return;
+    const dados = new FormData();
+    dados.append("imagem", imagem);
+    const res = await fetch(`${API_BASE_URL}/produtos/${idProduto}/imagem`, {
+        method: "POST",
+        body: dados
+    });
+    if (!res.ok) {
+        const erro = await res.json().catch(() => ({}));
+        throw new Error(`O produto foi salvo, mas a imagem não: ${erro.erro || "falha no envio"}. Tente salvar novamente.`);
+    }
+}
+
 async function carregarProdutos() {
     await buscarProdutos({}); // sem filtros = lista tudo, via a mesma rota de busca
 }
@@ -280,11 +300,11 @@ async function buscarProdutos(filtrosForcados) {
         const produtos = dados;
         const tabela = document.getElementById("tabela-produtos");
         const select = document.getElementById("select-produto");
-        if (!tabela || !select) return;
+        if (!tabela) return;
 
         tabela.innerHTML = "";
-        const produtoSelecionado = select.value;
-        select.innerHTML = '<option value="">Selecione o Produto...</option>';
+        const produtoSelecionado = select ? select.value : "";
+        if (select) select.innerHTML = '<option value="">Selecione o Produto...</option>';
 
         if (produtos.length === 0) {
             tabela.innerHTML = `<tr><td colspan="6">Nenhum produto encontrado.</td></tr>`;
@@ -294,7 +314,12 @@ async function buscarProdutos(filtrosForcados) {
             tabela.innerHTML += `
                 <tr>
                     <td>${prod.id_produto}</td>
-                    <td>${prod.nome}</td>
+                    <td>
+                        <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
+                             alt="Imagem do produto" width="80" loading="lazy"
+                             onerror="this.hidden = true">
+                        ${prod.nome}
+                    </td>
                     <td>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</td>
                     <td>${prod.quantidade_estoque}</td>
                     <td>${prod.categoria || ""}</td>
@@ -304,10 +329,10 @@ async function buscarProdutos(filtrosForcados) {
                     </td>
                 </tr>
             `;
-            select.innerHTML += `<option value="${prod.id_produto}" data-nome="${prod.nome}" data-preco="${prod.preco_atual}">${prod.nome} - R$ ${parseFloat(prod.preco_atual).toFixed(2)}</option>`;
+            if (select) select.innerHTML += `<option value="${prod.id_produto}" data-nome="${prod.nome}" data-preco="${prod.preco_atual}">${prod.nome} - R$ ${parseFloat(prod.preco_atual).toFixed(2)}</option>`;
         });
 
-        if (produtoSelecionado) select.value = produtoSelecionado;
+        if (select && produtoSelecionado) select.value = produtoSelecionado;
     } catch (erro) {
         console.error("Erro ao buscar produtos:", erro);
         alert("Ocorreu um erro ao buscar os produtos. Veja o console para detalhes.");

@@ -120,6 +120,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+async function enviarImagem(idProduto) {
+    const imagem = document.getElementById("imagem").files[0];
+
+    // Permite salvar o produto sem enviar uma imagem.
+    if (!imagem) return;
+
+    const extensao = imagem.name.split(".").pop().toLowerCase();
+    const nome = `produto_${idProduto}.${extensao}`;
+
+    const dados = new FormData();
+    dados.append("imagem", imagem, nome);
+
+    // Esta rota precisa ser criada no backend.
+    const resposta = await fetch(`${API_BASE_URL}/produtos/${idProduto}/imagem`, {
+        method: "POST",
+        body: dados
+    });
+
+    if (!resposta.ok) {
+        throw new Error("O produto foi salvo, mas a imagem não foi enviada.");
+    }
+}
 
     const btnCancelarEdicaoProduto = document.getElementById("btn-cancelar-edicao-produto");
     if (btnCancelarEdicaoProduto) {
@@ -370,6 +392,8 @@ async function removerProduto(id) {
         carregarPedidos();
     }
 }
+
+
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 function adicionarItemAoCarrinho() {

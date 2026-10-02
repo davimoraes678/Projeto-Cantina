@@ -15,6 +15,14 @@ function filtrar(categoria) {
 function selecionarCategoria(categoria) {
     document.getElementById("busca-categoria").value = categoria;
 }
+function lanches(lanche) {
+    console.log(lanche);
+}
+function selecionarCategoria(lanche) {
+    document.getElementsByClassName("select-produto").value = lanche;
+}
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -120,6 +128,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+       // Seleciona o elemento de texto pelo ID
+        const elementoContador = document.getElementById('contador');
+        
+        // Variável que guarda o valor atual
+        let valorAtual = 0;
+
+        // Função que soma ou subtrai e atualiza a tela
+        function alterar(quantidade) {
+            valorAtual += quantidade;
+            elementoContador.innerText = valorAtual;
+        }
+
 async function enviarImagem(idProduto) {
     const imagem = document.getElementById("imagem").files[0];
 
@@ -168,7 +189,7 @@ async function enviarImagem(idProduto) {
     }
 
     // --- EVENTO: ADICIONAR ITEM AO CARRINHO DO PEDIDO ---
-    const formItemPedido = document.getElementById("form-item-pedido");
+    const formItemPedido = document.getElementsByClassName("form-item-pedido");
     if (formItemPedido) {
         formItemPedido.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -320,20 +341,46 @@ async function buscarProdutos(filtrosForcados) {
         }
 
         const produtos = dados;
-        const tabela = document.getElementById("tabela-produtos");
+        const tabela = document.getElementById("tabela-produtos")
+        const tabela_admin = document.getElementById("tabela-produtos-admin");
         const select = document.getElementById("select-produto");
-        if (!tabela) return;
+        if (!tabela_admin) return;
 
-        tabela.innerHTML = "";
+        tabela_admin.innerHTML = "";
         const produtoSelecionado = select ? select.value : "";
         if (select) select.innerHTML = '<option value="">Selecione o Produto...</option>';
 
         if (produtos.length === 0) {
-            tabela.innerHTML = `<tr><td colspan="6">Nenhum produto encontrado.</td></tr>`;
+            tabela_admin.innerHTML = `<tr><td colspan="6">Nenhum produto encontrado.</td></tr>`;
         }
-
         produtos.forEach(prod => {
             tabela.innerHTML += `
+                <tr>
+                    <div>
+                        <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
+                             alt="Imagem do produto" width="80" loading="lazy"
+                             onerror="this.hidden = true">
+                        ${prod.nome}
+                    </div>
+                    <div>
+                        <p>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</p>
+                        <p>${prod.quantidade_estoque}</p>
+                    </div>
+                    <div>
+                        <p>${prod.categoria || ""}</p>
+                        <button class="pedido-quantidade btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
+        
+                        <input type="text" id="pedido-quantidade" value="1" style="width: 60px;" readonly>
+        
+                        <button class="pedido-quantidade btn-secondary" onclick="pedido-quantidade.value++">+</button>
+
+                        <button onclick="lanches('${prod.nome}')">Adicionar ao carrinho</button>
+                    </div>
+                </tr>
+            `
+        })
+        produtos.forEach(prod => {
+            tabela_admin.innerHTML += `
                 <tr>
                     <td>${prod.id_produto}</td>
                     <td>
@@ -397,10 +444,9 @@ async function removerProduto(id) {
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 function adicionarItemAoCarrinho() {
-    const selectProduto = document.getElementById("select-produto");
+    const Produto = document.getElementsByClassName("select-produto");
     const inputQuantidade = document.getElementById("pedido-quantidade");
 
-    const opcao = selectProduto.options[selectProduto.selectedIndex];
     const id_produto = parseInt(selectProduto.value);
     const quantidade = parseInt(inputQuantidade.value);
 
@@ -409,8 +455,8 @@ function adicionarItemAoCarrinho() {
         return;
     }
 
-    const nome = opcao.dataset.nome;
-    const preco = parseFloat(opcao.dataset.preco);
+    const nome = Produto.dataset.nome;
+    const preco = parseFloat(Produto.dataset.preco);
 
     // Se o produto já está no carrinho, apenas soma a quantidade
     const itemExistente = carrinho.find(i => i.id_produto === id_produto);

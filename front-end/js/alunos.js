@@ -346,6 +346,7 @@ async function buscarProdutos(filtrosForcados) {
         if (!tabela && !tabela_admin) return;
 
         if (tabela) tabela.innerHTML = "";
+        if (tabela_admin) tabela_admin.innerHTML = "";
 
         if (produtos.length === 0) {
         if (tabela) {
@@ -377,15 +378,14 @@ async function buscarProdutos(filtrosForcados) {
                     <div>
                         <input type="hidden" value=${prod.nome} class=select-produto>
                         <p>${prod.categoria || ""}</p>
-                        <form class="form-item-pedido">
-                            <button class="btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
-        
-                            <input type="number" class="pedido-quantidade" value="1" style="width: 60px;" readonly>
-        
-                            <button class="btn-secondary" onclick="pedido-quantidade.value++">+</button>
+                        <button class="btn-secondary" onclick="pedido-quantidade.value++">+</button>
+                        <button class="btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
 
+                        <form class="form-item-pedido">
+                            <input type="number" class="pedido-quantidade" value="1" style="width: 60px;" readonly>
                             <button type="submit">Adicionar ao pedido</button>
                         </form>
+
                     </div>
                 </tr>
             `
@@ -455,6 +455,7 @@ async function removerProduto(id) {
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 function adicionarItemAoCarrinho() {
+    
     const Produto = document.getElementsByClassName("select-produto");
     const inputQuantidade = document.getElementsByClassName("pedido-quantidade");
 

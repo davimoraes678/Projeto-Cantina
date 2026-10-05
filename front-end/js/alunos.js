@@ -343,17 +343,24 @@ async function buscarProdutos(filtrosForcados) {
         const produtos = dados;
         const tabela = document.getElementById("tabela-produtos")
         const tabela_admin = document.getElementById("tabela-produtos-admin");
-        const select = document.getElementById("select-produto");
-        if (!tabela_admin) return;
+        if (!tabela && !tabela_admin) return;
 
-        tabela_admin.innerHTML = "";
-        const produtoSelecionado = select ? select.value : "";
-        if (select) select.innerHTML = '<option value="">Selecione o Produto...</option>';
+        if (tabela) tabela.innerHTML = "";
 
         if (produtos.length === 0) {
-            tabela_admin.innerHTML = `<tr><td colspan="6">Nenhum produto encontrado.</td></tr>`;
+        if (tabela) {
+            tabela.innerHTML = `
+                <tr><td>Nenhum produto encontrado.</td></tr>
+            `;
         }
-        produtos.forEach(prod => {
+        if (tabela_admin) {
+            tabela_admin.innerHTML = `
+                <tr><td colspan="6">Nenhum produto encontrado.</td></tr>
+            `;
+        }
+        }
+        if (tabela) {
+            produtos.forEach(prod => {
             tabela.innerHTML += `
                 <tr>
                     
@@ -383,7 +390,9 @@ async function buscarProdutos(filtrosForcados) {
                 </tr>
             `
         })
-        produtos.forEach(prod => {
+        }
+        if (tabela_admin) {
+            produtos.forEach(prod => {
             tabela_admin.innerHTML += `
                 <tr>
                     <td>${prod.id_produto}</td>
@@ -401,11 +410,9 @@ async function buscarProdutos(filtrosForcados) {
                         <button class="excluir" onclick="removerProduto(${prod.id_produto})">Excluir</button>
                     </td>
                 </tr>
-            `;
-            if (select) select.innerHTML += `<option value="${prod.id_produto}" data-nome="${prod.nome}" data-preco="${prod.preco_atual}">${prod.nome} - R$ ${parseFloat(prod.preco_atual).toFixed(2)}</option>`;
+            `;        
         });
-
-        if (select && produtoSelecionado) select.value = produtoSelecionado;
+        }
     } catch (erro) {
         console.error("Erro ao buscar produtos:", erro);
         alert("Ocorreu um erro ao buscar os produtos. Veja o console para detalhes.");

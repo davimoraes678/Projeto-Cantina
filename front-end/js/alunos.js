@@ -356,6 +356,7 @@ async function buscarProdutos(filtrosForcados) {
         produtos.forEach(prod => {
             tabela.innerHTML += `
                 <tr>
+                    
                     <div>
                         <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
                              alt="Imagem do produto" width="80" loading="lazy"
@@ -367,14 +368,17 @@ async function buscarProdutos(filtrosForcados) {
                         <p>${prod.quantidade_estoque}</p>
                     </div>
                     <div>
+                        <input type="hidden" value=${prod.nome} class=select-produto>
                         <p>${prod.categoria || ""}</p>
-                        <button class="pedido-quantidade btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
+                        <form class="form-item-pedido">
+                            <button class="btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
         
-                        <input type="text" id="pedido-quantidade" value="1" style="width: 60px;" readonly>
+                            <input type="number" class="pedido-quantidade" value="1" style="width: 60px;" readonly>
         
-                        <button class="pedido-quantidade btn-secondary" onclick="pedido-quantidade.value++">+</button>
+                            <button class="btn-secondary" onclick="pedido-quantidade.value++">+</button>
 
-                        <button onclick="lanches('${prod.nome}')">Adicionar ao carrinho</button>
+                            <button type="submit">Adicionar ao pedido</button>
+                        </form>
                     </div>
                 </tr>
             `
@@ -445,7 +449,7 @@ async function removerProduto(id) {
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 function adicionarItemAoCarrinho() {
     const Produto = document.getElementsByClassName("select-produto");
-    const inputQuantidade = document.getElementById("pedido-quantidade");
+    const inputQuantidade = document.getElementsByClassName("pedido-quantidade");
 
     const id_produto = parseInt(selectProduto.value);
     const quantidade = parseInt(inputQuantidade.value);

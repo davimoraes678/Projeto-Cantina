@@ -20,7 +20,6 @@
     <main class="container">
 
         
-        
         <!-- Seção de Produtos -->
         <form id="form-busca-produto" class="busca-form">
             <input type="hidden" id="busca-categoria" value="">
@@ -52,11 +51,11 @@
             </select>
 
             <!-- Monta o carrinho: adiciona vários produtos antes de fechar o pedido -->
-            <form id="form-item-pedido">
+            <form class="form-item-pedido">
                 <select id="select-produto" required>
                     <option value="">Selecione o Produto...</option>
                 </select>
-                <input type="number" id="pedido-quantidade" placeholder="Qtd" value="1" min="1" required>
+                <input type="number" class="pedido-quantidade" placeholder="Qtd" value="1" min="1" required>
                 <button type="submit">Adicionar ao pedido</button>
             </form>
                 
@@ -105,6 +104,6 @@
         </section>
     </main>
 
-    <script src="js/alunos.js"></script>
+    <script src="front-end/js/alunos.js"></script>
 </body>
 </html>

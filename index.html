@@ -23,10 +23,10 @@
         <!-- Seção de Produtos -->
         <form id="form-busca-produto" class="busca-form">
             <input type="hidden" id="busca-categoria" value="">
-                <button onclick="filtrar('')">Todas</button>
-                <button onclick="filtrar('Bebida')">Bebidas</button>
-                <button onclick="filtrar('Lanche')">Salgados</button>
-                <button onclick="filtrar('Doce')">Doces</button>
+                <button type="button" onclick="filtrar('')">Todas</button>
+                <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
+                <button type="button" onclick="filtrar('Lanche')">Salgados</button>
+                <button type="button" onclick="filtrar('Doce')">Doces</button>
                 <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
                 <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
                 <select id="busca-ordenar">
@@ -39,6 +39,15 @@
             </form>
 
             <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Categoria</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
                 <tbody id="tabela-produtos"></tbody>
             </table>
 
@@ -50,15 +59,7 @@
                 <option value="">Selecione o Aluno...</option>
             </select>
 
-            <!-- Monta o carrinho: adiciona vários produtos antes de fechar o pedido -->
-            <!-- <form class="form-item-pedido">
-                <select id="select-produto" required>
-                    <option value="">Selecione o Produto...</option>
-                </select>
-                <input type="number" class="pedido-quantidade" placeholder="Qtd" value="1" min="1" required>
-                <button type="submit">Adicionar ao pedido</button>
-            </form> -->
-                
+            <!-- Carrinho do aluno selecionado (itens gravados como ItemPedido no banco) -->
             <table class="carrinho-tabela">
                 <thead>
                     <tr>

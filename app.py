@@ -4,6 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.controllers import aluno_controller, pedido_controller, produto_controller, item_pedido_controller
 from backend.extensions import db, lm
+from backend.models.aluno_model import Aluno
 
 from backend.models.aluno_model import Aluno
 from backend.models.produto_model import Produto
@@ -11,12 +12,36 @@ from backend.models.pedido_model import Pedido
 from backend.models.item_pedido import ItemPedido
 from backend.models.avaliacao_model import Avaliacao
 from backend.models.rateio_model import RateioPagamento
-    
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
 
 
 def create_app():
+    load_dotenv()
+
+    app = Flask(
+        __name__,
+        static_folder=FRONTEND_DIR,
+        static_url_path="/front-end"
+    )
+
+    app.config["SECRET_KEY"] = os.getenv(
+        "SECRET_KEY",
+        "chave-desenvolvimento"
+    )
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///cantina.db"
+    )
+
+    db.init_app(app)
+    lm.init_app(app)
+
+    @lm.user_loader
+    def carregar_aluno(id_aluno):
+        return Aluno.buscar_por_id(int(id_aluno))
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/front-end")
 
@@ -34,6 +59,7 @@ def create_app():
         return jsonify(erro="A imagem deve ter no máximo 5 MB."), 413
 
     db.init_app(app)
+    lm.init_app(app)
 
     app.register_blueprint(aluno_controller.bp_aluno)
     app.register_blueprint(produto_controller.bp_produto)
@@ -73,7 +99,6 @@ def create_app():
     return app
 
 app = create_app()
-
 
 if __name__ == "__main__":
     debug = os.getenv("FLASK_DEBUG", "True") == "True"

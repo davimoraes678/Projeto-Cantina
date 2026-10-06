@@ -81,7 +81,8 @@ class PedidoService:
 
     @staticmethod
     def listar_todos():
-        pedidos = Pedido.listar_todos()
+        # O carrinho (status "Carrinho") ainda não é um pedido feito, então não aparece na lista
+        pedidos = Pedido.query.filter(Pedido.status != "Carrinho").all()
         return [p.to_dict() for p in pedidos], 200
 
     @staticmethod

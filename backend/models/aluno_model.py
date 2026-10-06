@@ -46,3 +46,5 @@ class Aluno(UserMixin, db.Model):
             'email': self.email,
             'saldo': self.saldo
         }
+    def get_id(self):
+        return str(self.id_aluno)

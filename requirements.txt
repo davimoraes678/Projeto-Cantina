@@ -1,1 +1,7 @@
-pip install flask SQLAlchemy Flask-Cors dotenv Pillow flask_login
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Cors==4.0.1
+Flask-Login==0.6.3
+PyMySQL==1.1.1
+python-dotenv==1.0.1
+Pillow>=11.3.0,<13

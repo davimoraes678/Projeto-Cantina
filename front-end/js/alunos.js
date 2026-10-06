@@ -1,16 +1,16 @@
 // URL base da API
 const API_BASE_URL = "http://127.0.0.1:5000/api";
 
-// Carrinho do pedido atual: lista de itens que ainda não foram enviados ao backend.
-// Cada item: { id_produto, nome, preco, quantidade }
-let carrinho = [];
+// O carrinho fica no banco: é um pedido com status "Carrinho" do aluno selecionado,
+// e cada produto adicionado é um ItemPedido (rotas /api/carrinho).
 
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
 function filtrar(categoria) {
-    console.log(categoria);
+    document.getElementById("busca-categoria").value = categoria;
+    buscarProdutos();
 }
 function selecionarCategoria(categoria) {
     document.getElementById("busca-categoria").value = categoria;
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarAlunos();
     carregarProdutos();
     carregarPedidos();
-    renderizarCarrinho();
+    carregarCarrinho();
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
     const formAluno = document.getElementById("form-aluno");
@@ -170,7 +170,7 @@ async function enviarImagem(idProduto) {
     }
 
     // --- EVENTO: BUSCA/FILTRO DE PRODUTOS (usa GET /api/produtos/buscar) ---
-    const formBusca = document.getElementById("busca-categoria");
+    const formBusca = document.getElementById("form-busca-produto");
     if (formBusca) {
         formBusca.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -180,7 +180,7 @@ async function enviarImagem(idProduto) {
     const btnLimparBusca = document.getElementById("btn-limpar-busca");
     if (btnLimparBusca) {
         btnLimparBusca.addEventListener("click", () => {
-            filtrar().value = "";
+            document.getElementById("busca-categoria").value = "";
             document.getElementById("busca-preco-min").value = "";
             document.getElementById("busca-preco-max").value = "";
             document.getElementById("busca-ordenar").value = "";
@@ -188,16 +188,13 @@ async function enviarImagem(idProduto) {
         });
     }
 
-    // --- EVENTO: ADICIONAR ITEM AO CARRINHO DO PEDIDO ---
-    const formItemPedido = document.getElementsByClassName("form-item-pedido");
-    if (formItemPedido) {
-        formItemPedido.addEventListener("submit", (e) => {
-            e.preventDefault();
-            adicionarItemAoCarrinho();
-        });
+    // --- EVENTO: TROCAR O ALUNO MOSTRA O CARRINHO DELE ---
+    const selectAluno = document.getElementById("select-aluno");
+    if (selectAluno) {
+        selectAluno.addEventListener("change", carregarCarrinho);
     }
 
-    // --- EVENTO: FINALIZAR PEDIDO (envia o carrinho inteiro) ---
+    // --- EVENTO: FINALIZAR PEDIDO (transforma o carrinho em pedido) ---
     const btnFinalizar = document.getElementById("btn-finalizar-pedido");
     if (btnFinalizar) {
         btnFinalizar.addEventListener("click", finalizarPedido);
@@ -351,7 +348,7 @@ async function buscarProdutos(filtrosForcados) {
         if (produtos.length === 0) {
         if (tabela) {
             tabela.innerHTML = `
-                <tr><td>Nenhum produto encontrado.</td></tr>
+                <tr><td colspan="5">Nenhum produto encontrado.</td></tr>
             `;
         }
         if (tabela_admin) {
@@ -364,29 +361,19 @@ async function buscarProdutos(filtrosForcados) {
             produtos.forEach(prod => {
             tabela.innerHTML += `
                 <tr>
-                    
-                    <div>
+                    <td>
                         <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
                              alt="Imagem do produto" width="80" loading="lazy"
                              onerror="this.hidden = true">
                         ${prod.nome}
-                    </div>
-                    <div>
-                        <p>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</p>
-                        <p>${prod.quantidade_estoque}</p>
-                    </div>
-                    <div>
-                        <input type="hidden" value=${prod.nome} class=select-produto>
-                        <p>${prod.categoria || ""}</p>
-                        <button class="btn-secondary" onclick="pedido-quantidade.value++">+</button>
-                        <button class="btn-secondary" onclick="if(pedido-quantidade.value > 0) qtd.value--">-</button>
-
-                        <form class="form-item-pedido">
-                            <input type="number" class="pedido-quantidade" value="1" style="width: 60px;" readonly>
-                            <button type="submit">Adicionar ao pedido</button>
-                        </form>
-
-                    </div>
+                    </td>
+                    <td>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</td>
+                    <td>${prod.quantidade_estoque}</td>
+                    <td>${prod.categoria || ""}</td>
+                    <td>
+                        <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
+                        <button type="button" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
+                    </td>
                 </tr>
             `
         })
@@ -454,94 +441,110 @@ async function removerProduto(id) {
 
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
-function adicionarItemAoCarrinho() {
-    
-    const Produto = document.getElementsByClassName("select-produto");
-    const inputQuantidade = document.getElementsByClassName("pedido-quantidade");
+function alunoSelecionado() {
+    const select = document.getElementById("select-aluno");
+    return select ? parseInt(select.value) : NaN;
+}
 
-    const id_produto = parseInt(selectProduto.value);
+// Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
+async function adicionarItemAoCarrinho(id_produto) {
+    const id_aluno = alunoSelecionado();
+    if (!id_aluno) {
+        alert("Selecione o aluno antes de adicionar produtos.");
+        return;
+    }
+    const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
     const quantidade = parseInt(inputQuantidade.value);
-
-    if (!id_produto || !quantidade || quantidade < 1) {
-        alert("Selecione um produto e uma quantidade válida.");
+    if (!quantidade || quantidade < 1) {
+        alert("Informe uma quantidade válida.");
         return;
     }
 
-    const nome = Produto.dataset.nome;
-    const preco = parseFloat(Produto.dataset.preco);
-
-    // Se o produto já está no carrinho, apenas soma a quantidade
-    const itemExistente = carrinho.find(i => i.id_produto === id_produto);
-    if (itemExistente) {
-        itemExistente.quantidade += quantidade;
-    } else {
-        carrinho.push({ id_produto, nome, preco, quantidade });
+    try {
+        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/itens`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id_produto, quantidade })
+        });
+        const dados = await res.json();
+        if (!res.ok) {
+            alert(dados.erro || "Não foi possível adicionar o produto.");
+            return;
+        }
+        inputQuantidade.value = 1;
+        renderizarCarrinho(dados);
+    } catch (erro) {
+        console.error("Erro ao adicionar item:", erro);
+        alert("Ocorreu um erro ao adicionar o produto.");
     }
-
-    inputQuantidade.value = 1;
-    selectProduto.value = "";
-    renderizarCarrinho();
 }
 
-function removerItemDoCarrinho(id_produto) {
-    carrinho = carrinho.filter(i => i.id_produto !== id_produto);
-    renderizarCarrinho();
+async function removerItemDoCarrinho(id_item_pedido) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/carrinho/itens/${id_item_pedido}`, { method: "DELETE" });
+        const dados = await res.json();
+        if (!res.ok) {
+            alert(dados.erro || "Não foi possível remover o item.");
+            return;
+        }
+        renderizarCarrinho(dados);
+    } catch (erro) {
+        console.error("Erro ao remover item:", erro);
+    }
 }
 
-function renderizarCarrinho() {
+// Busca o carrinho do aluno selecionado no backend.
+async function carregarCarrinho() {
+    const id_aluno = alunoSelecionado();
+    if (!id_aluno) {
+        renderizarCarrinho(null);
+        return;
+    }
+    try {
+        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}`);
+        renderizarCarrinho(res.ok ? await res.json() : null);
+    } catch (erro) {
+        console.error("Erro ao carregar carrinho:", erro);
+    }
+}
+
+function renderizarCarrinho(carrinho) {
     const tabela = document.getElementById("tabela-carrinho");
     const totalEl = document.getElementById("carrinho-total");
     if (!tabela || !totalEl) return;
 
+    const itens = carrinho ? carrinho.itens : [];
     tabela.innerHTML = "";
-    let total = 0;
-
-    carrinho.forEach(item => {
-        const subtotal = item.preco * item.quantidade;
-        total += subtotal;
+    itens.forEach(item => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.nome}</td>
+                <td>${item.produto_nome}</td>
                 <td>${item.quantidade}</td>
-                <td>R$ ${subtotal.toFixed(2)}</td>
-                <td><button class="excluir" onclick="removerItemDoCarrinho(${item.id_produto})">Remover</button></td>
+                <td>R$ ${item.subtotal.toFixed(2)}</td>
+                <td><button class="excluir" onclick="removerItemDoCarrinho(${item.id_item_pedido})">Remover</button></td>
             </tr>
         `;
     });
 
+    const total = carrinho ? carrinho.valor_total : 0;
     totalEl.textContent = `Total: R$ ${total.toFixed(2)}`;
 }
 
 async function finalizarPedido() {
-    const id_aluno = parseInt(document.getElementById("select-aluno").value);
-
+    const id_aluno = alunoSelecionado();
     if (!id_aluno) {
         alert("Selecione o aluno do pedido.");
         return;
     }
-    if (carrinho.length === 0) {
-        alert("Adicione pelo menos um produto ao pedido.");
-        return;
-    }
-
-    const itens = carrinho.map(i => ({ id_produto: i.id_produto, quantidade: i.quantidade }));
 
     try {
-        const res = await fetch(`${API_BASE_URL}/pedidos`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id_aluno, itens })
-        });
-
+        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/finalizar`, { method: "POST" });
         if (!res.ok) {
             const erro = await res.json().catch(() => ({}));
-            alert(erro.erro || "Não foi possível criar o pedido.");
+            alert(erro.erro || "Não foi possível finalizar o pedido.");
             return;
         }
-
-        carrinho = [];
-        renderizarCarrinho();
-        document.getElementById("select-aluno").value = "";
+        carregarCarrinho();
         carregarPedidos();
     } catch (erro) {
         console.error("Erro ao finalizar pedido:", erro);

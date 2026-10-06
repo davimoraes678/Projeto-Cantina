@@ -4,7 +4,6 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.controllers import aluno_controller, pedido_controller, produto_controller, item_pedido_controller
 from backend.extensions import db, lm
-from backend.models.aluno_model import Aluno
 
 from backend.models.aluno_model import Aluno
 from backend.models.produto_model import Produto
@@ -18,17 +17,7 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
 
 
 def create_app():
-    load_dotenv()
 
-    app = Flask(
-        __name__,
-        static_folder=FRONTEND_DIR,
-        static_url_path="/front-end"
-    )
-
-    @lm.user_loader
-    def carregar_aluno(id_aluno):
-        return Aluno.buscar_por_id(int(id_aluno))
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/front-end")
 

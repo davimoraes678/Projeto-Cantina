@@ -1,0 +1,10 @@
+# Cache do Python (recriado a cada execução)
+__pycache__/
+*.pyc
+
+# Configuração local com senhas do banco
+.env
+
+# Banco SQLite local
+*.db
+instance/

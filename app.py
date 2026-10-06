@@ -26,19 +26,6 @@ def create_app():
         static_url_path="/front-end"
     )
 
-    app.config["SECRET_KEY"] = os.getenv(
-        "SECRET_KEY",
-        "chave-desenvolvimento"
-    )
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL",
-        "sqlite:///cantina.db"
-    )
-
-    db.init_app(app)
-    lm.init_app(app)
-
     @lm.user_loader
     def carregar_aluno(id_aluno):
         return Aluno.buscar_por_id(int(id_aluno))
@@ -53,6 +40,7 @@ def create_app():
 
     app.config["ARQUIVOS_DIR"] = os.path.join(app.root_path, "arquivos")
     app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "chave-desenvolvimento")
 
     @app.errorhandler(413)
     def upload_grande(erro):

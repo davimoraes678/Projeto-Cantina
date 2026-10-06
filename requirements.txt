@@ -1,1 +1,1 @@
-pip install flask SQLAlchemy Flask-Cors dotenv Pillow
+pip install flask SQLAlchemy Flask-Cors dotenv Pillow flask_login

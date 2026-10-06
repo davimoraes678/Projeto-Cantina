@@ -1,6 +1,6 @@
 from backend.extensions import db
 
-class Aluno(db.Model):
+class Aluno(UserMixin, db.Model):
     __tablename__ = "aluno"
 
     id_aluno = db.Column(db.Integer, primary_key=True)

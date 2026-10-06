@@ -1,9 +1,6 @@
 // URL base da API
 const API_BASE_URL = "http://127.0.0.1:5000/api";
 
-// O carrinho fica no banco: é um pedido com status "Carrinho" do aluno selecionado,
-// e cada produto adicionado é um ItemPedido (rotas /api/carrinho).
-
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
 let editandoAlunoId = null;
 let editandoProdutoId = null;

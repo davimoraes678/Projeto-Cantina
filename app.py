@@ -3,7 +3,7 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.controllers import aluno_controller, pedido_controller, produto_controller, item_pedido_controller
-from backend.extensions import db
+from backend.extensions import db, lm
 
 from backend.models.aluno_model import Aluno
 from backend.models.produto_model import Produto

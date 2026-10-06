@@ -1,4 +1,5 @@
 from backend.extensions import db
+from flask_login import UserMixin
 
 class Aluno(UserMixin, db.Model):
     __tablename__ = "aluno"

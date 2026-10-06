@@ -4,6 +4,8 @@ from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
 
+from backend.models.aluno_model import Aluno
+
 bp_aluno = Blueprint('alunos', __name__, url_prefix='/api/alunos')
 
 @bp_aluno.route('', methods=['POST'])

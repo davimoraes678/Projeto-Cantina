@@ -13,3 +13,7 @@ class ListarAlunoService:
         if not aluno:
             return {"erro": "Usuario nao encontrado"}, 404
         return aluno.to_dict(), 200
+
+    @login_manager.user_loader
+        def carregar_aluno(id_aluno):
+            return listar_aluno_servise.buscar_por_id(int(id_aluno))

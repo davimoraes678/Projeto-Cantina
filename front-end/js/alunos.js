@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Informe uma senha para cadastrar o aluno.");
                         return;
                     }
-                    res = await fetch(`${API_BASE_URL}/alunos`, {
+                    res = await fetch(`${API_BASE_URL}/alunos/registro`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ nome, email, senha })
@@ -435,21 +435,26 @@ async function removerProduto(id) {
     }
 }
 
+// LOGICA DO LOGIN DO USUARIO
 
-
-// --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
-function alunoSelecionado() {
-    const select = document.getElementById("select-aluno");
-    return select ? parseInt(select.value) : NaN;
+async function alunoLogado() {
+    const res = await fetch(`${API_BASE_URL}/alunos/registro`);
+    const aluno_inf = await res.json();
+    return aluno_inf.id
 }
 
+async function alunoInf() {
+    const res = await fetch(`${API_BASE_URL}/alunos/registro`);
+    const aluno_inf = await res.json();
+    document.getElementById('nome-aluno').value = aluno_inf.nome;
+    document.getElementById('email-aluno').value = aluno_inf.email;
+}
+
+// --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
 async function adicionarItemAoCarrinho(id_produto) {
-    const id_aluno = alunoSelecionado();
-    if (!id_aluno) {
-        alert("Selecione o aluno antes de adicionar produtos.");
-        return;
-    }
+    const id_aluno = alunoLogado();
+
     const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
     const quantidade = parseInt(inputQuantidade.value);
     if (!quantidade || quantidade < 1) {
@@ -492,7 +497,7 @@ async function removerItemDoCarrinho(id_item_pedido) {
 
 // Busca o carrinho do aluno selecionado no backend.
 async function carregarCarrinho() {
-    const id_aluno = alunoSelecionado();
+    const id_aluno = alunoLogado();
     if (!id_aluno) {
         renderizarCarrinho(null);
         return;
@@ -528,12 +533,7 @@ function renderizarCarrinho(carrinho) {
 }
 
 async function finalizarPedido() {
-    const id_aluno = alunoSelecionado();
-    if (!id_aluno) {
-        alert("Selecione o aluno do pedido.");
-        return;
-    }
-
+    const id_aluno = alunoLogado();
     try {
         const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/finalizar`, { method: "POST" });
         if (!res.ok) {

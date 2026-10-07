@@ -2,15 +2,11 @@ import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
-from backend.controllers import aluno_controller, pedido_controller, produto_controller, item_pedido_controller
-from backend.extensions import db, lm
+from backend.routes import register_routes
+from backend.extensions import db, lm, login_required
 
-from backend.models.aluno_model import Aluno
-from backend.models.produto_model import Produto
-from backend.models.pedido_model import Pedido
-from backend.models.item_pedido import ItemPedido
-from backend.models.avaliacao_model import Avaliacao
-from backend.models.rateio_model import RateioPagamento
+from backend.models import Aluno, Produto, Pedido, ItemPedido, Avaliacao, RateioPagamento
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
@@ -38,12 +34,10 @@ def create_app():
     db.init_app(app)
     lm.init_app(app)
 
-    app.register_blueprint(aluno_controller.bp_aluno)
-    app.register_blueprint(produto_controller.bp_produto)
-    app.register_blueprint(pedido_controller.bp_pedido)
-    app.register_blueprint(item_pedido_controller.bp_item_pedido)
+    register_routes(app)
 
     @app.get('/')
+    @login_required
     def home():
         return send_from_directory(BASE_DIR, "index.html")
 
@@ -53,7 +47,7 @@ def create_app():
             "message": "API Flask + SQLAlchemy funcionando!",
             "rotas": {
                 "listar_alunos": "GET /api/alunos",
-                "criar_aluno": "POST /api/alunos",
+                "registro_aluno": "POST /api/alunos/registro",
                 "atualizar_aluno": "PUT /api/alunos/<id>",
                 "deletar_aluno": "DELETE /api/alunos/<id>",
                 "listar_produtos": "GET /api/produtos",

@@ -7,11 +7,12 @@ from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
 
 bp_aluno = Blueprint('alunos', __name__, url_prefix='/api/alunos')
 
-@bp_aluno.route('', methods=['POST'])
-def criar_aluno():
+@bp_aluno.route('/registro', methods=['POST'])
+def registro_aluno():
     dados = request.get_json()
     resposta, status = CriarAlunoService.executar(dados)
     return jsonify(resposta), status
+
 
 @bp_aluno.route('', methods=['GET'])
 def listar_alunos():

@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 from backend.routes import register_routes
 from backend.extensions import db, lm, login_required
 
-from backend.models import Aluno, Produto, Pedido, ItemPedido, Avaliacao, RateioPagamento
-
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")

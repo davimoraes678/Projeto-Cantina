@@ -438,13 +438,13 @@ async function removerProduto(id) {
 // LOGICA DO LOGIN DO USUARIO
 
 async function alunoLogado() {
-    const res = await fetch(`${API_BASE_URL}/alunos/registro`);
+    const res = await fetch(`${API_BASE_URL}/alunos/login`);
     const aluno_inf = await res.json();
     return aluno_inf.id
 }
 
 async function alunoInf() {
-    const res = await fetch(`${API_BASE_URL}/alunos/registro`);
+    const res = await fetch(`${API_BASE_URL}/alunos/login`);
     const aluno_inf = await res.json();
     document.getElementById('nome-aluno').value = aluno_inf.nome;
     document.getElementById('email-aluno').value = aluno_inf.email;

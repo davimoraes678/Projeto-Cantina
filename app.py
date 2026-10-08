@@ -3,7 +3,7 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.routes import register_routes
-from backend.extensions import db, lm, login_required
+from backend.extensions import db, lm, login_required, login_user, current_user
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +37,8 @@ def create_app():
     @app.get('/')
     @login_required
     def home():
+        if not current_user.is_authenticated:
+            return redirect('/front-end/cadastro.html')
         return send_from_directory(BASE_DIR, "index.html")
 
     @app.get('/api')

@@ -6,15 +6,17 @@
     <title>Cadastro</title>
 </head>
 <body>
-    <form id="form-aluno">
+    <form id="form-aluno" action="/front-end/index.html">
         <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
         <input type="email" id="aluno-email" placeholder="E-mail" required>
         <input type="password" id="aluno-senha" placeholder="Senha">
         <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
        <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
     </form>
+    <a href="/front-end/login.html"><button type="button">fazer login</button></a>
     <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
     <script src="js/alunos.js"></script>
+    
 
 </body>
 </html>

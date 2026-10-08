@@ -14,8 +14,10 @@ class CriarAlunoService:
         senha = dados.get('senha')
         senha_cript = generate_password_hash(senha)
         novo_aluno = Aluno(nome=nome, email=email, senha=senha_cript)
+        db.session.add(novo_aluno)
+        db.session.commit()
         login_user(novo_aluno)
-        return novo_aluno
+        return novo_aluno.aluno.to_dict(), 200
 
 
 

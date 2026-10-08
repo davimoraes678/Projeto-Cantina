@@ -3,6 +3,7 @@ from backend.services.aluno.criar_aluno_service import CriarAlunoService
 from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
+from flask_login import login_required, current_user
 
 
 bp_aluno = Blueprint('alunos', __name__, url_prefix='/api/alunos')
@@ -12,6 +13,11 @@ def registro_aluno():
     dados = request.get_json()
     resposta, status = CriarAlunoService.executar(dados)
     return jsonify(resposta), status
+
+@bp_aluno.route('/login', methods=['GET'])
+@login_required
+def login_aluno():
+    return jsonify(current_user.to_dict()), 200
 
 
 @bp_aluno.route('', methods=['GET'])

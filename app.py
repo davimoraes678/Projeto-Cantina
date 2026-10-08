@@ -39,7 +39,7 @@ def create_app():
     def home():
         if not current_user.is_authenticated:
             return redirect('/front-end/cadastro.html')
-        return send_from_directory(BASE_DIR, "index.html")
+        return send_from_directory(FRONTEND_DIR, "index.html")
 
     @app.get('/api')
     def api_info():
@@ -48,6 +48,7 @@ def create_app():
             "rotas": {
                 "listar_alunos": "GET /api/alunos",
                 "registro_aluno": "POST /api/alunos/registro",
+                "login_aluno": "GET /api/alunos/login",
                 "atualizar_aluno": "PUT /api/alunos/<id>",
                 "deletar_aluno": "DELETE /api/alunos/<id>",
                 "listar_produtos": "GET /api/produtos",

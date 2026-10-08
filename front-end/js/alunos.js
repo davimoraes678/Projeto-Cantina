@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ nome, email, senha })
                     });
-                    
                 }
 
                 if (!res.ok) {
@@ -448,7 +447,6 @@ async function alunoLogado() {
     return aluno_inf.id
 }
 
-const id_aluno = await alunoLogado();
 
 async function alunoInf() {
     const res = await fetch(`${API_BASE_URL}/alunos/login`);

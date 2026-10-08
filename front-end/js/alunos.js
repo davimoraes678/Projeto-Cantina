@@ -59,11 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ nome, email, senha })
                     });
+                    
                 }
 
                 if (!res.ok) {
                     const erro = await res.json().catch(() => ({}));
                     alert(erro.erro || "Não foi possível salvar o aluno.");
+                    return;
+                }
+                if (!editandoAlunoId) {
+                    window.location.href = "/";   // cadastrou e já está logado: vai para a cantina
                     return;
                 }
 
@@ -442,6 +447,8 @@ async function alunoLogado() {
     const aluno_inf = await res.json();
     return aluno_inf.id
 }
+
+const id_aluno = await alunoLogado();
 
 async function alunoInf() {
     const res = await fetch(`${API_BASE_URL}/alunos/login`);

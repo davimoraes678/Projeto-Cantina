@@ -1,10 +1,11 @@
 import os
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.routes import register_routes
 from backend.extensions import db, lm, login_required, login_user, current_user
 
+from backend.models import aluno_model, produto_model, pedido_model, item_pedido, avaliacao_model, rateio_model
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
@@ -35,7 +36,6 @@ def create_app():
     register_routes(app)
 
     @app.get('/')
-    @login_required
     def home():
         if not current_user.is_authenticated:
             return redirect('/front-end/cadastro.html')

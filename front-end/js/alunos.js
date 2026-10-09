@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    const formLogin = document.getElementById("form-login");
+    const formLogin = document.getElementById("form-aluno-login");
     if (formLogin) {
         formLogin.addEventListener("submit", async (e) => {
             e.preventDefault();

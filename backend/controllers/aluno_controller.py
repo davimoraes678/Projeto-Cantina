@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from backend.services.aluno.criar_aluno_service import CriarAlunoService
+from backend.services.aluno.login_aluno_servise import LoginAlunoService
 from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService

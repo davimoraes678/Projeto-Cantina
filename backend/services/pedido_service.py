@@ -30,10 +30,6 @@ class PedidoService:
         if not id_aluno or not itens_data:
             return {"erro": "Aluno e itens são obrigatórios para fechar um pedido"}, 400
 
-        aluno = Aluno.buscar_por_id(id_aluno)
-        if not aluno:
-            return {"erro": f"Aluno ID {id_aluno} não encontrado"}, 404
-
         try:
             # 1. Cria a instância do pedido base, guardando uma "foto" do nome do aluno
             novo_pedido = Pedido(

@@ -1,4 +1,4 @@
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 from backend.models.aluno_model import Aluno
 from backend.extensions import db, lm, login_user
 

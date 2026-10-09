@@ -4,9 +4,6 @@ from backend.models.aluno_model import Aluno
 class DeletarAlunoService:
     @staticmethod
     def executar(id):
-        aluno = Aluno.buscar_por_id(id)
-        if not aluno:
-            return {"erro": "Usuário não encontrado"}, 404
 
         try:
             # Antes de apagar o aluno, preserva o histórico dos pedidos já feitos por ele:

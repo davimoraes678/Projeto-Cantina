@@ -71,8 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formLogin) {
         formLogin.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = document.getElementById("login-email").value;
-            const senha = document.getElementById("login-senha").value;
+            const email = document.getElementById("aluno-email").value;
+            const senha = document.getElementById("aluno-senha").value;
 
             try {
                 const res = await fetch(`${API_BASE_URL}/alunos/login`, {

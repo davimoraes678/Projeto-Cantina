@@ -48,7 +48,8 @@ def create_app():
             "rotas": {
                 "listar_alunos": "GET /api/alunos",
                 "registro_aluno": "POST /api/alunos/registro",
-                "login_aluno": "GET /api/alunos/login",
+                "login_aluno": "POST /api/alunos/login",
+                "aluno_atual": "GET /api/alunos/atual",
                 "atualizar_aluno": "PUT /api/alunos/<id>",
                 "deletar_aluno": "DELETE /api/alunos/<id>",
                 "listar_produtos": "GET /api/produtos",

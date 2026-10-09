@@ -5,20 +5,6 @@ const API_BASE_URL = "http://127.0.0.1:5000/api";
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
-function filtrar(categoria) {
-    document.getElementById("busca-categoria").value = categoria;
-    buscarProdutos();
-}
-function selecionarCategoria(categoria) {
-    document.getElementById("busca-categoria").value = categoria;
-}
-function lanches(lanche) {
-    console.log(lanche);
-}
-function selecionarCategoria(lanche) {
-    document.getElementsByClassName("select-produto").value = lanche;
-}
-
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -28,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarProdutos();
     carregarPedidos();
     carregarCarrinho();
+    AlunoInf();
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
     const formAluno = document.getElementById("form-aluno");
@@ -70,12 +57,40 @@ document.addEventListener("DOMContentLoaded", () => {
                     window.location.href = "/";   // cadastrou e já está logado: vai para a cantina
                     return;
                 }
-
+                
                 sairModoEdicaoAluno();
                 carregarAlunos();
             } catch (erro) {
                 console.error("Erro ao salvar aluno:", erro);
                 alert("Ocorreu um erro ao salvar o aluno.");
+            }
+        });
+    }
+    
+    const formLogin = document.getElementById("form-login");
+    if (formLogin) {
+        formLogin.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const senha = document.getElementById("login-senha").value;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/alunos/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                if (!res.ok) {
+                    const erro = await res.json().catch(() => ({}));
+                    alert(erro.erro || "Não foi possível fazer login.");
+                    return;
+                }
+
+                window.location.href = "/";
+            } catch (erro) {
+                console.error("Erro ao fazer login:", erro);
+                alert("Ocorreu um erro ao fazer login.");
             }
         });
     }
@@ -288,20 +303,6 @@ async function removerAluno(id) {
 }
 
 // --- LÓGICA DE PRODUTOS ---
-async function enviarImagem(idProduto) {
-    const imagem = document.getElementById("imagem")?.files[0];
-    if (!imagem) return;
-    const dados = new FormData();
-    dados.append("imagem", imagem);
-    const res = await fetch(`${API_BASE_URL}/produtos/${idProduto}/imagem`, {
-        method: "POST",
-        body: dados
-    });
-    if (!res.ok) {
-        const erro = await res.json().catch(() => ({}));
-        throw new Error(`O produto foi salvo, mas a imagem não: ${erro.erro || "falha no envio"}. Tente salvar novamente.`);
-    }
-}
 
 async function carregarProdutos() {
     await buscarProdutos({}); // sem filtros = lista tudo, via a mesma rota de busca
@@ -442,23 +443,23 @@ async function removerProduto(id) {
 // LOGICA DO LOGIN DO USUARIO
 
 async function alunoLogado() {
-    const res = await fetch(`${API_BASE_URL}/alunos/login`);
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
     const aluno_inf = await res.json();
-    return aluno_inf.id
+    return aluno_inf.id_aluno;
 }
 
 
 async function alunoInf() {
-    const res = await fetch(`${API_BASE_URL}/alunos/login`);
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
     const aluno_inf = await res.json();
-    document.getElementById('nome-aluno').value = aluno_inf.nome;
-    document.getElementById('email-aluno').value = aluno_inf.email;
+    document.getElementById('nome-aluno').innerHTML = aluno_inf.nome;
+    document.getElementById('email-aluno').innerHTML = aluno_inf.email;
 }
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
 async function adicionarItemAoCarrinho(id_produto) {
-    const id_aluno = alunoLogado();
+    const id_aluno = await alunoLogado();
 
     const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
     const quantidade = parseInt(inputQuantidade.value);
@@ -502,7 +503,7 @@ async function removerItemDoCarrinho(id_item_pedido) {
 
 // Busca o carrinho do aluno selecionado no backend.
 async function carregarCarrinho() {
-    const id_aluno = alunoLogado();
+    const id_aluno = await alunoLogado();
     if (!id_aluno) {
         renderizarCarrinho(null);
         return;
@@ -538,7 +539,7 @@ function renderizarCarrinho(carrinho) {
 }
 
 async function finalizarPedido() {
-    const id_aluno = alunoLogado();
+    const id_aluno = await alunoLogado();
     try {
         const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/finalizar`, { method: "POST" });
         if (!res.ok) {

@@ -35,10 +35,6 @@ class Aluno(UserMixin, db.Model):
     def listar_todos():
         return Aluno.query.all()
 
-    @staticmethod
-    def buscar_por_id(id_aluno):
-        return Aluno.query.get(id_aluno)
-
     def to_dict(self):
         return {
             'id_aluno': self.id_aluno,

@@ -14,11 +14,16 @@ def registro_aluno():
     resposta, status = CriarAlunoService.executar(dados)
     return jsonify(resposta), status
 
-@bp_aluno.route('/login', methods=['GET'])
+@bp_aluno.route('/atual', methods=['GET'])
 @login_required
-def login_aluno():
+def aluno_atual():
     return jsonify(current_user.to_dict()), 200
 
+@bp_aluno.route('/login', methods=['POST'])
+def login_aluno():
+    dados = request.get_json()
+    resposta, status = LoginAlunoService.executar(dados)
+    return jsonify(resposta), status
 
 @bp_aluno.route('', methods=['GET'])
 def listar_alunos():

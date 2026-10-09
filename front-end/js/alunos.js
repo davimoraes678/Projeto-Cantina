@@ -5,7 +5,10 @@ const API_BASE_URL = "http://127.0.0.1:5000/api";
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
-
+function filtrar(categoria) {
+    document.getElementById("busca-categoria").value = categoria;
+    buscarProdutos();
+}
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -14,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarProdutos();
     carregarPedidos();
     carregarCarrinho();
-    AlunoInf();
+    alunoInf();
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
     const formAluno = document.getElementById("form-aluno");

@@ -21,8 +21,6 @@ class ItemPedidoService:
 
     @staticmethod
     def ver_carrinho(id_aluno):
-        if not Aluno.buscar_por_id(id_aluno):
-            return {"erro": "Aluno não encontrado"}, 404
         carrinho = ItemPedidoService._buscar_carrinho(id_aluno)
         if not carrinho:
             return ItemPedidoService._carrinho_vazio(id_aluno), 200

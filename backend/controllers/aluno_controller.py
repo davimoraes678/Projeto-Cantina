@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from backend.services.aluno.criar_aluno_service import CriarAlunoService
-from backend.services.aluno.login_aluno_servise import LoginAlunoService
+from backend.services.aluno.login_aluno_service import LoginAlunoService
 from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
@@ -25,6 +25,12 @@ def login_aluno():
     dados = request.get_json()
     resposta, status = LoginAlunoService.executar(dados)
     return jsonify(resposta), status
+
+@bp_aluno.route('/logout', methods=['POST'])
+@login_required
+def logout_aluno():
+    LoginAlunoService.logout()
+    return jsonify({"mensagem": "Logout realizado com sucesso"}), 200
 
 @bp_aluno.route('', methods=['GET'])
 def listar_alunos():

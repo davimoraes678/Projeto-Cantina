@@ -21,7 +21,7 @@ class CriarAlunoService:
         login_user(novo_aluno)
         return novo_aluno.to_dict(), 200
     @lm.user_loader
-    def load_user(id):
+    def load_user(id): 
         return Aluno.query.get(int(id))
-
+    
 

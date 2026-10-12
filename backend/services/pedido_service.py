@@ -3,6 +3,7 @@ from backend.models.item_pedido import ItemPedido
 from backend.models.produto_model import Produto
 from backend.models.aluno_model import Aluno
 from backend.extensions import db
+from flask_login import current_user
 from datetime import datetime
 
 
@@ -24,7 +25,7 @@ def _parse_datetime(valor):
 class PedidoService:
     @staticmethod
     def criar(data):
-        id_aluno = data.get('id_aluno')
+        id_aluno = current_user.id_aluno
         itens_data = data.get('itens', []) # Espera uma lista de dicts: [{"id_produto": 1, "quantidade": 2}, ...]
 
         if not id_aluno or not itens_data:

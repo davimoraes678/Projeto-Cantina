@@ -1,23 +1,42 @@
 // URL base da API
 const API_BASE_URL = "http://127.0.0.1:5000/api";
 
+// O carrinho fica no banco: é um pedido com status "Carrinho" do aluno selecionado,
+// e cada produto adicionado é um ItemPedido (rotas /api/carrinho).
+
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
 function filtrar(categoria) {
-    document.getElementById("busca-categoria").value = categoria;
+    const buscaCategoria = document.getElementById("busca-categoria");
+    if (!buscaCategoria) return;
+    buscaCategoria.value = categoria;
     buscarProdutos();
 }
+function selecionarCategoria(categoria) {
+    const buscaCategoria = document.getElementById("busca-categoria");
+    if (!buscaCategoria) return;
+    buscaCategoria.value = categoria;
+}
+function lanches(lanche) {
+    console.log(lanche);
+}
+function selecionarCategoria(lanche) {
+    document.getElementsByClassName("select-produto").value = lanche;
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
+    const hasAlunoUi = document.getElementById("tabela-alunos") || document.getElementById("select-aluno") || document.getElementById("form-aluno");
+    const hasProdutoUi = document.getElementById("tabela-produtos") || document.getElementById("tabela-produtos-admin") || document.getElementById("form-busca-produto");
+    const hasPedidoUi = document.getElementById("tabela-pedidos") || document.getElementById("btn-finalizar-pedido") || document.getElementById("form-editar-pedido");
+    const hasCarrinhoUi = document.getElementById("tabela-carrinho") || document.getElementById("select-aluno") || document.getElementById("btn-finalizar-pedido");
 
-    // Carrega as tabelas e selects ao iniciar
-    carregarAlunos();
-    carregarProdutos();
-    carregarPedidos();
-    carregarCarrinho();
-    alunoInf();
+    if (hasAlunoUi) carregarAlunos();
+    if (hasProdutoUi) carregarProdutos();
+    if (hasPedidoUi) carregarPedidos();
+    if (hasCarrinhoUi) carregarCarrinho();
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
     const formAluno = document.getElementById("form-aluno");
@@ -56,11 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     alert(erro.erro || "Não foi possível salvar o aluno.");
                     return;
                 }
-                if (!editandoAlunoId) {
-                    window.location.href = "/";   // cadastrou e já está logado: vai para a cantina
-                    return;
-                }
-                
+
                 sairModoEdicaoAluno();
                 carregarAlunos();
             } catch (erro) {
@@ -69,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
     const formLogin = document.getElementById("form-aluno-login");
     if (formLogin) {
         formLogin.addEventListener("submit", async (e) => {
@@ -86,18 +100,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!res.ok) {
                     const erro = await res.json().catch(() => ({}));
-                    alert(erro.erro || "Não foi possível fazer login.");
+                    alert(erro.erro || "Não foi possível realizar o login.");
                     return;
                 }
 
-                window.location.href = "/";
+                const dados = await res.json();
+                localStorage.setItem("token", dados.token);
+                window.location.href = "/front-end/index.html";
             } catch (erro) {
-                console.error("Erro ao fazer login:", erro);
-                alert("Ocorreu um erro ao fazer login.");
+                console.error("Erro ao realizar login:", erro);
+                alert("Ocorreu um erro ao realizar o login.");
             }
         });
     }
-
+    
     const btnCancelarEdicaoAluno = document.getElementById("btn-cancelar-edicao-aluno");
     if (btnCancelarEdicaoAluno) {
         btnCancelarEdicaoAluno.addEventListener("click", sairModoEdicaoAluno);
@@ -270,6 +286,29 @@ async function carregarAlunos() {
     }
 }
 
+const btnLogout = document.getElementById("btn-logout");
+if (btnLogout) {
+    btnLogout.addEventListener("click", async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/alunos/logout`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            if (!res.ok) {
+                const erro = await res.json().catch(() => ({}));
+                alert(erro.erro || "Não foi possível realizar o logout.");
+                return;
+            }
+
+            window.location.href = "/front-end/login.html";
+        } catch (erro) {
+            console.error("Erro ao realizar logout:", erro);
+            alert("Ocorreu um erro ao realizar o logout.");
+        }
+    });
+}
+
 function editarAluno(id, nome, email) {
     editandoAlunoId = id;
     document.getElementById("aluno-nome").value = nome;
@@ -306,6 +345,20 @@ async function removerAluno(id) {
 }
 
 // --- LÓGICA DE PRODUTOS ---
+async function enviarImagem(idProduto) {
+    const imagem = document.getElementById("imagem")?.files[0];
+    if (!imagem) return;
+    const dados = new FormData();
+    dados.append("imagem", imagem);
+    const res = await fetch(`${API_BASE_URL}/produtos/${idProduto}/imagem`, {
+        method: "POST",
+        body: dados
+    });
+    if (!res.ok) {
+        const erro = await res.json().catch(() => ({}));
+        throw new Error(`O produto foi salvo, mas a imagem não: ${erro.erro || "falha no envio"}. Tente salvar novamente.`);
+    }
+}
 
 async function carregarProdutos() {
     await buscarProdutos({}); // sem filtros = lista tudo, via a mesma rota de busca
@@ -443,27 +496,21 @@ async function removerProduto(id) {
     }
 }
 
-// LOGICA DO LOGIN DO USUARIO
 
-async function alunoLogado() {
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    const aluno_inf = await res.json();
-    return aluno_inf.id_aluno;
-}
-
-
-async function alunoInf() {
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    const aluno_inf = await res.json();
-    document.getElementById('nome-aluno').innerHTML = aluno_inf.nome;
-    document.getElementById('email-aluno').innerHTML = aluno_inf.email;
-}
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
+function alunoSelecionado() {
+    const select = document.getElementById("select-aluno");
+    return select ? parseInt(select.value) : NaN;
+}
+
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
 async function adicionarItemAoCarrinho(id_produto) {
-    const id_aluno = await alunoLogado();
-
+    const id_aluno = alunoSelecionado();
+    if (!id_aluno) {
+        alert("Selecione o aluno antes de adicionar produtos.");
+        return;
+    }
     const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
     const quantidade = parseInt(inputQuantidade.value);
     if (!quantidade || quantidade < 1) {
@@ -506,7 +553,7 @@ async function removerItemDoCarrinho(id_item_pedido) {
 
 // Busca o carrinho do aluno selecionado no backend.
 async function carregarCarrinho() {
-    const id_aluno = await alunoLogado();
+    const id_aluno = alunoSelecionado();
     if (!id_aluno) {
         renderizarCarrinho(null);
         return;
@@ -542,7 +589,12 @@ function renderizarCarrinho(carrinho) {
 }
 
 async function finalizarPedido() {
-    const id_aluno = await alunoLogado();
+    const id_aluno = alunoSelecionado();
+    if (!id_aluno) {
+        alert("Selecione o aluno do pedido.");
+        return;
+    }
+
     try {
         const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/finalizar`, { method: "POST" });
         if (!res.ok) {

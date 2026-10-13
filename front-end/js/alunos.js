@@ -1,30 +1,15 @@
 // URL base da API
-const API_BASE_URL = "http://127.0.0.1:5000/api";
+const API_BASE_URL = "/api";  // mesmo endereço da página (funciona local e no Codespaces)
 
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
 let editandoAlunoId = null;
 let editandoProdutoId = null;
 
 function filtrar(categoria) {
-    document.getElementById("busca-categoria").value = categoria;
-    buscarProdutos();
-}
-function filtrar(categoria) {
     const buscaCategoria = document.getElementById("busca-categoria");
     if (!buscaCategoria) return;
     buscaCategoria.value = categoria;
     buscarProdutos();
-}
-function selecionarCategoria(categoria) {
-    const buscaCategoria = document.getElementById("busca-categoria");
-    if (!buscaCategoria) return;
-    buscaCategoria.value = categoria;
-}
-function lanches(lanche) {
-    console.log(lanche);
-}
-function selecionarCategoria(lanche) {
-    document.getElementsByClassName("select-produto").value = lanche;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -498,25 +483,19 @@ async function removerProduto(id) {
 
 // LOGICA DO LOGIN DO USUARIO
 
-async function alunoLogado() {
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    const aluno_inf = await res.json();
-    return aluno_inf.id_aluno;
-}
-
-
+// Mostra o nome do aluno logado no topo (só na página que tem #nome-aluno)
 async function alunoInf() {
+    const nomeEl = document.getElementById('nome-aluno');
+    if (!nomeEl) return;
     const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    const aluno_inf = await res.json();
-    document.getElementById('nome-aluno').innerHTML = aluno_inf.nome;
-    document.getElementById('email-aluno').innerHTML = aluno_inf.email;
+    if (!res.ok) return;   // não está logado
+    const aluno = await res.json();
+    nomeEl.textContent = aluno.nome;
 }
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
 async function adicionarItemAoCarrinho(id_produto) {
-    const id_aluno = await alunoLogado();
-
     const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
     const quantidade = parseInt(inputQuantidade.value);
     if (!quantidade || quantidade < 1) {
@@ -525,7 +504,7 @@ async function adicionarItemAoCarrinho(id_produto) {
     }
 
     try {
-        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/itens`, {
+        const res = await fetch(`${API_BASE_URL}/carrinho/itens`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_produto, quantidade })
@@ -557,15 +536,11 @@ async function removerItemDoCarrinho(id_item_pedido) {
     }
 }
 
-// Busca o carrinho do aluno selecionado no backend.
+// Busca o carrinho do aluno logado no backend.
 async function carregarCarrinho() {
-    const id_aluno = await alunoLogado();
-    if (!id_aluno) {
-        renderizarCarrinho(null);
-        return;
-    }
+    if (!document.getElementById("tabela-carrinho")) return;   // página sem carrinho
     try {
-        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}`);
+        const res = await fetch(`${API_BASE_URL}/carrinho`);
         renderizarCarrinho(res.ok ? await res.json() : null);
     } catch (erro) {
         console.error("Erro ao carregar carrinho:", erro);
@@ -595,9 +570,8 @@ function renderizarCarrinho(carrinho) {
 }
 
 async function finalizarPedido() {
-    const id_aluno = await alunoLogado();
     try {
-        const res = await fetch(`${API_BASE_URL}/carrinho/${id_aluno}/finalizar`, { method: "POST" });
+        const res = await fetch(`${API_BASE_URL}/carrinho/finalizar`, { method: "POST" });
         if (!res.ok) {
             const erro = await res.json().catch(() => ({}));
             alert(erro.erro || "Não foi possível finalizar o pedido.");

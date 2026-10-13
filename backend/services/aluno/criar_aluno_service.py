@@ -12,14 +12,14 @@ class CriarAlunoService:
         email = dados.get("email")
         if not nome or not email or not senha:
             return {"erro": "Nome, email e senha são obrigatórios"}, 400
-        """if Aluno.query.filter_by(email=email).first():
-            return {"erro": "Já existe um aluno cadastrado com esse email"}, 409"""
+        if Aluno.query.filter_by(email=email).first():
+            return {"erro": "Já existe um aluno cadastrado com esse email"}, 409
         senha_cript = generate_password_hash(senha)
         novo_aluno = Aluno(nome=nome, email=email, senha=senha_cript)
         db.session.add(novo_aluno)
         db.session.commit()
         login_user(novo_aluno)
-        return novo_aluno.to_dict(), 200
+        return novo_aluno.to_dict(), 201
     @lm.user_loader
     def load_user(id): 
         return Aluno.query.get(int(id))

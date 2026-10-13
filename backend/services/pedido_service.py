@@ -35,7 +35,7 @@ class PedidoService:
             # 1. Cria a instância do pedido base, guardando uma "foto" do nome do aluno
             novo_pedido = Pedido(
                 id_aluno=id_aluno,
-                nome_aluno=aluno.nome,
+                nome_aluno=current_user.nome,
                 status="Pendente",
                 horario_agendado_retirada=_parse_datetime(data.get('horario_agendado_retirada'))
             )

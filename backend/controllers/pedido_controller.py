@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_required
 from backend.services.pedido_service import PedidoService
 
 bp_pedido = Blueprint('pedidos', __name__, url_prefix='/api/pedidos')
 
 @bp_pedido.route('', methods=['POST'])
+@login_required
 def criar_pedido():
     data = request.json
     resposta, status = PedidoService.criar(data)

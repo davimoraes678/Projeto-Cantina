@@ -70,7 +70,8 @@ class ItemPedidoService:
     @staticmethod
     def remover_item(id_item_pedido):
         item = ItemPedido.buscar_por_id(id_item_pedido)
-        if not item or item.pedido.status != STATUS_CARRINHO:
+        if (not item or item.pedido.status != STATUS_CARRINHO
+                or item.pedido.id_aluno != current_user.id_aluno):
             return {"erro": "Item não encontrado no carrinho"}, 404
 
         carrinho = item.pedido

@@ -33,6 +33,10 @@ def create_app():
     db.init_app(app)
     lm.init_app(app)
 
+    @lm.unauthorized_handler
+    def nao_autorizado():
+        return jsonify(erro="Faça login para continuar."), 401
+
     register_routes(app)
 
     @app.get('/')

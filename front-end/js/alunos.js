@@ -12,6 +12,8 @@ function filtrar(categoria) {
     buscarProdutos();
 }
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
     // Carrega as tabelas e selects ao iniciar
@@ -209,12 +211,6 @@ async function enviarImagem(idProduto) {
         });
     }
 
-    // --- EVENTO: TROCAR O ALUNO MOSTRA O CARRINHO DELE ---
-    const selectAluno = document.getElementById("select-aluno");
-    if (selectAluno) {
-        selectAluno.addEventListener("change", carregarCarrinho);
-    }
-
     // --- EVENTO: FINALIZAR PEDIDO (transforma o carrinho em pedido) ---
     const btnFinalizar = document.getElementById("btn-finalizar-pedido");
     if (btnFinalizar) {
@@ -242,12 +238,9 @@ async function carregarAlunos() {
         const alunos = await res.json();
 
         const tabela = document.getElementById("tabela-alunos");
-        const select = document.getElementById("select-aluno");
-        if (!tabela && !select) return;
+        if (!tabela) return;
 
         if (tabela) tabela.innerHTML = "";
-        const alunoSelecionado = select ? select.value : "";
-        if (select) select.innerHTML = '<option value="">Selecione o Aluno...</option>';
 
         alunos.forEach(aluno => {
             if (tabela) tabela.innerHTML += `
@@ -262,11 +255,9 @@ async function carregarAlunos() {
                     </td>
                 </tr>
             `;
-            if (select) select.innerHTML += `<option value="${aluno.id_aluno}">${aluno.nome}</option>`;
         });
 
         // Mantém o aluno selecionado ao recarregar a lista (ex: depois de adicionar um item ao carrinho)
-        if (select && alunoSelecionado) select.value = alunoSelecionado;
     } catch (erro) {
         console.error("Erro ao carregar alunos:", erro);
     }
@@ -449,6 +440,28 @@ async function buscarProdutos(filtrosForcados) {
     }
 }
 
+async function editarDados() {
+
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
+    if (!res.ok) return; 
+    const aluno_inf = await res.json();
+
+    document.getElementById("form-editar-dados").innerHTML = `
+        <div>
+            <form id="form-aluno">
+                <input type="text" id="aluno-nome" value="${aluno_inf.nome}" placeholder="Nome do Aluno" required>
+                <input type="email" id="aluno-email" value="${aluno_inf.email}" placeholder="E-mail" required>
+                <input type="password" id="aluno-senha" placeholder="Senha">
+                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+                <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
+            </form>
+            <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
+        </div>
+    `;
+}
+
+
+
 function editarProduto(id, nome, preco, estoque, categoria) {
     editandoProdutoId = id;
     document.getElementById("produto-nome").value = nome;
@@ -486,11 +499,12 @@ async function removerProduto(id) {
 // Mostra o nome do aluno logado no topo (só na página que tem #nome-aluno)
 async function alunoInf() {
     const nomeEl = document.getElementById('nome-aluno');
-    if (!nomeEl) return;
+    const emailEl = document.getElementById('email-aluno');
     const res = await fetch(`${API_BASE_URL}/alunos/atual`);
     if (!res.ok) return;   // não está logado
-    const aluno = await res.json();
-    nomeEl.textContent = aluno.nome;
+    const aluno_inf = await res.json();
+    nomeEl.textContent = aluno_inf.nome;
+    emailEl.textContent = aluno_inf.email;
 }
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---

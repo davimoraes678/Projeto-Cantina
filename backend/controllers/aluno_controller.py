@@ -15,9 +15,16 @@ def registro_aluno():
     resposta, status = CriarAlunoService.executar(dados)
     return jsonify(resposta), status
 
-@bp_aluno.route('/atual', methods=['GET'])
+@bp_aluno.route('/atual', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def aluno_atual():
+    if request.method == 'PUT':
+        dados = request.get_json()
+        resposta, status = AtualizarAlunoService.executar(dados)
+        return jsonify(resposta), status
+    elif request.method == 'DELETE':
+        resposta, status = DeletarAlunoService.executar()
+        return jsonify(resposta), status
     return jsonify(current_user.to_dict()), 200
 
 @bp_aluno.route('/login', methods=['POST'])
@@ -37,11 +44,6 @@ def listar_alunos():
     resposta, status = ListarAlunoService.executar()
     return jsonify(resposta), status
 
-@bp_aluno.route('/<int:id_aluno>', methods=['PUT'])
-def atualizar_aluno(id_aluno):
-    dados = request.get_json()
-    resposta, status = AtualizarAlunoService.executar(id_aluno, dados)
-    return jsonify(resposta), status
 
 @bp_aluno.route('/<int:id_aluno>', methods=['DELETE'])
 def deletar_aluno(id_aluno):

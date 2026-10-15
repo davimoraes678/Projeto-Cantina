@@ -1,11 +1,12 @@
+from flask_login import current_user
 from werkzeug.security import generate_password_hash
 from backend.models.aluno_model import Aluno
 
 
 class AtualizarAlunoService:
     @staticmethod
-    def executar(id, dados):
-        aluno = Aluno.buscar_por_id(id)
+    def executar(dados):
+        aluno = current_user
         if not aluno:
             return {"erro": "Aluno não encontrado"}, 404
 

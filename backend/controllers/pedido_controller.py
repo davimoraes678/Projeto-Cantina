@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from backend.services.pedido_service import PedidoService
+from backend.services.pedido_service import AvaliacaoService, PedidoService
 
 bp_pedido = Blueprint('pedidos', __name__, url_prefix='/api/pedidos')
 
@@ -25,4 +25,10 @@ def buscar_pedido(id_pedido):
 def atualizar_pedido(id_pedido):
     data = request.json
     resposta, status = PedidoService.atualizar_status(id_pedido, data)
+    return jsonify(resposta), status
+
+@bp_pedido.route('/avaliacao/<int:id_pedido>', methods=['POST'])
+def criar_avaliacao(id_pedido):
+    data = request.json
+    resposta, status = AvaliacaoService.criar(data, id_pedido)
     return jsonify(resposta), status

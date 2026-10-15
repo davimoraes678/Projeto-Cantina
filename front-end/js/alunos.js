@@ -324,10 +324,10 @@ async function alunoInf() {
     const emailEl = document.getElementById('email-aluno');
     if (!nomeEl && !emailEl) return;
     const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    if (!res.ok) return;   // não está logado
+    if (!res.ok) return;
     const aluno_inf = await res.json();
-    nomeEl.textContent = aluno_inf.nome;
-    emailEl.textContent = aluno_inf.email;
+    if (nomeEl) nomeEl.textContent = aluno_inf.nome;
+    if (emailEl) emailEl.textContent = aluno_inf.email;
 }
 
 // --- LÓGICA DE PRODUTOS ---
@@ -404,23 +404,22 @@ async function buscarProdutos(filtrosForcados) {
         if (tabela) {
             produtos.forEach(prod => {
             tabela.innerHTML += `
-                <tr>
-                    <td>
-                        <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
-                             alt="Imagem do produto" width="80" loading="lazy"
-                             onerror="this.hidden = true">
-                        ${prod.nome}
-                    </td>
-                    <td>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</td>
-                    <td>${prod.quantidade_estoque}</td>
-                    <td>${prod.categoria || ""}</td>
-                    <td>
-                        <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
-                        <button type="button" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
-                    </td>
-                </tr>
+                <div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
+            alt="Imagem do produto" width="80" loading="lazy"
+            onerror="this.hidden = true">
+    <h5 class="mt-2 mb-0">${prod.nome}</h5>
+    <h4 class="mt-0 mb-2">R$ ${parseFloat(prod.preco_atual).toFixed(2)}</h4>
+    <p class="card-text fg-2">${prod.descricao}</p>
+    <button type="button" class="btn btn-primary" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
+            <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
+
+    </div>
+</div>
             `
         })
+
         }
         if (tabela_admin) {
             produtos.forEach(prod => {
@@ -620,6 +619,7 @@ async function carregarPedidos() {
         console.error("Erro ao carregar pedidos:", erro);
     }
 }
+
 
 function editarPedido(id) {
     const pedido = pedidosCache.find(p => p.id_pedido === id);

@@ -2,9 +2,12 @@ from backend.models.pedido_model import Pedido
 from backend.models.item_pedido import ItemPedido
 from backend.models.produto_model import Produto
 from backend.models.aluno_model import Aluno
+from backend.models.avaliacao_model import Avaliacao
 from backend.extensions import db
 from flask_login import current_user
 from datetime import datetime
+
+
 
 
 def _parse_datetime(valor):
@@ -101,3 +104,18 @@ class PedidoService:
             horario_agendado_retirada=_parse_datetime(data.get('horario_agendado_retirada'))
         )
         return pedido.to_dict(), 200
+
+class AvaliacaoService:
+    @staticmethod
+    def criar(data, id_pedido):
+        pedido_id = Pedido.buscar_por_id(id_pedido)
+        if not pedido_id:
+            return {"erro": "Pedido não encontrado"}, 404
+        nova_avaliacao = Avaliacao(
+            id_pedido=id_pedido,
+            nota=data.get('nota'),
+            comentario= data.get('comentario')
+        )
+        db.session.add(nova_avaliacao)
+        db.session.commit()
+        return nova_avaliacao.to_dict(), 201

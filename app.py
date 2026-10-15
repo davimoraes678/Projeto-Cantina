@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, send_from_directory, redirect
+from flask import Flask, jsonify, send_from_directory, redirect, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.routes import register_routes
@@ -33,11 +33,18 @@ def create_app():
     db.init_app(app)
     lm.init_app(app)
 
-    @lm.unauthorized_handler
-    def nao_autorizado():
-        return jsonify(erro="Faça login para continuar."), 401
+    PAGINAS_PROTEGIDAS = {
+        '/front-end/index.html',
+        '/front-end/admin.html',
+        '/front-end/conta.html',
+    }
+    @app.before_request
+    def proteger_paginas():
+        if request.path in PAGINAS_PROTEGIDAS and not current_user.is_authenticated:
+            return redirect('/front-end/cadastro.html')
 
     register_routes(app)
+
 
     @app.get('/')
     def home():
@@ -45,7 +52,9 @@ def create_app():
             return redirect('/front-end/cadastro.html')
         return send_from_directory(FRONTEND_DIR, "index.html")
 
+    
     @app.get('/api')
+    @login_required
     def api_info():
         return jsonify({
             "message": "API Flask + SQLAlchemy funcionando!",

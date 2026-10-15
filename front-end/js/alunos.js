@@ -2,7 +2,6 @@
 const API_BASE_URL = "/api";  // mesmo endereço da página (funciona local e no Codespaces)
 
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
-let editandoAlunoId = null;
 let editandoProdutoId = null;
 
 function filtrar(categoria) {
@@ -24,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alunoInf();
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
+    // --- EVENTO: SUBMIT DO FORMULÁRIO DE CADASTRO ---
     const formAluno = document.getElementById("form-aluno");
     if (formAluno) {
         formAluno.addEventListener("submit", async (e) => {
@@ -32,44 +32,28 @@ document.addEventListener("DOMContentLoaded", () => {
             const email = document.getElementById("aluno-email").value;
             const senha = document.getElementById("aluno-senha").value;
 
+            if (!senha) {
+                alert("Informe uma senha para se cadastrar.");
+                return;
+            }
+
             try {
-                let res;
-                if (editandoAlunoId) {
-                    // Edição: senha em branco = mantém a senha atual (o backend já trata isso)
-                    const corpo = { nome, email };
-                    if (senha) corpo.senha = senha;
-                    res = await fetch(`${API_BASE_URL}/alunos/${editandoAlunoId}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(corpo)
-                    });
-                } else {
-                    if (!senha) {
-                        alert("Informe uma senha para cadastrar o aluno.");
-                        return;
-                    }
-                    res = await fetch(`${API_BASE_URL}/alunos/registro`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ nome, email, senha })
-                    });
-                }
+                const res = await fetch(`${API_BASE_URL}/alunos/registro`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome, email, senha })
+                });
 
                 if (!res.ok) {
                     const erro = await res.json().catch(() => ({}));
-                    alert(erro.erro || "Não foi possível salvar o aluno.");
+                    alert(erro.erro || "Não foi possível fazer o cadastro.");
                     return;
                 }
-                if (!editandoAlunoId) {
-                    window.location.href = "/";   // cadastrou e já está logado: vai para a cantina
-                    return;
-                }
-                
-                sairModoEdicaoAluno();
-                carregarAlunos();
+
+                window.location.href = "/";   // cadastrou e já está logado: vai para a cantina
             } catch (erro) {
-                console.error("Erro ao salvar aluno:", erro);
-                alert("Ocorreu um erro ao salvar o aluno.");
+                console.error("Erro ao cadastrar:", erro);
+                alert("Ocorreu um erro ao fazer o cadastro.");
             }
         });
     }
@@ -102,10 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const btnCancelarEdicaoAluno = document.getElementById("btn-cancelar-edicao-aluno");
-    if (btnCancelarEdicaoAluno) {
-        btnCancelarEdicaoAluno.addEventListener("click", sairModoEdicaoAluno);
-    }
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (cria ou edita, dependendo do modo) ---
     const formProduto = document.getElementById("form-produto");
@@ -232,6 +212,7 @@ async function enviarImagem(idProduto) {
 });
 
 // --- LÓGICA DE ALUNOS ---
+// Carrega a lista de alunos para o administrador.
 async function carregarAlunos() {
     try {
         const res = await fetch(`${API_BASE_URL}/alunos`);
@@ -245,13 +226,12 @@ async function carregarAlunos() {
         alunos.forEach(aluno => {
             if (tabela) tabela.innerHTML += `
                 <tr>
-                    <td>${aluno.id_aluno}</td>
+                    <th scope="row">${aluno.id_aluno}</th>
                     <td>${aluno.nome}</td>
                     <td>${aluno.email}</td>
                     <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
                     <td>
                         <button class="editar" onclick="editarAluno(${aluno.id_aluno}, '${escapeAttr(aluno.nome)}', '${escapeAttr(aluno.email)}')">Editar</button>
-                        <button class="excluir" onclick="removerAluno(${aluno.id_aluno})">Excluir</button>
                     </td>
                 </tr>
             `;
@@ -262,7 +242,7 @@ async function carregarAlunos() {
         console.error("Erro ao carregar alunos:", erro);
     }
 }
-
+// Realiza o logout do aluno logado, limpando a sessão no backend e redirecionando para a tela de login.
 const btnLogout = document.getElementById("btn-logout");
 if (btnLogout) {
     btnLogout.addEventListener("click", async () => {
@@ -285,39 +265,69 @@ if (btnLogout) {
         }
     });
 }
-function editarAluno(id, nome, email) {
-    editandoAlunoId = id;
-    document.getElementById("aluno-nome").value = nome;
-    document.getElementById("aluno-email").value = email;
-    document.getElementById("aluno-senha").value = "";
-    document.getElementById("aluno-senha").placeholder = "Nova senha (opcional)";
-    document.getElementById("btn-salvar-aluno").textContent = "Salvar Edição";
-    document.getElementById("btn-cancelar-edicao-aluno").style.display = "inline-block";
-    document.getElementById("aviso-edicao-aluno").style.display = "block";
-    document.getElementById("aluno-nome").scrollIntoView({ behavior: "smooth", block: "center" });
-}
 
-function sairModoEdicaoAluno() {
-    editandoAlunoId = null;
-    document.getElementById("form-aluno").reset();
-    document.getElementById("aluno-senha").placeholder = "Senha";
-    document.getElementById("btn-salvar-aluno").textContent = "Cadastrar Aluno";
-    document.getElementById("btn-cancelar-edicao-aluno").style.display = "none";
-    document.getElementById("aviso-edicao-aluno").style.display = "none";
-}
 
-async function removerAluno(id) {
+async function removerAluno() {
     if (confirm("Deseja realmente remover este aluno? Os pedidos que ele já fez serão mantidos no histórico.")) {
-        const res = await fetch(`${API_BASE_URL}/alunos/${id}`, { method: "DELETE" });
+        const res = await fetch(`${API_BASE_URL}/alunos/atual`, { method: "DELETE" });
         if (!res.ok) {
             const erro = await res.json().catch(() => ({}));
             alert(erro.erro || "Não foi possível remover o aluno.");
             return;
         }
-        if (editandoAlunoId === id) sairModoEdicaoAluno();
-        carregarAlunos();
-        carregarPedidos();
+        window.location.href = "/front-end/login.html";
     }
+}
+
+// Edita os dados do aluno logado (nome, email, senha) no formulário de edição.
+async function editarDados() {
+    res = await fetch(`${API_BASE_URL}/alunos/atual`);
+    if (!res.ok) return; 
+    const aluno_inf = await res.json();
+
+    document.getElementById("form-editar-dados").innerHTML = `
+        <div>
+            <form>
+                <input type="text" id="aluno-nome" value="${aluno_inf.nome}" placeholder="Nome do Aluno" required>
+                <input type="email" id="aluno-email" value="${aluno_inf.email}" placeholder="E-mail" required>
+                <input type="password" id="aluno-senha" placeholder="Senha">
+                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+                <button type="button" id="btn-cancelar-edicao-aluno">Cancelar edição</button>
+            </form>
+            <p id="aviso-edicao-aluno">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
+        </div>
+    `;
+    document.getElementById("form-editar-dados").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const corpo = {
+            nome: document.getElementById("aluno-nome").value,
+            email: document.getElementById("aluno-email").value
+        };
+    const senha = document.getElementById("aluno-senha").value;
+    if (senha) corpo.senha = senha;
+        resPut = await fetch(`${API_BASE_URL}/alunos/atual`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(corpo)
+        });
+
+    window.location.reload();
+    });
+    document.getElementById("btn-cancelar-edicao-aluno").addEventListener("click", () => {
+        document.getElementById("form-editar-dados").innerHTML = "";
+    });
+}
+
+// Mostra as informações do aluno logado
+async function alunoInf() {
+    const nomeEl = document.getElementById('nome-aluno');
+    const emailEl = document.getElementById('email-aluno');
+    if (!nomeEl && !emailEl) return;
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
+    if (!res.ok) return;   // não está logado
+    const aluno_inf = await res.json();
+    nomeEl.textContent = aluno_inf.nome;
+    emailEl.textContent = aluno_inf.email;
 }
 
 // --- LÓGICA DE PRODUTOS ---
@@ -440,26 +450,6 @@ async function buscarProdutos(filtrosForcados) {
     }
 }
 
-async function editarDados() {
-
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    if (!res.ok) return; 
-    const aluno_inf = await res.json();
-
-    document.getElementById("form-editar-dados").innerHTML = `
-        <div>
-            <form id="form-aluno">
-                <input type="text" id="aluno-nome" value="${aluno_inf.nome}" placeholder="Nome do Aluno" required>
-                <input type="email" id="aluno-email" value="${aluno_inf.email}" placeholder="E-mail" required>
-                <input type="password" id="aluno-senha" placeholder="Senha">
-                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
-                <button type="button" id="btn-cancelar-edicao-aluno" style="display:none;">Cancelar edição</button>
-            </form>
-            <p id="aviso-edicao-aluno" style="display:none;">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
-        </div>
-    `;
-}
-
 
 
 function editarProduto(id, nome, preco, estoque, categoria) {
@@ -496,16 +486,7 @@ async function removerProduto(id) {
 
 // LOGICA DO LOGIN DO USUARIO
 
-// Mostra o nome do aluno logado no topo (só na página que tem #nome-aluno)
-async function alunoInf() {
-    const nomeEl = document.getElementById('nome-aluno');
-    const emailEl = document.getElementById('email-aluno');
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    if (!res.ok) return;   // não está logado
-    const aluno_inf = await res.json();
-    nomeEl.textContent = aluno_inf.nome;
-    emailEl.textContent = aluno_inf.email;
-}
+
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.

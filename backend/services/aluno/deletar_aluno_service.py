@@ -1,10 +1,11 @@
+from flask_login import current_user
 from backend.extensions import db
 from backend.models.aluno_model import Aluno
 
 class DeletarAlunoService:
     @staticmethod
-    def executar(id):
-        aluno = Aluno.buscar_por_id(id)
+    def executar():
+        aluno = current_user
         if not aluno:
             return {"erro": "Aluno não encontrado"}, 404
 

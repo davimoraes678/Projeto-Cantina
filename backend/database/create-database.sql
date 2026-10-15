@@ -154,14 +154,4 @@ END $
 
 DELIMITER ;
 
-INSERT INTO aluno (nome, email, senha, saldo) VALUES
-('João Silva', 'joao.silva@example.com', 'hashed_password_1', 100.00),
-('Maria Oliveira', 'maria.oliveira@example.com', 'hashed_password_2', 150.00),
-('Pedro Santos', 'pedro.santos@example.com', 'hashed_password_3', 200.00),
-('Ana Costa', 'ana.costa@example.com', 'hashed_password_4', 250.00);
 
-INSERT INTO produto (nome, preco_atual, quantidade_estoque, categoria) VALUES
-('Sanduíche Natural', 10.00, 20, 'Lanche'),
-('Suco de Laranja', 5.00, 30, 'Bebida'),
-('Salada de Frutas', 7.50, 15, 'Doce'),
-('Água Mineral', 2.00, 50, 'Bebida');

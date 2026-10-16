@@ -1,13 +1,9 @@
+from datetime import datetime
+from flask_login import current_user
+from sqlalchemy.exc import IntegrityError
 from backend.models.pedido_model import Pedido
-from backend.models.item_pedido import ItemPedido
-from backend.models.produto_model import Produto
-from backend.models.aluno_model import Aluno
 from backend.models.avaliacao_model import Avaliacao
 from backend.extensions import db
-from flask_login import current_user
-from datetime import datetime
-
-
 
 
 def _parse_datetime(valor):
@@ -26,59 +22,6 @@ def _parse_datetime(valor):
 
 
 class PedidoService:
-    @staticmethod
-    def criar(data):
-        id_aluno = current_user.id_aluno
-        itens_data = data.get('itens', []) # Espera uma lista de dicts: [{"id_produto": 1, "quantidade": 2}, ...]
-
-        if not id_aluno or not itens_data:
-            return {"erro": "Aluno e itens são obrigatórios para fechar um pedido"}, 400
-
-        try:
-            # 1. Cria a instância do pedido base, guardando uma "foto" do nome do aluno
-            novo_pedido = Pedido(
-                id_aluno=id_aluno,
-                nome_aluno=current_user.nome,
-                status="Pendente",
-                horario_agendado_retirada=_parse_datetime(data.get('horario_agendado_retirada'))
-            )
-            db.session.add(novo_pedido)
-            db.session.flush() # Gera o id_pedido antes do commit definitivo
-
-            # 2. Processa cada item do pedido (permite múltiplos produtos por pedido)
-            for item in itens_data:
-                quantidade = item.get('quantidade', 1)
-                if not quantidade or quantidade < 1:
-                    db.session.rollback()
-                    return {"erro": "Quantidade inválida em um dos itens do pedido"}, 400
-
-                produto = Produto.buscar_por_id(item.get('id_produto'))
-                if not produto:
-                    db.session.rollback()
-                    return {"erro": f"Produto ID {item.get('id_produto')} não encontrado"}, 404
-
-                # Cria o vínculo do item com o histórico de preço e nome daquele momento
-                novo_item_pedido = ItemPedido(
-                    id_pedido=novo_pedido.id_pedido,
-                    id_produto=produto.id_produto,
-                    nome_produto=produto.nome,
-                    quantidade=quantidade,
-                    preco_unitario_cobrado=produto.preco_atual
-                )
-                db.session.add(novo_item_pedido)
-
-            db.session.commit() # Salva temporariamente para calcular
-
-            # 3. Calcula o total utilizando a função interna da model Pedido
-            novo_pedido.calcular_total()
-            db.session.commit()
-
-            return novo_pedido.to_dict(), 201
-
-        except Exception as e:
-            db.session.rollback()
-            return {"erro": f"Falha ao criar pedido: {str(e)}"}, 500
-
     @staticmethod
     def listar_todos():
         # O carrinho (status "Carrinho") ainda não é um pedido feito, então não aparece na lista
@@ -105,17 +48,33 @@ class PedidoService:
         )
         return pedido.to_dict(), 200
 
+
 class AvaliacaoService:
     @staticmethod
     def criar(data, id_pedido):
-        pedido_id = Pedido.buscar_por_id(id_pedido)
-        if not pedido_id:
+        # Só o dono do pedido avalia; para os outros o pedido "não existe" (404, e não 403,
+        # para não revelar quais números de pedido existem).
+        pedido = Pedido.buscar_por_id(id_pedido)
+        if not pedido or pedido.id_aluno != current_user.id_aluno:
             return {"erro": "Pedido não encontrado"}, 404
-        nova_avaliacao = Avaliacao(
-            id_pedido=id_pedido,
-            nota=data.get('nota'),
-            comentario= data.get('comentario')
-        )
-        db.session.add(nova_avaliacao)
-        db.session.commit()
+        if pedido.status != "Concluído":
+            return {"erro": "Só é possível avaliar um pedido concluído"}, 400
+        if pedido.avaliacao:
+            return {"erro": "Este pedido já foi avaliado"}, 409
+
+        nota = data.get('nota')
+        if isinstance(nota, bool) or not isinstance(nota, int) or not 1 <= nota <= 5:
+            return {"erro": "A nota deve ser um número inteiro de 1 a 5"}, 400
+
+        comentario = data.get('comentario')
+        if comentario is not None and (not isinstance(comentario, str) or len(comentario) > 500):
+            return {"erro": "O comentário deve ter no máximo 500 caracteres"}, 400
+
+        try:
+            nova_avaliacao = Avaliacao(id_pedido=id_pedido, nota=nota, comentario=comentario or None)
+            nova_avaliacao.salvar()
+        except IntegrityError:
+            # Duas avaliações enviadas ao mesmo tempo: a coluna id_pedido é única, só uma vale.
+            db.session.rollback()
+            return {"erro": "Este pedido já foi avaliado"}, 409
         return nova_avaliacao.to_dict(), 201

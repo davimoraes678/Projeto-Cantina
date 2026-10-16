@@ -1,11 +1,11 @@
 from backend.extensions import db
-from datetime import datetime
+from backend.tempo import agora_utc
 
 class Pedido(db.Model):
     __tablename__ = "pedido"
 
     id_pedido = db.Column(db.Integer, primary_key=True)
-    data_hora_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    data_hora_criacao = db.Column(db.DateTime, default=agora_utc)
     status = db.Column(db.String(50), default="Pendente")
     valor_total = db.Column(db.Float, nullable=False, default=0.0)
     horario_agendado_retirada = db.Column(db.DateTime, nullable=True)
@@ -49,7 +49,7 @@ class Pedido(db.Model):
 
     @staticmethod
     def buscar_por_id(id_pedido):
-        return Pedido.query.get(id_pedido)
+        return db.session.get(Pedido, id_pedido)
 
     def to_dict(self):
         return {
@@ -60,6 +60,7 @@ class Pedido(db.Model):
             'horario_agendado_retirada': self.horario_agendado_retirada.isoformat() if self.horario_agendado_retirada else None,
             'data_hora_retirada': self.data_hora_retirada.isoformat() if self.data_hora_retirada else None,
             'id_aluno': self.id_aluno,
+            'avaliado': self.avaliacao is not None,
             # Se o aluno ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'aluno_nome': self.aluno.nome if self.aluno else (self.nome_aluno or 'Aluno removido'),
             'itens': [item.to_dict() for item in self.itens]

@@ -33,7 +33,7 @@ class ItemPedido(db.Model):
 
     @staticmethod
     def buscar_por_id(id_item_pedido):
-        return ItemPedido.query.get(id_item_pedido)
+        return db.session.get(ItemPedido, id_item_pedido)
 
     def to_dict(self):
         return {

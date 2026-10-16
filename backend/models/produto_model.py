@@ -11,8 +11,7 @@ class Produto(db.Model):
     preco_promocional = db.Column(db.Float, nullable=True)
     ingredientes = db.Column(db.String(500), nullable=True)
     categoria = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.Boolean, default=True) # ou db.String, dependendo de como você controla status
-    imagem = db.Column(db.String(100), nullable=True)
+    status = db.Column(db.Boolean, default=True)  # True = disponível para os alunos
 
     # Relacionamento 1:N com ItemPedido
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)
@@ -21,7 +20,8 @@ class Produto(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None, imagem=None):
+    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None,
+                  categoria=None, status=None, ingredientes=None, tabela_nutricional=None):
         if nome is not None:
             self.nome = nome
         if quantidade_estoque is not None:
@@ -34,8 +34,10 @@ class Produto(db.Model):
             self.categoria = categoria
         if status is not None:
             self.status = status
-        if imagem is not None:
-            self.imagem = imagem
+        if ingredientes is not None:
+            self.ingredientes = ingredientes
+        if tabela_nutricional is not None:
+            self.tabela_nutricional = tabela_nutricional
         db.session.commit()
 
     def deletar(self):
@@ -48,7 +50,7 @@ class Produto(db.Model):
 
     @staticmethod
     def buscar_por_id(id_produto):
-        return Produto.query.get(id_produto)
+        return db.session.get(Produto, id_produto)
 
     def to_dict(self):
         return {
@@ -59,5 +61,6 @@ class Produto(db.Model):
             'preco_promocional': self.preco_promocional,
             'categoria': self.categoria,
             'status': self.status,
-            'imagem': self.imagem
+            'ingredientes': self.ingredientes,
+            'tabela_nutricional': self.tabela_nutricional
         }

@@ -32,7 +32,7 @@ class RateioPagamento(db.Model):
 
     @staticmethod
     def buscar_por_id(id_rateio):
-        return RateioPagamento.query.get(id_rateio)
+        return db.session.get(RateioPagamento, id_rateio)
 
     def to_dict(self):
         return {

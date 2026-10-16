@@ -37,7 +37,7 @@ class Aluno(UserMixin, db.Model):
 
     @staticmethod
     def buscar_por_id(id_aluno):
-        return Aluno.query.get(id_aluno)
+        return db.session.get(Aluno, id_aluno)
 
     def to_dict(self):
         return {

@@ -8,11 +8,10 @@ Uma classe por **tabela do banco** (SQLAlchemy). Os [services](../services/READM
 | `produto_model.py` | `Produto` | `produto` | Itens vendidos pela cantina |
 | `pedido_model.py` | `Pedido` | `pedido` | Um pedido **ou o carrinho** de um aluno |
 | `item_pedido.py` | `ItemPedido` | `itens_pedido` | Cada produto dentro de um pedido |
-| `avaliacao_model.py` | `Avaliacao` | `avaliacao` | Nota de um pedido. **Ainda sem rotas** |
+| `avaliacao_model.py` | `Avaliacao` | `avaliacao` | Nota e comentário de um pedido concluído (uma por pedido) |
 | `rateio_model.py` | `RateioPagamento` | `rateio` | Divisão do valor entre alunos. **Ainda sem rotas** |
-| `database.py` | — | — | **Sem uso** (cria um segundo `db` nunca inicializado; o projeto usa `backend/extensions.py`). Pode ser removido |
 
-> ⚠️ Todos os models precisam ser **importados no `app.py`**, mesmo os sem rotas. Sem isso, o SQLAlchemy não encontra as classes citadas nos relacionamentos (`'Avaliacao'`, `'RateioPagamento'`) e **toda consulta dá erro 500**. Ao criar um model novo, acrescente-o nesse import.
+> ⚠️ Todos os models precisam ser **importados no `models/__init__.py`** (que o `app.py` carrega), mesmo os sem rotas. Sem isso, o SQLAlchemy não encontra as classes citadas nos relacionamentos (`'Avaliacao'`, `'RateioPagamento'`) e **toda consulta dá erro 500**. Ao criar um model novo, acrescente-o nesse import.
 
 ## Relacionamentos
 
@@ -29,7 +28,7 @@ erDiagram
 | Tabela | Campos principais |
 |---|---|
 | `aluno` | `id_aluno`, `nome`, `email` (único), `senha` (hash), `saldo` |
-| `produto` | `id_produto`, `nome`, `quantidade_estoque`, `preco_atual`, `preco_promocional`, `categoria`, `status` (disponível?), `imagem`, `ingredientes`, `tabela_nutricional` |
+| `produto` | `id_produto`, `nome`, `quantidade_estoque`, `preco_atual`, `preco_promocional`, `categoria`, `status` (disponível?), `ingredientes`, `tabela_nutricional` (a imagem não é coluna: o arquivo é achado pelo nome, veja [`arquivos/`](../../arquivos/README.md)) |
 | `pedido` | `id_pedido`, `status`, `valor_total`, `data_hora_criacao`, `horario_agendado_retirada`, `data_hora_retirada`, `id_aluno`, `nome_aluno` |
 | `itens_pedido` | `id_item_pedido`, `quantidade`, `preco_unitario_cobrado`, `id_pedido`, `id_produto`, `nome_produto` |
 
@@ -71,5 +70,5 @@ stateDiagram-v2
 ## Mudando uma tabela
 
 O `db.create_all()` (no `app.py`) cria tabelas novas, mas **não altera** as que já existem. Ao adicionar uma coluna num model:
-- **SQLite:** apague o `cantina.db` e rode de novo;
+- **SQLite:** apague o `instance/cantina.db` e rode de novo;
 - **MySQL:** faça um `ALTER TABLE` e atualize o [`create-database.sql`](../database/README.md).

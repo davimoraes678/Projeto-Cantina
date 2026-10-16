@@ -1,5 +1,5 @@
 from backend.extensions import db
-from datetime import datetime
+from backend.tempo import agora_utc
 
 class Avaliacao(db.Model):
     __tablename__ = "avaliacao"
@@ -7,7 +7,7 @@ class Avaliacao(db.Model):
     id_avaliacao = db.Column(db.Integer, primary_key=True)
     nota = db.Column(db.Integer, nullable=False)
     comentario = db.Column(db.String(500), nullable=True)
-    data_avaliacao = db.Column(db.DateTime, default=datetime.utcnow)
+    data_avaliacao = db.Column(db.DateTime, default=agora_utc)
 
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), unique=True, nullable=False)
 
@@ -32,7 +32,7 @@ class Avaliacao(db.Model):
 
     @staticmethod
     def buscar_por_id(id_avaliacao):
-        return Avaliacao.query.get(id_avaliacao)
+        return db.session.get(Avaliacao, id_avaliacao)
 
     def to_dict(self):
         return {

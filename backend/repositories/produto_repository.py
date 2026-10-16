@@ -13,43 +13,22 @@ class ProdutoRepository:
     """
 
     @staticmethod
-    def _chamar_procedure(nome_procedure, params=None):
-        params = params or {}
-
-        if db.engine.dialect.name != "mysql":
-            # As procedures só existem no MySQL (ver backend/database/create-database.sql).
-            # Se a app estiver rodando com outro banco (ex.: SQLite em DATABASE_URL),
-            # a busca não tem como funcionar - avisamos isso claramente ao dev.
-            raise RuntimeError(
-                "A busca de produtos depende de stored procedures do MySQL. "
-                "Configure DATABASE_URL no .env apontando para o MySQL, por exemplo: "
-                "mysql+pymysql://usuario:senha@localhost/cantina_db?charset=utf8mb4"
-            )
-
-        placeholders = ", ".join(f":{chave}" for chave in params.keys())
-        sql = text(f"CALL {nome_procedure}({placeholders})")
-
-        resultado = db.session.execute(sql, params)
-        colunas = resultado.keys()
-        linhas = resultado.fetchall()
-        return [dict(zip(colunas, linha)) for linha in linhas]
+    def usa_procedures():
+        """As procedures só existem no MySQL (ver backend/database/create-database.sql).
+        Em outro banco (ex.: SQLite em desenvolvimento) o service busca pelo ORM."""
+        return db.engine.dialect.name == "mysql"
 
     @staticmethod
-    def buscar_por_categoria(categoria):
-        return ProdutoRepository._chamar_procedure(
-            "sp_produtos_por_categoria", {"p_categoria": categoria}
-        )
-
-    @staticmethod
-    def buscar_por_faixa_de_preco(preco_min, preco_max):
-        return ProdutoRepository._chamar_procedure(
-            "sp_produtos_por_faixa_de_preco", {"p_min": preco_min, "p_max": preco_max}
-        )
-
-    @staticmethod
-    def ordenar_por_preco():
-        return ProdutoRepository._chamar_procedure("sp_produtos_ordenar_por_preco")
-
-    @staticmethod
-    def ordenar_por_nome():
-        return ProdutoRepository._chamar_procedure("sp_produtos_ordenar_por_nome")
+    def buscar(categoria=None, preco_min=None, preco_max=None, ordenar=None, apenas_ativos=False):
+        """CALL sp_produtos_buscar: todos os filtros são opcionais e se combinam (None = não filtrar)."""
+        parametros = {
+            "p_categoria": categoria,
+            "p_preco_min": preco_min,
+            "p_preco_max": preco_max,
+            "p_ordenar": ordenar,
+            "p_apenas_ativos": 1 if apenas_ativos else 0,
+        }
+        placeholders = ", ".join(f":{chave}" for chave in parametros)
+        resultado = db.session.execute(text(f"CALL sp_produtos_buscar({placeholders})"), parametros)
+        colunas = list(resultado.keys())
+        return [dict(zip(colunas, linha)) for linha in resultado.fetchall()]

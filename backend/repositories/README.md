@@ -4,23 +4,19 @@ Acesso ao banco por **stored procedures do MySQL**. Hoje é usado só na busca d
 
 | Arquivo | O que faz |
 |---|---|
-| `produto_repository.py` | `ProdutoRepository`: executa `CALL sp_produtos_...` e devolve as linhas como dicionários. É o único lugar do projeto que monta essas chamadas |
-| `aluno_repository.py` | **Sem uso** (só tem imports). Pode ser removido |
-| `app.py` | **Sem uso** (importa `create_app` de um lugar onde ela não existe; dá `ImportError` se executado). Pode ser removido |
+| `produto_repository.py` | `ProdutoRepository`: executa `CALL sp_produtos_buscar(...)` e devolve as linhas como dicionários. É o único lugar do projeto que monta essa chamada |
 
 ## Fluxo da busca de produtos
 
 ```
-GET /api/produtos/buscar → produto_controller → ProdutoService.buscar → ProdutoRepository → CALL sp_... → MySQL
+GET /api/produtos/buscar → produto_controller → ProdutoService.buscar → ProdutoRepository → CALL sp_produtos_buscar → MySQL
 ```
 
-| Método do repository | Procedure |
+| Método do repository | O que faz |
 |---|---|
-| `buscar_por_categoria(categoria)` | `sp_produtos_por_categoria` |
-| `buscar_por_faixa_de_preco(min, max)` | `sp_produtos_por_faixa_de_preco` |
-| `ordenar_por_preco()` | `sp_produtos_ordenar_por_preco` |
-| `ordenar_por_nome()` | `sp_produtos_ordenar_por_nome` |
+| `usa_procedures()` | `True` só no MySQL (nos outros bancos as procedures não existem) |
+| `buscar(categoria, preco_min, preco_max, ordenar, apenas_ativos)` | `CALL sp_produtos_buscar(...)`. Todos os parâmetros são opcionais (`None` = não filtrar) e **se combinam** |
 
-As procedures são criadas pelo [`create-database.sql`](../database/README.md).
+A procedure é criada pelo [`create-database.sql`](../database/README.md). Ela substituiu as quatro procedures antigas (uma por filtro), que não combinavam os critérios.
 
-**Fora do MySQL** (ex.: SQLite em desenvolvimento), as procedures não existem: o repository lança um `RuntimeError`, e o `ProdutoService.buscar` faz a mesma busca pelo ORM. Por isso a busca funciona nos dois bancos.
+**Fora do MySQL** (ex.: SQLite em desenvolvimento), o `ProdutoService.buscar` não chama o repository e faz a mesma busca pelo ORM (`_buscar_orm`). **A regra precisa ser igual nos dois lugares:** ao mudar a procedure, mude o `_buscar_orm` também (e vice-versa).

@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS produto (
     preco_promocional DECIMAL(10, 2),
     ingredientes VARCHAR(500),
     categoria VARCHAR(100),
-    imagem VARCHAR(100),
     status BOOLEAN DEFAULT TRUE
 );
 
@@ -72,34 +71,32 @@ CREATE TABLE IF NOT EXISTS rateio (
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 
+-- Categorias aceitas: Bebida, Salgado, Doce (constante CATEGORIAS em backend/constantes.py).
+-- Versões antigas deste script usavam 'Lanche'; esta linha acerta bancos já existentes.
+UPDATE produto SET categoria = 'Salgado' WHERE categoria = 'Lanche';
+
 -- =========================================================================
--- PROCEDURES DE BUSCA DE PRODUTO
--- Chamadas apenas pelo ProdutoRepository (backend/repositories/produto_repository.py)
--- via `CALL sp_...`. Controller e Service nunca as chamam diretamente.
+-- PROCEDURE DE BUSCA DE PRODUTO
+-- Chamada apenas pelo ProdutoRepository (backend/repositories/produto_repository.py)
+-- via `CALL sp_produtos_buscar(...)`. Controller e Service nunca a chamam diretamente.
+-- Todos os parâmetros são opcionais (NULL = não filtrar) e os filtros se combinam.
+-- Mantenha a regra igual à de ProdutoService._buscar_orm (a busca do SQLite).
 -- =========================================================================
 
 DELIMITER $
 
 DROP PROCEDURE IF EXISTS sp_produtos_por_categoria $
-CREATE PROCEDURE sp_produtos_por_categoria (IN p_categoria VARCHAR(100))
-BEGIN
-    SELECT
-        id_produto,
-        nome,
-        quantidade_estoque,
-        preco_atual,
-        preco_promocional,
-        ingredientes,
-        categoria,
-        status
-    FROM
-        produto
-    WHERE
-        categoria = p_categoria;
-END $
-
 DROP PROCEDURE IF EXISTS sp_produtos_por_faixa_de_preco $
-CREATE PROCEDURE sp_produtos_por_faixa_de_preco (IN p_min DECIMAL(10,2), IN p_max DECIMAL(10,2))
+DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_preco $
+DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_nome $
+DROP PROCEDURE IF EXISTS sp_produtos_buscar $
+CREATE PROCEDURE sp_produtos_buscar (
+    IN p_categoria VARCHAR(100),
+    IN p_preco_min DECIMAL(10,2),
+    IN p_preco_max DECIMAL(10,2),
+    IN p_ordenar VARCHAR(10),       -- 'nome', 'preco' ou NULL
+    IN p_apenas_ativos TINYINT      -- 1 = só produtos disponíveis
+)
 BEGIN
     SELECT
         id_produto,
@@ -108,50 +105,33 @@ BEGIN
         preco_atual,
         preco_promocional,
         ingredientes,
+        tabela_nutricional,
         categoria,
         status
     FROM
         produto
     WHERE
-        preco_atual BETWEEN p_min AND p_max;
-END $
-
-DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_preco $
-CREATE PROCEDURE sp_produtos_ordenar_por_preco ()
-BEGIN
-    SELECT
-        id_produto,
-        nome,
-        quantidade_estoque,
-        preco_atual,
-        preco_promocional,
-        ingredientes,
-        categoria,
-        status
-    FROM
-        produto
+        (p_categoria IS NULL OR categoria = p_categoria)
+        AND (p_preco_min IS NULL OR preco_atual >= p_preco_min)
+        AND (p_preco_max IS NULL OR preco_atual <= p_preco_max)
+        AND (p_apenas_ativos = 0 OR status = TRUE)
     ORDER BY
-        preco_atual, preco_promocional;
-END $
-
-DROP PROCEDURE IF EXISTS sp_produtos_ordenar_por_nome $
-CREATE PROCEDURE sp_produtos_ordenar_por_nome ()
-BEGIN
-    SELECT
-        id_produto,
-        nome,
-        quantidade_estoque,
-        preco_atual,
-        preco_promocional,
-        ingredientes,
-        categoria,
-        status
-    FROM
-        produto
-    ORDER BY
-        nome;
+        CASE WHEN p_ordenar = 'preco' THEN preco_atual END,
+        CASE WHEN p_ordenar = 'nome' THEN nome END,
+        id_produto;
 END $
 
 DELIMITER ;
 
+-- =========================================================================
+-- DADOS DE EXEMPLO (só entram se o produto ainda não existir; pode rodar o script de novo)
+-- =========================================================================
 
+INSERT INTO produto (nome, quantidade_estoque, preco_atual, categoria, ingredientes)
+SELECT * FROM (
+    SELECT 'Suco de Laranja' AS nome, 20 AS quantidade_estoque, 5.00 AS preco_atual, 'Bebida' AS categoria, 'Laranja' AS ingredientes
+    UNION ALL SELECT 'Coxinha', 15, 6.50, 'Salgado', 'Massa, frango e catupiry'
+    UNION ALL SELECT 'Pão de Queijo', 25, 4.00, 'Salgado', 'Polvilho, queijo e ovos'
+    UNION ALL SELECT 'Brigadeiro', 30, 3.00, 'Doce', 'Leite condensado, chocolate e manteiga'
+) AS exemplo
+WHERE NOT EXISTS (SELECT 1 FROM produto WHERE produto.nome = exemplo.nome);

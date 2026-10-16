@@ -63,7 +63,18 @@ def salvar_imagem(produto, arquivo):
     return destino.name
 
 
-def renomear_imagem(produto, novo_nome):
+def url_imagem(id_produto, nome):
+    """Endereço da imagem do produto, ou None se ele ainda não tem imagem (o front não precisa tentar e levar 404)."""
+    try:
+        existe = caminho_imagem(nome).is_file()
+    except ValueError:
+        return None
+    return f"/api/produtos/{id_produto}/imagem" if existe else None
+
+
+def verificar_renomeacao(produto, novo_nome):
+    """Confere se a imagem pode ser renomeada, sem mexer em nada. Chame ANTES de gravar o novo nome
+    no banco, para um erro aqui não deixar o banco e a pasta de imagens em desacordo."""
     origem = caminho_imagem(produto.nome)
     destino = caminho_imagem(novo_nome)
     if origem == destino or not origem.is_file():
@@ -71,4 +82,19 @@ def renomear_imagem(produto, novo_nome):
     verificar_nome_disponivel(produto, novo_nome)
     if destino.exists():
         raise ValueError("Já existe uma imagem com esse nome. Use um nome diferente.")
-    origem.rename(destino)
+
+
+def renomear_imagem(nome_antigo, novo_nome):
+    """Renomeia o arquivo da imagem. Chame DEPOIS de gravar o novo nome no banco."""
+    origem = caminho_imagem(nome_antigo)
+    destino = caminho_imagem(novo_nome)
+    if origem != destino and origem.is_file() and not destino.exists():
+        origem.rename(destino)
+
+
+def remover_imagem(nome):
+    """Apaga o arquivo da imagem (se existir), para um produto novo com o mesmo nome não herdar a foto antiga."""
+    try:
+        caminho_imagem(nome).unlink(missing_ok=True)
+    except ValueError:
+        pass

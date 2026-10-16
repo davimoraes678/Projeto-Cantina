@@ -1,28 +1,15 @@
 // URL base da API
 const API_BASE_URL = "/api";  // mesmo endereço da página (funciona local e no Codespaces)
 
-// Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
+// Guarda o ID do produto em edição (null = formulário está em modo "cadastrar").
 let editandoProdutoId = null;
+// Aluno logado (preenchido por alunoInf) e listas já carregadas, para os botões acharem o item pelo id.
+let alunoAtual = null;
+let produtosCache = [];
+let pedidosCache = [];
 
-function filtrar(categoria) {
-    const buscaCategoria = document.getElementById("busca-categoria");
-    if (!buscaCategoria) return;
-    buscaCategoria.value = categoria;
-    buscarProdutos();
-}
+document.addEventListener("DOMContentLoaded", async () => {
 
-
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    // Carrega as tabelas e selects ao iniciar
-    carregarAlunos();
-    carregarProdutos();
-    carregarPedidos();
-    carregarCarrinho();
-    alunoInf();
-
-    // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE CADASTRO ---
     const formAluno = document.getElementById("form-aluno");
     if (formAluno) {
@@ -57,7 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
+
+    // --- EVENTO: SUBMIT DO FORMULÁRIO DE LOGIN ---
     const formLogin = document.getElementById("form-aluno-login");
     if (formLogin) {
         formLogin.addEventListener("submit", async (e) => {
@@ -86,31 +74,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // --- EVENTO: LOGOUT (limpa a sessão no back-end e volta para o login) ---
+    const btnLogout = document.getElementById("btn-logout");
+    if (btnLogout) {
+        btnLogout.addEventListener("click", realizarLogout);
+    }
 
     // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (cria ou edita, dependendo do modo) ---
     const formProduto = document.getElementById("form-produto");
     if (formProduto) {
         formProduto.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const nome = document.getElementById("produto-nome").value;
-            const preco_atual = parseFloat(document.getElementById("produto-preco").value);
-            const quantidade_estoque = parseInt(document.getElementById("produto-estoque").value);
-            const categoria = document.getElementById("produto-categoria").value;
-            const corpo = { nome, preco_atual, quantidade_estoque, categoria };
+            const corpo = {
+                nome: document.getElementById("produto-nome").value,
+                preco_atual: parseFloat(document.getElementById("produto-preco").value),
+                quantidade_estoque: parseInt(document.getElementById("produto-estoque").value),
+                categoria: document.getElementById("produto-categoria").value,
+                ingredientes: document.getElementById("produto-ingredientes").value,
+                tabela_nutricional: document.getElementById("produto-tabela").value,
+                status: document.getElementById("produto-ativo").checked
+            };
 
             try {
                 // Reaproveita as rotas que já existem no backend: POST pra criar, PUT pra editar.
-                const res = editandoProdutoId
-                    ? await fetch(`${API_BASE_URL}/produtos/${editandoProdutoId}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(corpo)
-                    })
-                    : await fetch(`${API_BASE_URL}/produtos`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(corpo)
-                    });
+                const url = editandoProdutoId
+                    ? `${API_BASE_URL}/produtos/${editandoProdutoId}`
+                    : `${API_BASE_URL}/produtos`;
+                const res = await fetch(url, {
+                    method: editandoProdutoId ? "PUT" : "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(corpo)
+                });
 
                 if (!res.ok) {
                     const erro = await res.json().catch(() => ({}));
@@ -119,53 +113,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 const produtoSalvo = await res.json();
-                // Se o upload falhar, mantém o ID para tentar novamente sem duplicar o produto.
-                editarProduto(produtoSalvo.id_produto, produtoSalvo.nome,
-                    produtoSalvo.preco_atual, produtoSalvo.quantidade_estoque, produtoSalvo.categoria || "");
+                // Se o upload falhar, continua em modo de edição deste produto para tentar de novo sem duplicá-lo.
+                editandoProdutoId = produtoSalvo.id_produto;
                 await enviarImagem(produtoSalvo.id_produto);
                 sairModoEdicaoProduto();
                 carregarProdutos();
             } catch (erro) {
                 console.error("Erro ao salvar produto:", erro);
                 alert(erro.message || "Ocorreu um erro ao salvar o produto.");
+                carregarProdutos();
             }
         });
     }
-
-       // Seleciona o elemento de texto pelo ID
-        const elementoContador = document.getElementById('contador');
-        
-        // Variável que guarda o valor atual
-        let valorAtual = 0;
-
-        // Função que soma ou subtrai e atualiza a tela
-        function alterar(quantidade) {
-            valorAtual += quantidade;
-            elementoContador.innerText = valorAtual;
-        }
-
-async function enviarImagem(idProduto) {
-    const imagem = document.getElementById("imagem").files[0];
-
-    // Permite salvar o produto sem enviar uma imagem.
-    if (!imagem) return;
-
-    const extensao = imagem.name.split(".").pop().toLowerCase();
-    const nome = `produto_${idProduto}.${extensao}`;
-
-    const dados = new FormData();
-    dados.append("imagem", imagem, nome);
-
-    // Esta rota precisa ser criada no backend.
-    const resposta = await fetch(`${API_BASE_URL}/produtos/${idProduto}/imagem`, {
-        method: "POST",
-        body: dados
-    });
-
-    if (!resposta.ok) {
-        throw new Error("O produto foi salvo, mas a imagem não foi enviada.");
-    }
-}
 
     const btnCancelarEdicaoProduto = document.getElementById("btn-cancelar-edicao-produto");
     if (btnCancelarEdicaoProduto) {
@@ -175,7 +134,7 @@ async function enviarImagem(idProduto) {
     // --- EVENTO: BUSCA/FILTRO DE PRODUTOS (usa GET /api/produtos/buscar) ---
     const formBusca = document.getElementById("form-busca-produto");
     if (formBusca) {
-        formBusca.addEventListener("submit", async (e) => {
+        formBusca.addEventListener("submit", (e) => {
             e.preventDefault();
             buscarProdutos();
         });
@@ -188,6 +147,14 @@ async function enviarImagem(idProduto) {
             document.getElementById("busca-preco-max").value = "";
             document.getElementById("busca-ordenar").value = "";
             carregarProdutos();
+        });
+    }
+    // Botões de categoria (index.html): o clique escolhe a categoria e refaz a busca.
+    const filtroCategorias = document.getElementById("filtro-categorias");
+    if (filtroCategorias) {
+        filtroCategorias.addEventListener("click", (e) => {
+            const botao = e.target.closest("button[data-categoria]");
+            if (botao) filtrar(botao.dataset.categoria);
         });
     }
 
@@ -209,64 +176,47 @@ async function enviarImagem(idProduto) {
     if (btnCancelarEdicaoPedido) {
         btnCancelarEdicaoPedido.addEventListener("click", fecharEdicaoPedido);
     }
+
+    // --- EVENTO: ENVIAR AVALIAÇÃO DE UM PEDIDO CONCLUÍDO ---
+    const formAvaliacao = document.getElementById("form-avaliacao");
+    if (formAvaliacao) {
+        formAvaliacao.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await enviarAvaliacao();
+        });
+    }
+
+    // Só depois de ligar os formulários, carrega os dados. O aluno vem primeiro: a lista de pedidos precisa saber quem ele é.
+    await alunoInf();
+    carregarCategorias();
+    carregarProdutos();
+    carregarPedidos();
+    carregarCarrinho();
 });
 
 // --- LÓGICA DE ALUNOS ---
-// Carrega a lista de alunos para o administrador.
-async function carregarAlunos() {
+// Encerra a sessão no back-end e leva para a tela de login.
+async function realizarLogout() {
     try {
-        const res = await fetch(`${API_BASE_URL}/alunos`);
-        const alunos = await res.json();
-
-        const tabela = document.getElementById("tabela-alunos");
-        if (!tabela) return;
-
-        if (tabela) tabela.innerHTML = "";
-
-        alunos.forEach(aluno => {
-            if (tabela) tabela.innerHTML += `
-                <tr>
-                    <th scope="row">${aluno.id_aluno}</th>
-                    <td>${aluno.nome}</td>
-                    <td>${aluno.email}</td>
-                    <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
-                    <td>
-                        <button class="editar" onclick="editarAluno(${aluno.id_aluno}, '${escapeAttr(aluno.nome)}', '${escapeAttr(aluno.email)}')">Editar</button>
-                    </td>
-                </tr>
-            `;
+        const res = await fetch(`${API_BASE_URL}/alunos/logout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
         });
 
-        // Mantém o aluno selecionado ao recarregar a lista (ex: depois de adicionar um item ao carrinho)
+        if (!res.ok) {
+            const erro = await res.json().catch(() => ({}));
+            alert(erro.erro || "Não foi possível realizar o logout.");
+            return;
+        }
+
+        window.location.href = "/front-end/login.html";
     } catch (erro) {
-        console.error("Erro ao carregar alunos:", erro);
+        console.error("Erro ao realizar logout:", erro);
+        alert("Ocorreu um erro ao realizar o logout.");
     }
 }
-// Realiza o logout do aluno logado, limpando a sessão no backend e redirecionando para a tela de login.
-const btnLogout = document.getElementById("btn-logout");
-if (btnLogout) {
-    btnLogout.addEventListener("click", async () => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/alunos/logout`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            });
 
-            if (!res.ok) {
-                const erro = await res.json().catch(() => ({}));
-                alert(erro.erro || "Não foi possível realizar o logout.");
-                return;
-            }
-
-            window.location.href = "/front-end/login.html";
-        } catch (erro) {
-            console.error("Erro ao realizar logout:", erro);
-            alert("Ocorreu um erro ao realizar o logout.");
-        }
-    });
-}
-
-
+// Apaga a conta do aluno logado (os pedidos dele continuam no histórico).
 async function removerAluno() {
     if (confirm("Deseja realmente remover este aluno? Os pedidos que ele já fez serão mantidos no histórico.")) {
         const res = await fetch(`${API_BASE_URL}/alunos/atual`, { method: "DELETE" });
@@ -279,58 +229,78 @@ async function removerAluno() {
     }
 }
 
-// Edita os dados do aluno logado (nome, email, senha) no formulário de edição.
+// Mostra, na página "Minha conta", o formulário para editar nome, e-mail e senha do aluno logado.
 async function editarDados() {
-    res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    if (!res.ok) return; 
-    const aluno_inf = await res.json();
+    const areaEl = document.getElementById("form-editar-dados");
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
+    if (!res.ok) {
+        alert("Não foi possível carregar seus dados.");
+        return;
+    }
+    const aluno = await res.json();
 
-    document.getElementById("form-editar-dados").innerHTML = `
-        <div>
-            <form>
-                <input type="text" id="aluno-nome" value="${aluno_inf.nome}" placeholder="Nome do Aluno" required>
-                <input type="email" id="aluno-email" value="${aluno_inf.email}" placeholder="E-mail" required>
-                <input type="password" id="aluno-senha" placeholder="Senha">
-                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
-                <button type="button" id="btn-cancelar-edicao-aluno">Cancelar edição</button>
-            </form>
-            <p id="aviso-edicao-aluno">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
-        </div>
+    areaEl.innerHTML = `
+        <form id="form-dados-aluno">
+            <input type="text" id="aluno-nome" value="${escapeHtml(aluno.nome)}" placeholder="Nome do Aluno" aria-label="Nome" required>
+            <input type="email" id="aluno-email" value="${escapeHtml(aluno.email)}" placeholder="E-mail" aria-label="E-mail" required>
+            <input type="password" id="aluno-senha" placeholder="Nova senha (opcional)" aria-label="Nova senha">
+            <button type="submit">Salvar alterações</button>
+            <button type="button" id="btn-cancelar-edicao-aluno">Cancelar</button>
+            <p>Deixe a senha em branco para não alterá-la.</p>
+        </form>
     `;
-    document.getElementById("form-editar-dados").addEventListener("submit", async (e) => {
+
+    document.getElementById("form-dados-aluno").addEventListener("submit", async (e) => {
         e.preventDefault();
         const corpo = {
             nome: document.getElementById("aluno-nome").value,
             email: document.getElementById("aluno-email").value
         };
-    const senha = document.getElementById("aluno-senha").value;
-    if (senha) corpo.senha = senha;
-        resPut = await fetch(`${API_BASE_URL}/alunos/atual`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(corpo)
-        });
+        const senha = document.getElementById("aluno-senha").value;
+        if (senha) corpo.senha = senha;
 
-    window.location.reload();
+        try {
+            const resPut = await fetch(`${API_BASE_URL}/alunos/atual`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(corpo)
+            });
+            if (!resPut.ok) {
+                const erro = await resPut.json().catch(() => ({}));
+                alert(erro.erro || "Não foi possível salvar seus dados.");
+                return;
+            }
+            window.location.reload();
+        } catch (erro) {
+            console.error("Erro ao salvar dados do aluno:", erro);
+            alert("Ocorreu um erro ao salvar seus dados.");
+        }
     });
     document.getElementById("btn-cancelar-edicao-aluno").addEventListener("click", () => {
-        document.getElementById("form-editar-dados").innerHTML = "";
+        areaEl.innerHTML = "";
     });
 }
 
-// Mostra as informações do aluno logado
+// Busca o aluno logado e mostra o nome (e o e-mail, na página "Minha conta"). Devolve null se não der.
 async function alunoInf() {
     const nomeEl = document.getElementById('nome-aluno');
     const emailEl = document.getElementById('email-aluno');
-    if (!nomeEl && !emailEl) return;
-    const res = await fetch(`${API_BASE_URL}/alunos/atual`);
-    if (!res.ok) return;
-    const aluno_inf = await res.json();
-    if (nomeEl) nomeEl.textContent = aluno_inf.nome;
-    if (emailEl) emailEl.textContent = aluno_inf.email;
+    if (!nomeEl && !emailEl && !document.getElementById("tabela-pedidos")) return null;
+    try {
+        const res = await fetch(`${API_BASE_URL}/alunos/atual`);
+        if (!res.ok) return null;
+        alunoAtual = await res.json();
+        if (nomeEl) nomeEl.textContent = alunoAtual.nome;
+        if (emailEl) emailEl.textContent = alunoAtual.email;
+        return alunoAtual;
+    } catch (erro) {
+        console.error("Erro ao carregar o aluno:", erro);
+        return null;
+    }
 }
 
 // --- LÓGICA DE PRODUTOS ---
+// Envia a imagem escolhida no formulário do admin. Sem arquivo escolhido, não faz nada.
 async function enviarImagem(idProduto) {
     const imagem = document.getElementById("imagem")?.files[0];
     if (!imagem) return;
@@ -346,29 +316,68 @@ async function enviarImagem(idProduto) {
     }
 }
 
+// Busca as categorias no back-end e monta os botões de filtro (index) e os selects (admin).
+async function carregarCategorias() {
+    const filtroEl = document.getElementById("filtro-categorias");
+    const selects = [document.getElementById("produto-categoria"), document.getElementById("busca-categoria")]
+        .filter(el => el && el.tagName === "SELECT");
+    if (!filtroEl && selects.length === 0) return;
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/produtos/categorias`);
+        if (!res.ok) return;
+        const categorias = await res.json();
+
+        if (filtroEl) {
+            filtroEl.innerHTML = [""].concat(categorias).map(categoria => `
+                <button type="button" class="btn btn-outline-primary" data-categoria="${escapeHtml(categoria)}">
+                    ${categoria ? escapeHtml(categoria) : "Todas"}
+                </button>
+            `).join("");
+        }
+        selects.forEach(select => {
+            const primeira = select.options[0];   // "Selecione..." / "Todas as categorias"
+            select.innerHTML = "";
+            select.appendChild(primeira);
+            categorias.forEach(categoria => select.appendChild(new Option(categoria, categoria)));
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar categorias:", erro);
+    }
+}
+
+// Escolhe a categoria dos botões de filtro e refaz a busca.
+function filtrar(categoria) {
+    const buscaCategoria = document.getElementById("busca-categoria");
+    if (!buscaCategoria) return;
+    buscaCategoria.value = categoria;
+    buscarProdutos();
+}
+
 async function carregarProdutos() {
     await buscarProdutos({}); // sem filtros = lista tudo, via a mesma rota de busca
 }
 
 // Busca/filtra/ordena produtos usando a rota GET /api/produtos/buscar.
 async function buscarProdutos(filtrosForcados) {
-    const categoriaEl = document.getElementById("busca-categoria");
-    const precoMinEl = document.getElementById("busca-preco-min");
-    const precoMaxEl = document.getElementById("busca-preco-max");
-    const ordenarEl = document.getElementById("busca-ordenar");
+    const listaEl = document.getElementById("lista-produtos");               // index.html: cards
+    const tabelaAdminEl = document.getElementById("tabela-produtos-admin");  // admin.html: tabela
+    if (!listaEl && !tabelaAdminEl) return;
 
-    const params = new URLSearchParams();
+    const campo = (id) => document.getElementById(id)?.value || "";
     const filtros = filtrosForcados || {
-        categoria: categoriaEl ? categoriaEl.value : "",
-        preco_min: precoMinEl ? precoMinEl.value : "",
-        preco_max: precoMaxEl ? precoMaxEl.value : "",
-        ordenar: ordenarEl ? ordenarEl.value : ""
+        categoria: campo("busca-categoria"),
+        preco_min: campo("busca-preco-min"),
+        preco_max: campo("busca-preco-max"),
+        ordenar: campo("busca-ordenar")
     };
 
+    const params = new URLSearchParams();
     if (filtros.categoria) params.set("categoria", filtros.categoria);
     if (filtros.preco_min) params.set("preco_min", filtros.preco_min);
     if (filtros.preco_max) params.set("preco_max", filtros.preco_max);
     if (filtros.ordenar) params.set("ordenar", filtros.ordenar);
+    if (listaEl) params.set("ativos", "1");   // o aluno só vê produtos disponíveis
 
     try {
         const res = await fetch(`${API_BASE_URL}/produtos/buscar?${params.toString()}`);
@@ -381,87 +390,83 @@ async function buscarProdutos(filtrosForcados) {
             return;
         }
 
-        const produtos = dados;
-        const tabela = document.getElementById("tabela-produtos")
-        const tabela_admin = document.getElementById("tabela-produtos-admin");
-        if (!tabela && !tabela_admin) return;
-
-        if (tabela) tabela.innerHTML = "";
-        if (tabela_admin) tabela_admin.innerHTML = "";
-
-        if (produtos.length === 0) {
-        if (tabela) {
-            tabela.innerHTML = `
-                <tr><td colspan="5">Nenhum produto encontrado.</td></tr>
-            `;
-        }
-        if (tabela_admin) {
-            tabela_admin.innerHTML = `
-                <tr><td colspan="6">Nenhum produto encontrado.</td></tr>
-            `;
-        }
-        }
-        if (tabela) {
-            produtos.forEach(prod => {
-            tabela.innerHTML += `
-                <div class="card" style="width: 18rem;">
-  <div class="card-body">
-    <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
-            alt="Imagem do produto" width="80" loading="lazy"
-            onerror="this.hidden = true">
-    <h5 class="mt-2 mb-0">${prod.nome}</h5>
-    <h4 class="mt-0 mb-2">R$ ${parseFloat(prod.preco_atual).toFixed(2)}</h4>
-    <p class="card-text fg-2">${prod.descricao}</p>
-    <button type="button" class="btn btn-primary" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
-            <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
-
-    </div>
-</div>
-            `
-        })
-
-        }
-        if (tabela_admin) {
-            produtos.forEach(prod => {
-            tabela_admin.innerHTML += `
-                <tr>
-                    <td>${prod.id_produto}</td>
-                    <td>
-                        <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
-                             alt="Imagem do produto" width="80" loading="lazy"
-                             onerror="this.hidden = true">
-                        ${prod.nome}
-                    </td>
-                    <td>R$ ${parseFloat(prod.preco_atual).toFixed(2)}</td>
-                    <td>${prod.quantidade_estoque}</td>
-                    <td>${prod.categoria || ""}</td>
-                    <td>
-                        <button class="editar" onclick="editarProduto(${prod.id_produto}, '${escapeAttr(prod.nome)}', ${prod.preco_atual}, ${prod.quantidade_estoque}, '${escapeAttr(prod.categoria || "")}')">Editar</button>
-                        <button class="excluir" onclick="removerProduto(${prod.id_produto})">Excluir</button>
-                    </td>
-                </tr>
-            `;        
-        });
-        }
+        produtosCache = dados;
+        if (listaEl) renderizarCardsProdutos(listaEl, dados);
+        if (tabelaAdminEl) renderizarTabelaProdutos(tabelaAdminEl, dados);
     } catch (erro) {
         console.error("Erro ao buscar produtos:", erro);
         alert("Ocorreu um erro ao buscar os produtos. Veja o console para detalhes.");
     }
 }
 
+// Desenha os produtos como cards (página da cantina).
+function renderizarCardsProdutos(listaEl, produtos) {
+    if (produtos.length === 0) {
+        listaEl.innerHTML = `<p class="col-12">Nenhum produto encontrado.</p>`;
+        return;
+    }
+    listaEl.innerHTML = produtos.map(prod => `
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100">
+                ${prod.imagem_url ? `<img src="${escapeHtml(prod.imagem_url)}" class="card-img-top" alt="Imagem de ${escapeHtml(prod.nome)}" loading="lazy">` : ""}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">${escapeHtml(prod.nome)}</h5>
+                    <h4>${formatarMoeda(prod.preco_atual)}</h4>
+                    <p class="card-text text-body-secondary">${escapeHtml(prod.ingredientes || "")}</p>
+                    <p class="card-text"><small>${escapeHtml(prod.categoria || "")} · Estoque: ${prod.quantidade_estoque}</small></p>
+                    <div class="input-group mt-auto">
+                        <input type="number" id="qtd-produto-${prod.id_produto}" class="form-control" value="1" min="1" aria-label="Quantidade de ${escapeHtml(prod.nome)}">
+                        <button type="button" class="btn btn-primary" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
 
+// Desenha os produtos como linhas de tabela (página do administrador).
+function renderizarTabelaProdutos(tabelaEl, produtos) {
+    if (produtos.length === 0) {
+        tabelaEl.innerHTML = `<tr><td colspan="6">Nenhum produto encontrado.</td></tr>`;
+        return;
+    }
+    tabelaEl.innerHTML = produtos.map(prod => `
+        <tr>
+            <td>${prod.id_produto}</td>
+            <td>
+                ${prod.imagem_url ? `<img src="${escapeHtml(prod.imagem_url)}" alt="Imagem de ${escapeHtml(prod.nome)}" width="80" loading="lazy">` : ""}
+                ${escapeHtml(prod.nome)}${prod.status ? "" : " (indisponível)"}
+            </td>
+            <td>${formatarMoeda(prod.preco_atual)}</td>
+            <td>${prod.quantidade_estoque}</td>
+            <td>${escapeHtml(prod.categoria || "")}</td>
+            <td>
+                <button class="editar" onclick="editarProduto(${prod.id_produto})">Editar</button>
+                <button class="excluir" onclick="removerProduto(${prod.id_produto})">Excluir</button>
+            </td>
+        </tr>
+    `).join("");
+}
 
-function editarProduto(id, nome, preco, estoque, categoria) {
+// Coloca o produto escolhido no formulário e passa para o modo "editar".
+function editarProduto(id) {
+    const produto = produtosCache.find(p => p.id_produto === id);
+    if (!produto) return;
+
     editandoProdutoId = id;
-    document.getElementById("produto-nome").value = nome;
-    document.getElementById("produto-preco").value = preco;
-    document.getElementById("produto-estoque").value = estoque;
-    document.getElementById("produto-categoria").value = categoria;
+    document.getElementById("produto-nome").value = produto.nome;
+    document.getElementById("produto-preco").value = produto.preco_atual;
+    document.getElementById("produto-estoque").value = produto.quantidade_estoque;
+    document.getElementById("produto-categoria").value = produto.categoria || "";
+    document.getElementById("produto-ingredientes").value = produto.ingredientes || "";
+    document.getElementById("produto-tabela").value = produto.tabela_nutricional || "";
+    document.getElementById("produto-ativo").checked = produto.status;
     document.getElementById("btn-salvar-produto").textContent = "Salvar Edição";
     document.getElementById("btn-cancelar-edicao-produto").style.display = "inline-block";
     document.getElementById("produto-nome").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+// Volta o formulário de produto para o modo "cadastrar".
 function sairModoEdicaoProduto() {
     editandoProdutoId = null;
     document.getElementById("form-produto").reset();
@@ -482,10 +487,6 @@ async function removerProduto(id) {
         carregarPedidos();
     }
 }
-
-// LOGICA DO LOGIN DO USUARIO
-
-
 
 // --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
 // Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
@@ -541,26 +542,26 @@ async function carregarCarrinho() {
     }
 }
 
+// Desenha os itens do carrinho e o total.
 function renderizarCarrinho(carrinho) {
     const tabela = document.getElementById("tabela-carrinho");
     const totalEl = document.getElementById("carrinho-total");
     if (!tabela || !totalEl) return;
 
     const itens = carrinho ? carrinho.itens : [];
-    tabela.innerHTML = "";
-    itens.forEach(item => {
-        tabela.innerHTML += `
+    tabela.innerHTML = itens.length === 0
+        ? `<tr><td colspan="4">Seu carrinho está vazio.</td></tr>`
+        : itens.map(item => `
             <tr>
-                <td>${item.produto_nome}</td>
+                <td>${escapeHtml(item.produto_nome)}</td>
                 <td>${item.quantidade}</td>
-                <td>R$ ${item.subtotal.toFixed(2)}</td>
+                <td>${formatarMoeda(item.subtotal)}</td>
                 <td><button class="excluir" onclick="removerItemDoCarrinho(${item.id_item_pedido})">Remover</button></td>
             </tr>
-        `;
-    });
+        `).join("");
 
     const total = carrinho ? carrinho.valor_total : 0;
-    totalEl.textContent = `Total: R$ ${total.toFixed(2)}`;
+    totalEl.textContent = `Total: ${formatarMoeda(total)}`;
 }
 
 async function finalizarPedido() {
@@ -580,47 +581,57 @@ async function finalizarPedido() {
 }
 
 // --- LÓGICA DE PEDIDOS ---
-let pedidosCache = [];
-
 async function carregarPedidos() {
+    const tabela = document.getElementById("tabela-pedidos");
+    if (!tabela) return;   // página sem lista de pedidos
+
     try {
         const res = await fetch(`${API_BASE_URL}/pedidos`);
+        if (!res.ok) return;
         const pedidos = await res.json();
         pedidosCache = pedidos;
-        const tabela = document.getElementById("tabela-pedidos");
-        if (!tabela) return;
 
-        tabela.innerHTML = "";
+        tabela.innerHTML = pedidos.length === 0
+            ? `<tr><td colspan="6">Nenhum pedido ainda.</td></tr>`
+            : pedidos.map(ped => {
+                const listaProdutos = ped.itens
+                    .map(item => `${item.quantidade}x ${item.produto_nome}`)
+                    .join(", ");
 
-        pedidos.forEach(ped => {
-            const listaProdutos = ped.itens
-                .map(item => `${item.quantidade}x ${item.produto_nome}`)
-                .join(", ");
+                const botaoConcluir = ped.status !== "Concluído"
+                    ? `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`
+                    : "";
 
-            const botaoConcluir = ped.status !== "Concluído"
-                ? `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`
-                : "";
+                // Só o dono avalia, e só pedido concluído que ainda não foi avaliado.
+                const ehDoAluno = alunoAtual && ped.id_aluno === alunoAtual.id_aluno;
+                let botaoAvaliar = "";
+                if (ped.status === "Concluído" && ehDoAluno) {
+                    botaoAvaliar = ped.avaliado
+                        ? "Avaliado"
+                        : `<button class="avaliar" onclick="abrirAvaliacao(${ped.id_pedido})">Avaliar</button>`;
+                }
 
-            tabela.innerHTML += `
-                <tr>
-                    <td>${ped.id_pedido}</td>
-                    <td>${ped.aluno_nome}</td>
-                    <td>${listaProdutos}</td>
-                    <td>${ped.status}</td>
-                    <td>R$ ${parseFloat(ped.valor_total).toFixed(2)}</td>
-                    <td>
-                        <button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
-                        ${botaoConcluir}
-                    </td>
-                </tr>
-            `;
-        });
+                return `
+                    <tr>
+                        <td>${ped.id_pedido}</td>
+                        <td>${escapeHtml(ped.aluno_nome)}</td>
+                        <td>${escapeHtml(listaProdutos)}</td>
+                        <td>${escapeHtml(ped.status)}</td>
+                        <td>${formatarMoeda(ped.valor_total)}</td>
+                        <td>
+                            <button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
+                            ${botaoConcluir}
+                            ${botaoAvaliar}
+                        </td>
+                    </tr>
+                `;
+            }).join("");
     } catch (erro) {
         console.error("Erro ao carregar pedidos:", erro);
     }
 }
 
-
+// Preenche o formulário de edição com o pedido escolhido.
 function editarPedido(id) {
     const pedido = pedidosCache.find(p => p.id_pedido === id);
     if (!pedido) return;
@@ -675,11 +686,16 @@ async function salvarEdicaoPedido() {
 async function concluirPedido(id) {
     if (confirm("Deseja realmente marcar este pedido como concluído?")) {
         try {
-            await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: "Concluído" })
             });
+            if (!res.ok) {
+                const erro = await res.json().catch(() => ({}));
+                alert(erro.erro || "Não foi possível concluir o pedido.");
+                return;
+            }
 
             carregarPedidos();
         } catch (erro) {
@@ -689,8 +705,54 @@ async function concluirPedido(id) {
     }
 }
 
+// --- LÓGICA DE AVALIAÇÃO ---
+// Abre a janela de avaliação do pedido escolhido.
+function abrirAvaliacao(idPedido) {
+    document.getElementById("form-avaliacao").reset();
+    document.getElementById("avaliacao-pedido-id").value = idPedido;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-avaliacao")).show();
+}
+
+// Envia nota e comentário para POST /api/pedidos/<id>/avaliacao.
+async function enviarAvaliacao() {
+    const idPedido = document.getElementById("avaliacao-pedido-id").value;
+    const corpo = {
+        nota: parseInt(document.getElementById("avaliacao-nota").value),
+        comentario: document.getElementById("avaliacao-comentario").value
+    };
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/pedidos/${idPedido}/avaliacao`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(corpo)
+        });
+        if (!res.ok) {
+            const erro = await res.json().catch(() => ({}));
+            alert(erro.erro || "Não foi possível enviar a avaliação.");
+            return;
+        }
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-avaliacao")).hide();
+        carregarPedidos();
+    } catch (erro) {
+        console.error("Erro ao enviar avaliação:", erro);
+        alert("Ocorreu um erro ao enviar a avaliação.");
+    }
+}
+
 // --- UTIL ---
-// Escapa aspas simples pra não quebrar o HTML gerado nos onclick com nome/email do aluno.
-function escapeAttr(texto) {
-    return String(texto).replace(/'/g, "\\'");
+// Troca os caracteres especiais do HTML (< > & " ') para o texto da API aparecer como texto, e não como código.
+function escapeHtml(texto) {
+    return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+// Formata um número como dinheiro brasileiro (R$ 1.234,50).
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(valor) || 0);
 }

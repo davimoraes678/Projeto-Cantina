@@ -1,19 +1,21 @@
 from flask_login import current_user
 from backend.extensions import db
-from backend.models.aluno_model import Aluno
+
 
 class DeletarAlunoService:
     @staticmethod
     def executar():
         aluno = current_user
-        if not aluno:
-            return {"erro": "Aluno não encontrado"}, 404
 
         try:
             # Antes de apagar o aluno, preserva o histórico dos pedidos já feitos por ele:
             # guarda o nome (caso ainda não tenha sido salvo) e solta o vínculo com o aluno,
             # para que o pedido continue existindo mesmo depois do aluno ser excluído.
-            for pedido in aluno.pedido:
+            # O carrinho em aberto não é histórico (nunca virou pedido), então é apagado junto.
+            for pedido in list(aluno.pedido):
+                if pedido.status == "Carrinho":
+                    db.session.delete(pedido)
+                    continue
                 if not pedido.nome_aluno:
                     pedido.nome_aluno = aluno.nome
                 pedido.id_aluno = None
@@ -27,4 +29,3 @@ class DeletarAlunoService:
         except Exception as e:
             db.session.rollback()
             return {"erro": f"Falha ao deletar aluno: {str(e)}"}, 500
-

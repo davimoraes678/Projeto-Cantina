@@ -7,13 +7,18 @@ class AtualizarAlunoService:
     @staticmethod
     def executar(dados):
         aluno = current_user
-        if not aluno:
-            return {"erro": "Aluno não encontrado"}, 404
+        email = dados.get('email')
+
+        # O e-mail é único: sem esta conferência o banco recusa e a rota responderia 500.
+        if email:
+            outro = Aluno.query.filter(Aluno.email == email, Aluno.id_aluno != aluno.id_aluno).first()
+            if outro:
+                return {"erro": "Já existe um aluno cadastrado com esse email"}, 409
 
         senha = dados.get('senha')
         aluno.atualizar(
             nome=dados.get('nome'),
-            email=dados.get('email'),
+            email=email,
             senha=generate_password_hash(senha) if senha else None,
         )
         return aluno.to_dict(), 200

@@ -1,7 +1,7 @@
+from flask_login import login_user
 from werkzeug.security import generate_password_hash
 from backend.models.aluno_model import Aluno
-from backend.extensions import db, lm, login_user
-
+from backend.extensions import db, lm
 
 
 class CriarAlunoService:
@@ -20,8 +20,7 @@ class CriarAlunoService:
         db.session.commit()
         login_user(novo_aluno)
         return novo_aluno.to_dict(), 201
-    @lm.user_loader
-    def load_user(id): 
-        return Aluno.query.get(int(id))
-    
 
+    @lm.user_loader
+    def load_user(id):
+        return db.session.get(Aluno, int(id))

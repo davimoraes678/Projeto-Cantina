@@ -6,9 +6,9 @@ Todo método de service devolve uma tupla **`(dicionário, código_http)`**, por
 
 | Arquivo | O que faz |
 |---|---|
-| [`aluno/`](aluno/README.md) | Cadastro, login, logout e CRUD de alunos |
+| [`aluno/`](aluno/README.md) | Cadastro, login, logout e conta do aluno |
 | `item_pedido_service.py` | Carrinho do aluno logado |
-| `pedido_service.py` | Pedidos: criar direto, listar, consultar e mudar status |
+| `pedido_service.py` | Pedidos (listar, consultar e mudar status) e avaliação de pedidos |
 | `produto_service.py` | CRUD e busca de produtos |
 | `imagem_service.py` | Imagens dos produtos em `arquivos/` |
 
@@ -27,19 +27,23 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 
 | Método | Regra |
 |---|---|
-| `criar(data)` | Cria um pedido direto, sem carrinho, para o aluno logado (o front não usa) |
 | `listar_todos()` | Todos os pedidos, **exceto** os que ainda são carrinho |
 | `buscar_por_id(id)` | Um pedido |
 | `atualizar_status(id, data)` | Muda status e horários. Datas chegam como texto (`"2026-10-13T12:30"`) e são convertidas por `_parse_datetime` |
+
+`AvaliacaoService.criar(data, id_pedido)` (no mesmo arquivo): só o dono avalia (para os outros o pedido "não existe": `404`), só pedido `Concluído` (`400`), nota inteira de 1 a 5 (`400`), comentário de até 500 caracteres (`400`) e uma única vez (`409`).
 
 ## `produto_service.py` — produtos
 
 | Método | Regra |
 |---|---|
-| `criar(data)` | Exige `nome` e `preco_atual` |
-| `atualizar(id, data)` | Muda só os campos enviados; ao trocar o nome, renomeia a imagem junto |
-| `deletar(id)` | Antes de apagar, copia o nome do produto para os itens de pedidos antigos e solta o vínculo, para o histórico continuar mostrando o nome |
-| `buscar(filtros)` | Usa as stored procedures do MySQL (via [`repositories/`](../repositories/README.md)). Se não estiver no MySQL, ou se a procedure falhar, faz a mesma busca pelo ORM (`_buscar_fallback_orm`). No MySQL, só o primeiro critério é aplicado: categoria, depois faixa de preço, depois ordenação |
+| `categorias()` | Lista `CATEGORIAS` (`backend/constantes.py`) |
+| `criar(data)` | Exige `nome` e `preco_atual`; a categoria, se vier, precisa estar em `CATEGORIAS` (`400`) |
+| `atualizar(id, data)` | Muda só os campos enviados. Ao trocar o nome, confere a imagem **antes** de gravar e só renomeia o arquivo **depois** (banco e pasta não ficam em desacordo) |
+| `deletar(id)` | Antes de apagar, copia o nome do produto para os itens de pedidos antigos e solta o vínculo, para o histórico continuar mostrando o nome; depois apaga a imagem |
+| `buscar(filtros)` | Categoria, faixa de preço, ordenação e `apenas_ativos` **se combinam**. No MySQL chama a procedure `sp_produtos_buscar` (via [`repositories/`](../repositories/README.md)); nos outros bancos faz a mesma busca pelo ORM (`_buscar_orm`). Se a procedure não existir no MySQL, registra um aviso no log e usa o ORM. Os dois caminhos devolvem o mesmo formato |
+
+Todo produto devolvido pelo service traz `imagem_url` (o endereço da imagem, ou `null`).
 
 ## `imagem_service.py` — imagens
 
@@ -48,6 +52,9 @@ O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-d
 | Função | O que faz |
 |---|---|
 | `salvar_imagem(produto, arquivo)` | Aceita PNG, JPG ou WEBP até 5 MB, corrige a rotação da foto e salva como PNG |
-| `renomear_imagem(produto, novo_nome)` | Renomeia o arquivo quando o produto muda de nome |
+| `url_imagem(id, nome)` | Endereço da imagem, ou `None` se o arquivo não existe |
+| `verificar_renomeacao(produto, novo_nome)` | Confere se a imagem pode ser renomeada, sem mexer em nada (chamada antes de gravar o nome no banco) |
+| `renomear_imagem(nome_antigo, novo_nome)` | Renomeia o arquivo (chamada depois de gravar o nome no banco) |
+| `remover_imagem(nome)` | Apaga o arquivo; usada ao excluir o produto |
 | `verificar_nome_disponivel(...)` | Impede dois produtos que gerariam o mesmo nome de arquivo (ex.: "Suco" e "suco!") |
 | `nome_imagem(nome)` | Gera o nome do arquivo a partir do nome do produto |

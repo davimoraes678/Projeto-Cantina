@@ -13,7 +13,7 @@ Sistema de pedidos da cantina do COTEMIG: o aluno se cadastra, faz login, monta 
 | Felipe Ferreira da Fonseca | 12502537 |
 | Maria Eduarda Fidelis Correa | 12401595 |
 
-**Stack:** HTML, CSS e JavaScript puro no front-end; Python + Flask no back-end (API JSON); Flask-SQLAlchemy; Flask-Login; MySQL em produção e SQLite em desenvolvimento.
+**Stack:** HTML, CSS e JavaScript puro no front-end, com Bootstrap 5.3.8 (CDN, versão estável); Python + Flask no back-end (API JSON); Flask-SQLAlchemy; Flask-Login; MySQL em produção e SQLite em desenvolvimento.
 
 ## Como rodar
 
@@ -26,7 +26,7 @@ python app.py
 
 Abra **http://127.0.0.1:5000** (no Codespaces, a URL da porta 5000). Sem login, você é levado para a tela de cadastro.
 
-**Configuração (opcional):** crie um `.env` na raiz. Sem ele, o projeto usa SQLite (`cantina.db`) e uma chave de desenvolvimento.
+**Configuração (opcional):** crie um `.env` na raiz. Sem ele, o projeto usa SQLite (`instance/cantina.db`) e uma chave de desenvolvimento.
 
 ```env
 # MySQL (se não definir, usa SQLite)
@@ -37,7 +37,7 @@ SECRET_KEY=troque-por-um-texto-aleatorio
 FLASK_DEBUG=True
 ```
 
-As tabelas são criadas automaticamente na primeira execução. Para recomeçar do zero no SQLite, apague o `cantina.db`.
+As tabelas são criadas automaticamente na primeira execução. Para recomeçar do zero no SQLite, apague o `instance/cantina.db`.
 
 ## Onde está cada coisa
 
@@ -89,6 +89,7 @@ Erros que já aconteceram neste projeto:
 | `unexpected keyword argument 'id_aluno'` | A URL tem `<int:id_aluno>` e a função não recebe o parâmetro (ou o contrário) | Os nomes entre `< >` precisam ser parâmetros da função |
 | `NameError` num service | Uma linha que criava a variável foi apagada junto com outra mudança | Teste a rota depois de cada mudança |
 | `login_user` dá `NotImplementedError` | Falta `get_id()` no `Aluno` | Não remova o `get_id()` |
+| Categoria `Lanche` dá erro 400 | A categoria se chama `Salgado` (constante `CATEGORIAS` em `backend/constantes.py`) | Não escreva a lista de categorias à mão: o front lê de `GET /api/produtos/categorias` |
 | Página "401 Unauthorized" ao abrir `/` | `@login_required` numa rota que deveria redirecionar | Em páginas, use `if not current_user.is_authenticated: redirect(...)` |
 | Formulário recarrega com `?` na URL e nada acontece | O JS quebrou antes de ligar o formulário | F12 → corrija o primeiro erro vermelho |
 | `await is only valid in async functions` | `await` solto no arquivo | Só dentro de `async function` |
@@ -100,6 +101,6 @@ Erros que já aconteceram neste projeto:
 
 ## Limitações conhecidas
 
-- **Não há papel de administrador:** rotas de alunos, produtos e de alterar pedidos não exigem login.
+- **Não há papel de administrador:** as rotas de produtos e de listar/alterar pedidos não exigem login (a Fase 3 resolve), e todo aluno logado vê os pedidos de todos.
 - **Estoque** não é conferido nem baixado nos pedidos.
 - **Preço promocional** não é aplicado; o item usa sempre `preco_atual`.

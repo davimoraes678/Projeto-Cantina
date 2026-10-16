@@ -6,6 +6,8 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**; quem desenha as
 |---|---|
 | `extensions.py` | Cria `db` (banco, SQLAlchemy) e `lm` (login, LoginManager) **uma única vez**, para todo o projeto importar daqui |
 | `routes.py` | `register_routes(app)`: registra todos os controllers no app. **Controller novo precisa ser registrado aqui.** |
+| `constantes.py` | Valores fixos do sistema (hoje, as categorias de produto) |
+| `tempo.py` | `agora_utc()`: hora atual em UTC, usada nas colunas de data |
 | [`controllers/`](controllers/README.md) | Recebem a requisição HTTP e devolvem JSON |
 | [`services/`](services/README.md) | Regras de negócio |
 | [`models/`](models/README.md) | Tabelas do banco |
@@ -66,7 +68,7 @@ O `app.py` fica na raiz do projeto. A função `create_app()`:
 6. Define `/` (entrega o `index.html`, ou redireciona para o cadastro se não houver login) e `/api` (lista de rotas).
 7. Cria as tabelas que ainda não existem (`db.create_all()`).
 
-> ⚠️ O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
+> ⚠️ O `app.py` faz `from backend import models`, e o `backend/models/__init__.py` importa **todos** os models, inclusive os que parecem sem uso (`rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**. Model novo: acrescente-o no `__init__.py` dos models.
 
 ## Login (Flask-Login)
 
@@ -103,9 +105,9 @@ O `current_user` é recalculado **a cada requisição** a partir do cookie dela,
 
 ## Passo a passo: funcionalidade nova
 
-Exemplo: permitir que o aluno avalie um pedido (o model `Avaliacao` já existe).
+Exemplo: permitir que o aluno avalie um pedido. **Essa funcionalidade já existe** (`AvaliacaoService` em `services/pedido_service.py`, rota `POST /api/pedidos/<id>/avaliacao`); o exemplo abaixo é uma versão simplificada, para você ver o caminho completo.
 
-**1. Model** (`models/`): se criar uma tabela, importe o arquivo no `app.py` junto com os outros models.
+**1. Model** (`models/`): se criar uma tabela, importe o arquivo no `models/__init__.py` junto com os outros models.
 
 **2. Service** (`services/avaliacao_service.py`):
 ```python
@@ -117,7 +119,7 @@ class AvaliacaoService:
     @staticmethod
     def avaliar(id_pedido, dados):
         pedido = Pedido.buscar_por_id(id_pedido)
-        if not pedido or pedido.id_aluno != current_user.id_aluno:
+        if not pedido or pedido.id_aluno != current_user.id_aluno:   # só o dono avalia
             return {"erro": "Pedido não encontrado"}, 404
         nota = dados.get("nota")
         if nota not in (1, 2, 3, 4, 5):
@@ -135,7 +137,7 @@ from backend.services.avaliacao_service import AvaliacaoService
 
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/avaliacoes')
 
-@bp_avaliacao.route('/<int:id_pedido>', methods=['POST'])
+@bp_avaliacao.route('/<int:id_pedido>', methods=['POST'])   # (na versão real, a rota fica em pedido_controller.py)
 @login_required
 def avaliar(id_pedido):
     dados = request.get_json(silent=True) or {}

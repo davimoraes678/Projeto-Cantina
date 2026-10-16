@@ -3,9 +3,9 @@ from flask import Flask, jsonify, send_from_directory, redirect, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.routes import register_routes
-from backend.extensions import db, lm, login_required, login_user, current_user
-
-from backend.models import aluno_model, produto_model, pedido_model, item_pedido, avaliacao_model, rateio_model
+from flask_login import login_required, current_user
+from backend.extensions import db, lm
+from backend import models  # noqa: F401  (registra TODOS os models; sem isso as consultas dão erro 500)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
@@ -33,6 +33,11 @@ def create_app():
     db.init_app(app)
     lm.init_app(app)
 
+    @lm.unauthorized_handler
+    def nao_autorizado():
+        # Rota protegida sem login: o front espera JSON (e não a página HTML padrão de erro 401).
+        return jsonify(erro="Faça login para continuar."), 401
+
     PAGINAS_PROTEGIDAS = {
         '/front-end/index.html',
         '/front-end/admin.html',
@@ -59,22 +64,26 @@ def create_app():
         return jsonify({
             "message": "API Flask + SQLAlchemy funcionando!",
             "rotas": {
-                "listar_alunos": "GET /api/alunos",
                 "registro_aluno": "POST /api/alunos/registro",
                 "login_aluno": "POST /api/alunos/login",
                 "aluno_atual": "GET /api/alunos/atual",
                 "logout_aluno": "POST /api/alunos/logout",
-                "atualizar_aluno": "PUT /api/alunos/<id>",
-                "deletar_aluno": "DELETE /api/alunos/<id>",
+                "atualizar_aluno": "PUT /api/alunos/atual",
+                "deletar_aluno": "DELETE /api/alunos/atual",
                 "listar_produtos": "GET /api/produtos",
+                "buscar_produtos": "GET /api/produtos/buscar",
+                "listar_categorias": "GET /api/produtos/categorias",
+                "buscar_produto": "GET /api/produtos/<id>",
                 "criar_produto": "POST /api/produtos",
                 "atualizar_produto": "PUT /api/produtos/<id>",
                 "deletar_produto": "DELETE /api/produtos/<id>",
+                "enviar_imagem_produto": "POST /api/produtos/<id>/imagem",
+                "ver_imagem_produto": "GET /api/produtos/<id>/imagem",
                 "listar_pedidos": "GET /api/pedidos",
-                "criar_pedido": "POST /api/pedidos",
-                "buscar_pedido": "GET /api/pedidos/",
-                "atualizar_pedido": "PUT /api/pedidos/",
-                "ver_carrinho": "GET /api/carrinho/",
+                "buscar_pedido": "GET /api/pedidos/<id>",
+                "atualizar_pedido": "PUT /api/pedidos/<id>",
+                "avaliar_pedido": "POST /api/pedidos/<id>/avaliacao",
+                "ver_carrinho": "GET /api/carrinho",
                 "adicionar_item_carrinho": "POST /api/carrinho/itens",
                 "remover_item_carrinho": "DELETE /api/carrinho/itens/<id_item_pedido>",
                 "finalizar_carrinho": "POST /api/carrinho/finalizar"

@@ -1,7 +1,7 @@
+from flask_login import login_user, logout_user
 from werkzeug.security import check_password_hash
 from backend.models.aluno_model import Aluno
-from backend.extensions import db, lm, login_user
-from flask_login import logout_user, current_user
+
 
 class LoginAlunoService:
     @staticmethod
@@ -15,6 +15,7 @@ class LoginAlunoService:
             return {"erro": "Email ou senha inválidos"}, 401
         login_user(aluno)
         return aluno.to_dict(), 200
+
     @staticmethod
     def logout():
         logout_user()

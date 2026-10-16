@@ -1,17 +1,16 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 from backend.services.aluno.criar_aluno_service import CriarAlunoService
 from backend.services.aluno.login_aluno_service import LoginAlunoService
-from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
-from flask_login import login_required, current_user
 
 
 bp_aluno = Blueprint('alunos', __name__, url_prefix='/api/alunos')
 
 @bp_aluno.route('/registro', methods=['POST'])
 def registro_aluno():
-    dados = request.get_json()
+    dados = request.get_json(silent=True) or {}
     resposta, status = CriarAlunoService.executar(dados)
     return jsonify(resposta), status
 
@@ -19,7 +18,7 @@ def registro_aluno():
 @login_required
 def aluno_atual():
     if request.method == 'PUT':
-        dados = request.get_json()
+        dados = request.get_json(silent=True) or {}
         resposta, status = AtualizarAlunoService.executar(dados)
         return jsonify(resposta), status
     elif request.method == 'DELETE':
@@ -29,7 +28,7 @@ def aluno_atual():
 
 @bp_aluno.route('/login', methods=['POST'])
 def login_aluno():
-    dados = request.get_json()
+    dados = request.get_json(silent=True) or {}
     resposta, status = LoginAlunoService.executar(dados)
     return jsonify(resposta), status
 
@@ -38,14 +37,3 @@ def login_aluno():
 def logout_aluno():
     LoginAlunoService.logout()
     return jsonify({"mensagem": "Logout realizado com sucesso"}), 200
-
-@bp_aluno.route('', methods=['GET'])
-def listar_alunos():
-    resposta, status = ListarAlunoService.executar()
-    return jsonify(resposta), status
-
-
-@bp_aluno.route('/<int:id_aluno>', methods=['DELETE'])
-def deletar_aluno(id_aluno):
-    resposta, status = DeletarAlunoService.executar(id_aluno)
-    return jsonify(resposta), status

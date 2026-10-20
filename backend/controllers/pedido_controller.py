@@ -27,7 +27,7 @@ def atualizar_pedido(id_pedido):
     resposta, status = PedidoService.atualizar_status(id_pedido, data)
     return jsonify(resposta), status
 
-@bp_pedido.route('/avaliacao/<int:id_pedido>', methods=['POST'])
+@bp_pedido.route('/<int:id_pedido>', methods=['POST'])
 def criar_avaliacao(id_pedido):
     data = request.json
     resposta, status = AvaliacaoService.criar(data, id_pedido)

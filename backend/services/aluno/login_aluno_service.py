@@ -2,6 +2,24 @@ from werkzeug.security import check_password_hash
 from backend.models.aluno_model import Aluno
 from backend.extensions import db, lm, login_user
 from flask_login import logout_user, current_user
+from functools import wraps
+
+
+def funcao_required(*funcoes):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return {"erro": "Faça login para continuar."}, 401
+            if current_user.funcao not in funcoes:
+                return {"erro": "Acesso negado. Voçe nao tem permissão pra isso."}, 403
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+admin_required = funcao_required('admin', 'master')
+master_required = funcao_required('master')
+
 
 class LoginAlunoService:
     @staticmethod

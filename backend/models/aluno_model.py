@@ -9,7 +9,7 @@ class Aluno(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     senha = db.Column(db.String(255), nullable=False)
     saldo = db.Column(db.Float, nullable=False, default=0.0)
-
+    funcao = db.Column(db.String(20), nullable=False, default='aluno')
     # Relacionamentos
     pedido = db.relationship('Pedido', backref='aluno', lazy=True)
     rateio = db.relationship('RateioPagamento', backref='aluno', lazy=True)
@@ -39,12 +39,17 @@ class Aluno(UserMixin, db.Model):
     def buscar_por_id(id_aluno):
         return Aluno.query.get(id_aluno)
 
+    @property
+    def is_admin(self):
+        return self.funcao in ("admin", "master")
+
     def to_dict(self):
         return {
             'id_aluno': self.id_aluno,
             'nome': self.nome,
             'email': self.email,
-            'saldo': self.saldo
+            'saldo': self.saldo,
+            'funcao': self.funcao
         }
     def get_id(self):
         return str(self.id_aluno)

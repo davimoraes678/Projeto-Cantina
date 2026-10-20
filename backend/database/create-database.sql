@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS aluno (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(120) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    saldo DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+    saldo DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    funcao VARCHAR(20) DEFAULT "aluno"
 );
 
 CREATE TABLE IF NOT EXISTS produto (
@@ -151,6 +152,8 @@ BEGIN
     ORDER BY
         nome;
 END $
+
+drop procedure if exists sp_repetir_ultimo_pedido $
 
 DELIMITER ;
 

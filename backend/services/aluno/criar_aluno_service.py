@@ -4,6 +4,7 @@ from backend.extensions import db, lm, login_user
 
 
 
+
 class CriarAlunoService:
     @staticmethod
     def executar(dados):
@@ -23,5 +24,7 @@ class CriarAlunoService:
     @lm.user_loader
     def load_user(id): 
         return Aluno.query.get(int(id))
+
+    
     
 

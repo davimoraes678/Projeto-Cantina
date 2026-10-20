@@ -13,9 +13,8 @@ function filtrar(categoria) {
 
 document.addEventListener("DOMContentLoaded", () => {
   // Carrega as tabelas e selects ao iniciar
-  carregarAlunos();
+
   carregarProdutos();
-  carregarPedidos();
   carregarCarrinho();
   alunoInf();
 
@@ -244,7 +243,7 @@ async function carregarAlunos() {
                     <td>${aluno.email}</td>
                     <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
                     <td>
-                        <button class="editar" onclick="editarAluno(${aluno.id_aluno}, '${escapeAttr(aluno.nome)}', '${escapeAttr(aluno.email)}')">Editar</button>
+                        <button onclick="promoverAluno(${aluno.id_aluno}">Promover</button>
                     </td>
                 </tr>
             `;
@@ -255,6 +254,22 @@ async function carregarAlunos() {
     console.error("Erro ao carregar alunos:", erro);
   }
 }
+
+function funcaoPorAluno(funcao) {
+  const admin = funcao === "admin" || "mestre"
+  const mestre = funcao === "mestre"
+
+  if (admin) {
+    carregarPedidos();
+
+  }
+  if (mestre) {
+    carregarAlunos();
+  }
+
+}
+
+
 // Realiza o logout do aluno logado, limpando a sessão no backend e redirecionando para a tela de login.
 const btnLogout = document.getElementById("btn-logout");
 if (btnLogout) {
@@ -350,6 +365,8 @@ async function alunoInf() {
   const aluno_inf = await res.json();
   if (nomeEl) nomeEl.textContent = aluno_inf.nome;
   if (emailEl) emailEl.textContent = aluno_inf.email;
+
+  funcaoPorAluno(aluno_inf.funcao)
 }
 
 // --- LÓGICA DE PRODUTOS ---

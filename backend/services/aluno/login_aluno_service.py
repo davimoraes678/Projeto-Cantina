@@ -17,9 +17,9 @@ def funcao_required(*funcoes):
         return wrapper
     return decorator
 
+
 admin_required = funcao_required('admin', 'master')
 master_required = funcao_required('master')
-
 
 class LoginAlunoService:
     @staticmethod

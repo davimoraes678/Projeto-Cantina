@@ -17,3 +17,4 @@ class AtualizarAlunoService:
             senha=generate_password_hash(senha) if senha else None,
         )
         return aluno.to_dict(), 200
+    

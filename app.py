@@ -1,4 +1,4 @@
-import os
+import os, click
 from flask import Flask, jsonify, send_from_directory, redirect, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -32,6 +32,8 @@ def create_app():
 
     db.init_app(app)
     lm.init_app(app)
+
+
 
     PAGINAS_PROTEGIDAS = {
         '/front-end/index.html',

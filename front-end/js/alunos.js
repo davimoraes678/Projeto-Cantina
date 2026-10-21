@@ -242,8 +242,9 @@ async function carregarAlunos() {
                     <td>${aluno.nome}</td>
                     <td>${aluno.email}</td>
                     <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
+                    <td>${aluno.funcao}</td>
                     <td>
-                        <button onclick="promoverAluno(${aluno.id_aluno}">Promover</button>
+                        <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
                     </td>
                 </tr>
             `;
@@ -255,13 +256,30 @@ async function carregarAlunos() {
   }
 }
 
+async function promoverAluno(id_aluno) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ funcao: "admin" }),
+    });
+    if (!res.ok) {
+      const erro = await res.json().catch(() => ({}));
+      alert(erro.erro || "Não foi possível promover o aluno.");
+      return;
+    }
+    carregarAlunos();
+  } catch (erro) {
+    console.error("Erro ao promover aluno:", erro);
+  }
+}
+
 function funcaoPorAluno(funcao) {
-  const admin = funcao === "admin" || "mestre"
-  const mestre = funcao === "mestre"
+  const admin = funcao === "admin" || funcao === "mestre";
+  const mestre = funcao === "mestre";
 
   if (admin) {
     carregarPedidos();
-
   }
   if (mestre) {
     carregarAlunos();
@@ -359,7 +377,6 @@ async function editarDados() {
 async function alunoInf() {
   const nomeEl = document.getElementById("nome-aluno");
   const emailEl = document.getElementById("email-aluno");
-  if (!nomeEl && !emailEl) return;
   const res = await fetch(`${API_BASE_URL}/alunos/atual`);
   if (!res.ok) return;
   const aluno_inf = await res.json();

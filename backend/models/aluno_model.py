@@ -18,13 +18,15 @@ class Aluno(UserMixin, db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, email=None, senha=None):
+    def atualizar(self, nome=None, email=None, senha=None, funcao=None):
         if nome is not None:
             self.nome = nome
         if email is not None:
             self.email = email
         if senha is not None:
-            self.senha = senha
+            self.senha = senha 
+        if funcao is not None:
+            self.funcao = funcao
         db.session.commit()
 
     def deletar(self):

@@ -1,15 +1,27 @@
 # front-end/
 
-As telas do sistema: HTML, CSS e JavaScript puro, sem framework. O Flask serve esta pasta em `/front-end/...`, e o `index.html` também em `/`.
+As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e JavaScript puro. O Flask serve esta pasta em `/front-end/...`, e o `index.html` também em `/`.
 
 | Arquivo | Endereço | Login | Para quê |
 |---|---|---|---|
-| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cantina: produtos, filtros, carrinho e pedidos. Mostra o nome do aluno e o botão de logout |
+| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cantina: produtos e filtros. O botão 🛒 abre o carrinho num painel lateral; o menu com o nome do aluno leva para Minha Conta, Administrador e Logout |
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
-| `admin.html` | `/front-end/admin.html` | | Cadastrar e editar alunos e produtos (com imagem) |
-| `css/style.css` | | | Estilo de todas as páginas |
+| `conta.html` | `/front-end/conta.html` | Sim | Ver, editar e remover a própria conta; botão Sair |
+| `admin.html` | `/front-end/admin.html` | Sim | Alunos (mestre), produtos (com imagem) e pedidos (editar status, concluir e avaliar) |
+| `css/style.css` | | | Só as cores da cantina e poucos ajustes por cima do Bootstrap |
+| `assets/logo.png` | | | Logo da Cantina Real |
 | [`js/alunos.js`](js/README.md) | | | **Todo** o JavaScript das páginas |
+
+## Bootstrap
+
+O Bootstrap 5.3.8 vem do CDN jsDelivr, com `integrity` (o navegador confere se o arquivo não foi alterado).
+
+- O **CSS** está em todas as páginas.
+- O **JS** (`bootstrap.bundle.min.js`, com `defer`) só está onde é usado: `index.html` (painel do carrinho e menu do aluno) e `admin.html` (janela de avaliação). Login, cadastro e conta não precisam dele.
+- Antes de escrever CSS, procure uma classe pronta do Bootstrap (espaçamento `mb-3`, grade `row`/`col-md-6`, `d-flex`, `gap-2`...). O `style.css` deve continuar pequeno.
+- Para mudar uma cor da cantina, troque as variáveis no topo do `style.css`.
+- Ao trocar a versão do Bootstrap, troque também o `integrity` (está na página de download do Bootstrap).
 
 ## Como as páginas falam com o back-end
 
@@ -26,6 +38,8 @@ flowchart LR
 ## Regras para mexer nas páginas
 
 - **Caminhos absolutos:** use `/front-end/css/style.css`, `/front-end/js/alunos.js`, `/front-end/admin.html`. O `index.html` é aberto em `/`, então um caminho relativo como `css/style.css` viraria `/css/style.css` e daria 404.
+- **Elementos que o JS mostra e esconde** (ex.: `#form-editar-pedido`, `#btn-cancelar-edicao-produto`) começam com `style="display:none;"`. Não troque pela classe `d-none` do Bootstrap: ela usa `!important` e o JS não conseguiria mostrar o elemento.
+- **A janela de avaliação** abre porque o `concluirPedido()` clica no botão escondido `#open-dialog`, que tem `data-bs-toggle="modal"`. Mantenha esse botão no `admin.html`.
 - **Abra pelo Flask** (`http://127.0.0.1:5000`), não pelo Live Server nem com duplo clique no arquivo. Senão a API fica em outro endereço e o login não funciona.
 - **Os `id` dos elementos são usados pelo JS.** Ao renomear um `id` no HTML (ex.: `tabela-carrinho`), procure-o no `alunos.js` e troque lá também.
 - **Botões dentro de `<form>`** que não devem enviar o formulário precisam de `type="button"`, senão recarregam a página.

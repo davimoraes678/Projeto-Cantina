@@ -1,136 +1,54 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cantina Real - COTEMIG</title>
-    <link rel="stylesheet" href="/front-end/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cantina Real</title>
+<link rel="stylesheet" href="/front-end/css/style.css">
 
 </head>
 <body>
-    <header>
-    <button class="btn-solid theme-secondary" type="button" data-bs-toggle="menu" aria-expanded="false">
-        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#e3e3e3"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"/></svg>
-        <span id="nome-aluno">Aluno</span>
-        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#e3e3e3"><path d="M480-333 240-573l51-51 189 189 189-189 51 51-240 240Z"/></svg>
-    </button>
-<div class="menu">
-    <a href="/front-end/conta.html" class="menu-item">Minha Conta</a>
-    <a href="/front-end/admin.html" class="menu-item">Administrador</a>
-    <hr class="menu-divider">
-    <button id="btn-logout" class="menu-item theme-danger" type="button">Logout</button>
-</div>
-        </div>
-        <h1>Cantina Real - Cotemig</h1>
-    </header>
-    <main class="container">
 
-        
-        <!-- Seção de Produtos -->
-        <form id="form-busca-produto" class="busca-form">
-            <input type="hidden" id="busca-categoria" value="">
-                <button type="button" onclick="filtrar('')">Todas</button>
-                <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
-                <button type="button" onclick="filtrar('Salgado')">Salgados</button>
-                <button type="button" onclick="filtrar('Doce')">Doces</button>
-                <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
-                <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
-                <select id="busca-ordenar">
-                    <option value="">Sem ordenação</option>
-                    <option value="nome">Ordenar por nome</option>
-                    <option value="preco">Ordenar por preço</option>
-                </select>
-                <button type="submit">Buscar</button>
-                <button type="button" id="btn-limpar-busca">Limpar</button>
-            </form>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
-                        <th>Categoria</th>
-                        <th>Quantidade</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-produtos"></tbody>
-            </table>
-
-        <!-- Seção de Pedidos -->
-        <section class="card">
-            <h2>Pedidos</h2>
-            <table class="carrinho-tabela">
-                <thead>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Qtd</th>
-                        <th>Subtotal</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-carrinho"></tbody>
-            </table>
-            <p id="carrinho-total">Total: R$ 0,00</p>
-            <button type="button" id="btn-finalizar-pedido">Finalizar Pedido</button>
-
-  
-            <!-- Edição de pedido (status / horário de retirada) - aparece ao clicar em "Editar" -->
-            <form id="form-editar-pedido" style="display:none;">
-                <input type="hidden" id="editar-pedido-id">
-                <select id="editar-pedido-status" required>
-                    <option value="Pendente">Pendente</option>
-                    <option value="Em Preparo">Em Preparo</option>
-                    <option value="Pronto">Pronto</option>
-                    <option value="Concluído">Concluído</option>
-                    <option value="Cancelado">Cancelado</option>
-                </select>
-                <input type="datetime-local" id="editar-pedido-horario">
-                <button type="submit">Salvar Pedido</button>
-                <button type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
-            </form>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Pedido</th>
-                        <th>Aluno</th>
-                        <th>Produtos</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-pedidos"></tbody>
-            </table>
-        </section>
-    </main>
-
-    <button type="button" id="open-dialog" style="display:none;" data-bs-toggle="dialog" data-bs-target="#exampleDialog"></button>
-            <dialog class="dialog" id="exampleDialog">
-  <div class="dialog-header">
-    <h1 class="dialog-title">Dialog title</h1>
-    <button type="button" class="btn-close" data-bs-dismiss="dialog" aria-label="Close"></button>
+<header class="topbar">
+  <button class="icon-btn" type="button" aria-label="Menu">☰</button>
+  <div class="header-title">Olá, <span id="nome-aluno">Usuário</span> 👆</div>
+  <a class="header-right" href="#pedido" aria-label="Carrinho">🛒<span class="badge">3</span></a>
+</header>
+<main class="page bottom-space">
+  <form id="form-busca-produto" class="search-box">
+    <input type="hidden" id="busca-categoria" value="">
+    <input class="search-input" type="search" placeholder="Busca no Cardápio...">
+    <button class="search-btn" type="submit">⌕</button>
+    <input type="number" step="0.01" id="busca-preco-min" style="display:none">
+    <input type="number" step="0.01" id="busca-preco-max" style="display:none">
+    <select id="busca-ordenar" style="display:none"><option value="">Sem ordenação</option></select>
+    <button type="button" id="btn-limpar-busca" style="display:none">Limpar</button>
+  </form>
+  <div class="category-row">
+    <button class="active" type="button" onclick="filtrar('')">Todos</button>
+    <button type="button" onclick="filtrar('Salgado')">Salgados</button>
+    <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
+    <button type="button" onclick="filtrar('Doce')">Doces</button>
   </div>
-  <div class="dialog-body">
-    <h3>Oque voce achou do pedido?</h3>
-    <form id="form-avaliacao">
-        <input type="hidden" id="avaliacao-pedido-id">
-        <label for="avaliacao-nota">Nota (1 a 5):</label>
-        <input type="number" id="avaliacao-nota" min="1" max="5" required>
-        <label for="avaliacao-comentario">Comentário:</label>
-        <textarea id="avaliacao-comentario" rows="4" cols="50"></textarea>
-        <button type="submit">Enviar Avaliação</button>
-  
-  <div class="dialog-footer">
-    <button type="button" class="btn-solid theme-primary">Enviar Avaliação</button>
-  </div>
-  </div>
-</dialog>
-    <script src="/front-end/js/alunos.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+  <div id="tabela-produtos"></div>
 
+  <section class="panel" id="pedido" style="margin-top:50px">
+    <h2>Meu Pedido</h2>
+    <div class="table-wrap">
+      <table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody id="tabela-carrinho"></tbody></table>
+    </div>
+    <div id="carrinho-total" class="total-row">Total: R$ 0,00</div>
+    <div class="pickup-box">◷ &nbsp; Horário Estimado da Retirada:<br><strong>10:20</strong></div>
+    <button id="btn-finalizar-pedido" class="big-action" type="button">Confirmar Pedido</button>
+  </section>
+</main>
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:30px 0"><a class="filter-btn" href="/front-end/pedido.html" style="padding:18px 28px">Meu Pedido</a><a class="filter-btn" href="/front-end/horario.html" style="padding:18px 28px">Horário</a><a class="filter-btn" href="/front-end/orcamento.html" style="padding:18px 28px">Orçamento</a><a class="filter-btn" href="/front-end/promocoes.html" style="padding:18px 28px">Promoções</a><a class="filter-btn" href="/front-end/cozinha.html" style="padding:18px 28px">Cozinha</a></div><nav class="bottom-nav">
+  <a class="active" href="/front-end/index.html">⌂</a>
+  <a href="#pedido">☷</a>
+  <a href="/front-end/conta.html">♙</a>
+</nav>
+
+<script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

@@ -1,54 +1,92 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cantina Real</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantina Real</title>
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
+    <header class="topbar">
+        <!-- Menu do usuário: <details> abre/fecha sem precisar de JavaScript -->
+        <details class="menu-usuario">
+            <summary class="icon-btn" aria-label="Menu">☰</summary>
+            <nav class="menu-lista">
+                <a href="/front-end/conta.html">Minha Conta</a>
+                <a href="/front-end/admin.html">Administrador</a>
+                <button id="btn-logout" type="button">Logout</button>
+            </nav>
+        </details>
+        <div class="header-title">Olá, <span id="nome-aluno">Usuário</span> 👋</div>
+        <a class="header-right" href="#pedido" aria-label="Carrinho">🛒</a>
+    </header>
 
-<header class="topbar">
-  <button class="icon-btn" type="button" aria-label="Menu">☰</button>
-  <div class="header-title">Olá, <span id="nome-aluno">Usuário</span> 👆</div>
-  <a class="header-right" href="#pedido" aria-label="Carrinho">🛒<span class="badge">3</span></a>
-</header>
-<main class="page bottom-space">
-  <form id="form-busca-produto" class="search-box">
-    <input type="hidden" id="busca-categoria" value="">
-    <input class="search-input" type="search" placeholder="Busca no Cardápio...">
-    <button class="search-btn" type="submit">⌕</button>
-    <input type="number" step="0.01" id="busca-preco-min" style="display:none">
-    <input type="number" step="0.01" id="busca-preco-max" style="display:none">
-    <select id="busca-ordenar" style="display:none"><option value="">Sem ordenação</option></select>
-    <button type="button" id="btn-limpar-busca" style="display:none">Limpar</button>
-  </form>
-  <div class="category-row">
-    <button class="active" type="button" onclick="filtrar('')">Todos</button>
-    <button type="button" onclick="filtrar('Salgado')">Salgados</button>
-    <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
-    <button type="button" onclick="filtrar('Doce')">Doces</button>
-  </div>
-  <div id="tabela-produtos"></div>
+    <main class="page bottom-space">
+        <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
+        <form id="form-busca-produto" class="filtros">
+            <input type="hidden" id="busca-categoria" value="">
+            <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
+            <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
+            <select id="busca-ordenar">
+                <option value="">Sem ordenação</option>
+                <option value="nome">Ordenar por nome</option>
+                <option value="preco">Ordenar por preço</option>
+            </select>
+            <button type="submit">Buscar</button>
+            <button type="button" id="btn-limpar-busca">Limpar</button>
+        </form>
 
-  <section class="panel" id="pedido" style="margin-top:50px">
-    <h2>Meu Pedido</h2>
-    <div class="table-wrap">
-      <table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th><th></th></tr></thead>
-      <tbody id="tabela-carrinho"></tbody></table>
-    </div>
-    <div id="carrinho-total" class="total-row">Total: R$ 0,00</div>
-    <div class="pickup-box">◷ &nbsp; Horário Estimado da Retirada:<br><strong>10:20</strong></div>
-    <button id="btn-finalizar-pedido" class="big-action" type="button">Confirmar Pedido</button>
-  </section>
-</main>
-<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:30px 0"><a class="filter-btn" href="/front-end/pedido.html" style="padding:18px 28px">Meu Pedido</a><a class="filter-btn" href="/front-end/horario.html" style="padding:18px 28px">Horário</a><a class="filter-btn" href="/front-end/orcamento.html" style="padding:18px 28px">Orçamento</a><a class="filter-btn" href="/front-end/promocoes.html" style="padding:18px 28px">Promoções</a><a class="filter-btn" href="/front-end/cozinha.html" style="padding:18px 28px">Cozinha</a></div><nav class="bottom-nav">
-  <a class="active" href="/front-end/index.html">⌂</a>
-  <a href="#pedido">☷</a>
-  <a href="/front-end/conta.html">♙</a>
-</nav>
+        <div class="category-row">
+            <button type="button" onclick="filtrar('')">Todos</button>
+            <button type="button" onclick="filtrar('Salgado')">Salgados</button>
+            <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
+            <button type="button" onclick="filtrar('Doce')">Doces</button>
+        </div>
 
-<script src="/front-end/js/alunos.js"></script>
+        <!-- Cards dos produtos, montados pelo alunos.js -->
+        <div id="tabela-produtos"></div>
+
+        <!-- Carrinho -->
+        <section class="panel carrinho" id="pedido">
+            <h2>Meu Pedido</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Qtd</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-carrinho"></tbody>
+                </table>
+            </div>
+            <div id="carrinho-total" class="total-row">Total: R$ 0,00</div>
+            <button id="btn-finalizar-pedido" class="big-action" type="button">Confirmar Pedido</button>
+        </section>
+
+        <!-- Telas do design que ainda não estão ligadas ao back-end (ver front-end/README.md) -->
+        <section class="prototipos">
+            <h3>Em desenvolvimento (protótipos, ainda sem dados reais)</h3>
+            <div>
+                <a class="filter-btn" href="/front-end/pedido.html">Meu Pedido</a>
+                <a class="filter-btn" href="/front-end/horario.html">Horário</a>
+                <a class="filter-btn" href="/front-end/confirmado.html">Confirmado</a>
+                <a class="filter-btn" href="/front-end/pronto.html">Pronto</a>
+                <a class="filter-btn" href="/front-end/orcamento.html">Orçamento</a>
+                <a class="filter-btn" href="/front-end/promocoes.html">Promoções</a>
+                <a class="filter-btn" href="/front-end/cozinha.html">Cozinha</a>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <a class="active" href="/front-end/index.html" aria-label="Início">⌂</a>
+        <a href="#pedido" aria-label="Meu pedido">☷</a>
+        <a href="/front-end/conta.html" aria-label="Minha conta">♙</a>
+    </nav>
+
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

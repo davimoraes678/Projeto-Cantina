@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cantina Real - Cadastro</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantina Real - Cadastro</title>
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
+    <header class="topbar">
+        <a class="icon-btn" href="/front-end/login.html" aria-label="Voltar">←</a>
+        <div class="header-title">Criar Conta</div>
+        <div></div>
+    </header>
 
-<div class="topbar">
-  <a href="/front-end/login.html" class="icon-btn">←</a>
-  <div class="header-title">Criar Conta</div>
-  <div></div>
-</div>
-<main class="center-page">
-  <div class="panel">
-    <h1>Cadastre-se na Cantina Real</h1>
-    <form id="form-aluno" class="auth-form">
-      <input class="field" type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
-      <input class="field" type="email" id="aluno-email" placeholder="E-mail" required>
-      <input class="field" type="password" id="aluno-senha" placeholder="Senha" required>
-      <button class="primary-btn" type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
-      <button class="filter-btn" type="button" id="btn-cancelar-edicao-aluno" style="display:none">Cancelar edição</button>
-    </form>
-    <p id="aviso-edicao-aluno" style="display:none">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
-    <p><a class="link-red" href="/front-end/login.html">Já tenho uma conta</a></p>
-  </div>
-</main>
+    <main class="center-page">
+        <div class="panel">
+            <h1>Cadastre-se na Cantina Real</h1>
+            <form id="form-aluno" class="auth-form">
+                <input class="field" type="text" id="aluno-nome" placeholder="Nome do Aluno" required>
+                <input class="field" type="email" id="aluno-email" placeholder="E-mail" required>
+                <input class="field" type="password" id="aluno-senha" placeholder="Senha" required>
+                <button class="primary-btn" type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+            </form>
+            <p><a class="link-red" href="/front-end/login.html">Já tenho uma conta</a></p>
+        </div>
+    </main>
 
-<script src="/front-end/js/alunos.js"></script>
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

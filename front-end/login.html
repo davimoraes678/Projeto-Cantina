@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cantina Real - Login</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantina Real - Login</title>
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
+    <section class="login-hero">
+        <img src="/front-end/assets/logo.png" alt="Cantina Real">
+        <div class="login-brand">CANTINA<span>REAL</span></div>
+        <div class="login-tag">Peça Antes, Retire<br>Sem Filas.</div>
+    </section>
 
-<section class="login-hero">
-  <img src="/front-end/assets/logo.png" alt="Cantina Real">
-  <div class="login-brand">CANTINA<span>REAL</span></div>
-  <div class="login-tag">Peça Antes, Retire<br>Sem Filas.</div>
-</section>
-<main class="login-panel center-page">
-  <h1>BEM-VINDO(A)!</h1>
-  <h2>Faça Login Para Continuar</h2>
-  <form id="form-aluno-login" class="auth-form">
-    <input class="field" type="email" id="aluno-email" placeholder="Matrícula ou email" required>
-    <input class="field" type="password" id="aluno-senha" placeholder="Senha" required>
-    <button class="primary-btn" type="submit" id="btn-salvar-aluno">Entrar</button>
-  </form>
-  <a class="link-red" href="#">Esqueceu a Senha?</a>
-  <div class="quick-note">◷ &nbsp; Rápido, Prático e Feito<br>para seu intervalo</div>
-  <p><a class="link-red" href="/front-end/cadastro.html">Ainda não tenho cadastro</a></p>
-</main>
+    <main class="login-panel center-page">
+        <h1>BEM-VINDO(A)!</h1>
+        <h2>Faça Login Para Continuar</h2>
+        <form id="form-aluno-login" class="auth-form">
+            <input class="field" type="email" id="aluno-email" placeholder="E-mail" required>
+            <input class="field" type="password" id="aluno-senha" placeholder="Senha" required>
+            <button class="primary-btn" type="submit" id="btn-salvar-aluno">Entrar</button>
+        </form>
+        <div class="quick-note">◷ &nbsp; Rápido, Prático e Feito<br>para seu intervalo</div>
+        <p><a class="link-red" href="/front-end/cadastro.html">Ainda não tenho cadastro</a></p>
+    </main>
 
-<script src="/front-end/js/alunos.js"></script>
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

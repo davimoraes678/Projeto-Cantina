@@ -1,55 +1,149 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Administração - Cantina Real</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Cantina Real</title>
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
+    <header class="topbar">
+        <a class="icon-btn" href="/front-end/index.html" aria-label="Voltar">←</a>
+        <div class="header-title">Administração</div>
+        <div></div>
+    </header>
 
-<header class="topbar"><a class="icon-btn" href="/front-end/index.html">←</a><div class="header-title">Cozinha / Administração</div><div class="header-right">🔔</div></header>
-<main class="page admin">
-<section class="panel">
-<h2>Alunos</h2>
-<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Saldo</th><th>Função</th><th>Ações</th></tr></thead><tbody id="tabela-alunos"></tbody></table></div>
-</section>
-<section class="panel">
-<h2>Produtos</h2>
-<form id="form-produto" class="form-grid">
-<input class="field" type="text" id="produto-nome" placeholder="Nome do Produto" required>
-<input class="field" type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required>
-<input class="field" type="number" id="produto-estoque" placeholder="Qtd. Estoque" required>
-<select class="field" id="produto-categoria" required><option value="">Selecione a Categoria...</option><option value="Bebida">Bebida</option><option value="Salgado">Salgado</option><option value="Doce">Doce</option></select>
-<input class="field" type="file" id="imagem" accept="image/*">
-<button class="primary-btn" style="height:65px;font-size:20px" type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
-<button class="filter-btn" type="button" id="btn-cancelar-edicao-produto" style="display:none">Cancelar edição</button>
-</form>
-<form id="form-busca-produto" class="busca-form">
-<select id="busca-categoria"><option value="">Todas as categorias</option><option value="Bebida">Bebida</option><option value="Salgado">Salgado</option><option value="Doce">Doce</option></select>
-<input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
-<input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
-<select id="busca-ordenar"><option value="">Sem ordenação</option><option value="nome">Nome</option><option value="preco">Preço</option></select>
-<button class="admin btn" type="submit">Buscar</button><button class="admin btn" type="button" id="btn-limpar-busca">Limpar</button>
-</form>
-<div class="table-wrap"><table><thead><tr><th>ID</th><th>Produto</th><th>Preço</th><th>Estoque</th><th>Categoria</th><th>Ações</th></tr></thead><tbody id="tabela-produtos-admin"></tbody></table></div>
-</section>
-<section class="panel">
-<h2>Pedidos</h2>
-<div class="tabs"><button class="active">Todos</button><button>Preparando</button><button>Pronto</button><button>Entregue</button></div>
-<div class="table-wrap"><table><thead><tr><th>ID</th><th>Aluno</th><th>Itens</th><th>Status</th><th>Total</th><th>Ações</th></tr></thead><tbody id="tabela-pedidos"></tbody></table></div>
-<form id="form-editar-pedido" style="display:none;flex-direction:column;gap:12px;margin-top:25px" class="panel">
-<input type="hidden" id="editar-pedido-id">
-<select id="editar-pedido-status"><option>Preparando</option><option>Pronto</option><option>Concluído</option></select>
-<input type="datetime-local" id="editar-pedido-horario">
-<button class="primary-btn" type="submit" style="height:65px;font-size:22px">Salvar</button>
-<button class="filter-btn" type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
-</form>
-</section>
-<dialog id="open-dialog"><form id="form-avaliacao" method="dialog"><h3>Avaliação</h3><input id="avaliacao-nota" type="number" min="1" max="5"><textarea id="avaliacao-comentario"></textarea><button type="submit">Enviar</button></form></dialog>
-</main>
+    <main class="page admin">
+        <!-- Seção de Alunos (só aparece preenchida para o mestre) -->
+        <section class="panel">
+            <h2>Alunos</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Saldo</th>
+                            <th>Função</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-alunos"></tbody>
+                </table>
+            </div>
+        </section>
 
-<script src="/front-end/js/alunos.js"></script>
+        <!-- Seção de Produtos -->
+        <section class="panel">
+            <h2>Produtos</h2>
+            <form id="form-produto" class="form-grid">
+                <input class="field" type="text" id="produto-nome" placeholder="Nome do Produto" required>
+                <input class="field" type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required>
+                <input class="field" type="number" id="produto-estoque" placeholder="Qtd. Estoque" required>
+                <select class="field" id="produto-categoria" required>
+                    <option value="">Selecione a Categoria...</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Salgado">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select>
+                <input class="field" type="file" id="imagem" accept="image/*">
+                <button class="primary-btn" type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
+                <!-- Escondido pelo CSS; o alunos.js mostra ao editar um produto -->
+                <button class="filter-btn" type="button" id="btn-cancelar-edicao-produto">Cancelar edição</button>
+            </form>
+
+            <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
+            <form id="form-busca-produto" class="busca-form">
+                <select id="busca-categoria">
+                    <option value="">Todas as categorias</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Salgado">Salgado</option>
+                    <option value="Doce">Doce</option>
+                </select>
+                <input type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
+                <input type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
+                <select id="busca-ordenar">
+                    <option value="">Sem ordenação</option>
+                    <option value="nome">Ordenar por nome</option>
+                    <option value="preco">Ordenar por preço</option>
+                </select>
+                <button class="btn" type="submit">Buscar</button>
+                <button class="btn" type="button" id="btn-limpar-busca">Limpar</button>
+            </form>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th>Categoria</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-produtos-admin"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Seção de Pedidos -->
+        <section class="panel">
+            <h2>Pedidos</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Aluno</th>
+                            <th>Itens</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-pedidos"></tbody>
+                </table>
+            </div>
+
+            <!-- Edição de pedido (status / horário de retirada). Escondido pelo CSS;
+                 o alunos.js mostra ao clicar em "Editar" -->
+            <form id="form-editar-pedido" class="panel">
+                <input type="hidden" id="editar-pedido-id">
+                <select class="field" id="editar-pedido-status" required>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Preparo">Em Preparo</option>
+                    <option value="Pronto">Pronto</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+                <input class="field" type="datetime-local" id="editar-pedido-horario">
+                <button class="primary-btn" type="submit">Salvar Pedido</button>
+                <button class="filter-btn" type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Avaliação do pedido. O concluirPedido() do alunos.js "clica" no #open-dialog,
+         que abre o <dialog> -->
+    <button type="button" id="open-dialog" hidden
+            onclick="document.getElementById('dialog-avaliacao').showModal()"></button>
+    <dialog id="dialog-avaliacao" class="dialog-avaliacao">
+        <form id="form-avaliacao">
+            <h3>O que você achou do pedido?</h3>
+            <input type="hidden" id="avaliacao-pedido-id">
+            <label for="avaliacao-nota">Nota (1 a 5):</label>
+            <input class="field" type="number" id="avaliacao-nota" min="1" max="5" required>
+            <label for="avaliacao-comentario">Comentário (opcional):</label>
+            <textarea id="avaliacao-comentario" rows="4"></textarea>
+            <button class="primary-btn" type="submit">Enviar Avaliação</button>
+            <button class="filter-btn" type="button"
+                    onclick="document.getElementById('dialog-avaliacao').close()">Pular</button>
+        </form>
+    </dialog>
+
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

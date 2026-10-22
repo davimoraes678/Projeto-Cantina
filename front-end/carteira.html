@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carteira - Cantina Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/front-end/css/style.css">
+</head>
+<body class="bg-body-tertiary">
+    <nav class="navbar navbar-dark bg-cantina">
+        <div class="container">
+            <a class="btn btn-outline-light" href="/">← Voltar</a>
+            <span class="navbar-brand mb-0 fw-bold">Carteira</span>
+        </div>
+    </nav>
+
+    <main class="container py-4" style="max-width: 600px;">
+        <section class="card shadow-sm">
+            <div class="card-body">
+                <p class="text-body-secondary mb-1">Saldo atual</p>
+                <p class="display-6 fw-bold">R$ <span id="saldo-aluno">0.00</span></p>
+
+                <!-- Recarga: o alunos.js envia PUT /api/alunos/atual com {recarga} -->
+                <form id="form-recarga" class="d-grid gap-2">
+                    <label class="form-label mb-0" for="recarga-valor">Quanto quer adicionar?</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="document.getElementById('recarga-valor').value = 5">R$ 5</button>
+                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="document.getElementById('recarga-valor').value = 10">R$ 10</button>
+                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="document.getElementById('recarga-valor').value = 20">R$ 20</button>
+                    </div>
+                    <input class="form-control form-control-lg" type="number" step="0.01" min="0.01" max="500" id="recarga-valor" placeholder="Outro valor (R$)" required>
+                    <button class="btn btn-primary btn-lg" type="submit">Adicionar saldo</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="/front-end/js/alunos.js"></script>
+</body>
+</html>

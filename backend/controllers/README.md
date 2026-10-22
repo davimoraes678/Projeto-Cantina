@@ -23,6 +23,7 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **🔒 = exige login**;
 | `POST` | `/login` | | `{email, senha}` | `200` logado · `400` faltou campo · `401` e-mail ou senha errados |
 | `POST` | `/logout` | 🔒 | — | `200` |
 | `GET` | `/atual` | 🔒 | — | `200` aluno logado |
+| `PUT` | `/atual` | 🔒 | `{nome?, email?, senha?, recarga?}`. `recarga` soma ao saldo (carteira) | `200` · `400` recarga fora de R$ 0,01 a R$ 500,00 |
 | `GET` | `` (raiz) | | — | `200` lista de alunos |
 | `PUT` | `/<id>` | | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` · `404` |
 | `DELETE` | `/<id>` | | — | `200` · `404` |
@@ -53,7 +54,8 @@ Todas as rotas usam o **aluno logado** (`current_user`), então nenhuma recebe `
 | `GET` | `` (raiz) | — | `200` carrinho (vazio se ainda não existir) |
 | `POST` | `/itens` | `{id_produto, quantidade}` | `201` carrinho atualizado (soma se o produto já estiver) · `400` quantidade inválida · `404` produto |
 | `DELETE` | `/itens/<id_item_pedido>` | — | `200` · `404` se o item não for do carrinho do aluno |
-| `POST` | `/finalizar` | — | `200` pedido agora `"Pendente"` · `400` carrinho vazio |
+| `POST` | `/repetir` | — | `201` carrinho com os itens do último pedido somados · `404` se não houver pedido anterior |
+| `POST` | `/finalizar` | — | `200` pedido agora `"Pendente"`, estoque e saldo descontados · `400` carrinho vazio, estoque ou saldo insuficiente |
 
 Formato do carrinho (igual ao de um pedido):
 
@@ -75,8 +77,10 @@ Formato do carrinho (igual ao de um pedido):
 | Método | Rota | | O que faz |
 |---|---|---|---|
 | `GET` | `` (raiz) | | Lista os pedidos (**sem** os carrinhos em aberto) |
+| `GET` | `/combinacoes` | 🔒 | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
 | `GET` | `/<id>` | | Um pedido |
 | `PUT` | `/<id>` | | `{status?, horario_agendado_retirada?, data_hora_retirada?}`. Status do front: `Pendente`, `Em Preparo`, `Pronto`, `Concluído`, `Cancelado`. Datas em `AAAA-MM-DDTHH:MM` |
+| `POST` | `/<id>` | 🔒 | Avalia o pedido: `{nota, comentario?}`. Só o dono do pedido, uma vez (`404` / `400`) |
 | `POST` | `` (raiz) | 🔒 | Cria um pedido direto, sem carrinho: `{itens: [{id_produto, quantidade}]}` (o front não usa) |
 
 ## Ao criar uma rota

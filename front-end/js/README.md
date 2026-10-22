@@ -29,11 +29,16 @@ Caminho relativo: a API é chamada no mesmo endereço da página. Funciona no `1
 
 | Assunto | Funções | Rotas usadas |
 |---|---|---|
-| Login | listener de `#form-aluno-login`, listener de `#btn-logout`, `alunoInf()` (nome no topo) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
+| Login | listener de `#form-aluno-login`, listener de `#btn-logout`, `alunoInf()` (nome, e-mail e saldo) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
+| Carteira | listener de `#form-recarga` | `PUT /alunos/atual` com `{recarga}` |
 | Alunos | listener de `#form-aluno`, `carregarAlunos`, `editarAluno`, `sairModoEdicaoAluno`, `removerAluno` | `POST /alunos/registro`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>` |
 | Produtos | listener de `#form-produto`, `enviarImagem`, `carregarProdutos`, `buscarProdutos`, `filtrar`, `editarProduto`, `sairModoEdicaoProduto`, `removerProduto` | `/produtos`, `/produtos/buscar`, `/produtos/<id>/imagem` |
-| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido` | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar` |
+| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido` | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
+| Combinações | `carregarCombinacoes`, `adicionarCombinacao` | `GET /pedidos/combinacoes`, `POST /carrinho/itens` |
 | Pedidos | `carregarPedidos`, `editarPedido`, `fecharEdicaoPedido`, `salvarEdicaoPedido`, `concluirPedido` | `GET /pedidos`, `PUT /pedidos/<id>` |
+| Avaliação | `verificarAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>` |
+
+**Como a avaliação chega ao aluno:** ao finalizar, o `finalizarPedido` guarda o número do pedido no navegador (`localStorage`, chave `pedidoParaAvaliar`). Ao abrir o `index.html`, o `verificarAvaliacao` consulta esse pedido e, se estiver `Concluído`, abre a janela. Depois de avaliar (ou no logout) a chave é apagada. A janela só aparece no navegador onde o pedido foi feito.
 | Util | `escapeAttr` | — |
 
 **O formulário `#form-aluno` faz duas coisas.** Com `editandoAlunoId = null`, ele **cadastra** (`POST /alunos/registro`) e leva para `/`. Com um número, ele **edita** no admin (`PUT /alunos/<id>`). O formulário de produto funciona igual, com `editandoProdutoId`.

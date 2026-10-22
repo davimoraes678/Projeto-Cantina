@@ -6,6 +6,8 @@ from backend.models.avaliacao_model import Avaliacao
 from backend.extensions import db
 from flask_login import current_user
 from datetime import datetime
+from collections import Counter
+from itertools import combinations
 
 
 
@@ -105,12 +107,31 @@ class PedidoService:
         )
         return pedido.to_dict(), 200
 
+    @staticmethod
+    def combinacoes_mais_pedidas():
+        # Conta quantas vezes cada par de produtos foi pedido junto (carrinho e cancelados não contam)
+        contagem = Counter()
+        pedidos = Pedido.query.filter(Pedido.status.notin_(["Carrinho", "Cancelado"])).all()
+        for pedido in pedidos:
+            produtos = sorted({item.produto for item in pedido.itens if item.produto}, key=lambda p: p.id_produto)
+            for par in combinations(produtos, 2):
+                contagem[par] += 1
+
+        # As 3 combinações que mais aparecem
+        return [
+            {"produtos": [{"id_produto": p.id_produto, "nome": p.nome} for p in par], "vezes": vezes}
+            for par, vezes in contagem.most_common(3)
+        ], 200
+
 class AvaliacaoService:
     @staticmethod
     def criar(data, id_pedido):
-        pedido_id = Pedido.buscar_por_id(id_pedido)
-        if not pedido_id:
+        pedido = Pedido.buscar_por_id(id_pedido)
+        # Só o dono do pedido avalia, e uma vez só (a tabela aceita uma avaliação por pedido)
+        if not pedido or pedido.id_aluno != current_user.id_aluno:
             return {"erro": "Pedido não encontrado"}, 404
+        if pedido.avaliacao:
+            return {"erro": "Este pedido já foi avaliado"}, 400
         nova_avaliacao = Avaliacao(
             id_pedido=id_pedido,
             nota=data.get('nota'),

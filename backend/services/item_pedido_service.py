@@ -86,7 +86,42 @@ class ItemPedidoService:
         if not carrinho or not carrinho.itens:
             return {"erro": "O carrinho está vazio"}, 400
 
-        carrinho.status = "Pendente"
         carrinho.calcular_total()
+
+        # Confere estoque e saldo antes de mudar qualquer coisa
+        for item in carrinho.itens:
+            if not item.produto:
+                return {"erro": f"{item.nome_produto} não está mais à venda. Remova-o do carrinho."}, 400
+            if item.produto.quantidade_estoque < item.quantidade:
+                return {"erro": f"Estoque insuficiente de {item.produto.nome} (restam {item.produto.quantidade_estoque})"}, 400
+        if current_user.saldo < carrinho.valor_total:
+            return {"erro": "Saldo insuficiente. Adicione saldo na sua carteira."}, 400
+
+        # Tudo certo: baixa o estoque, desconta o saldo e o carrinho vira pedido
+        for item in carrinho.itens:
+            item.produto.quantidade_estoque -= item.quantidade
+        current_user.saldo = round(current_user.saldo - carrinho.valor_total, 2)
+        carrinho.status = "Pendente"
         db.session.commit()
         return carrinho.to_dict(), 200
+
+    @staticmethod
+    def repetir_ultimo_pedido():
+        # Último pedido já feito pelo aluno (o carrinho não conta)
+        ultimo = (Pedido.query
+                  .filter(Pedido.id_aluno == current_user.id_aluno, Pedido.status != STATUS_CARRINHO)
+                  .order_by(Pedido.id_pedido.desc())
+                  .first())
+        if not ultimo:
+            return {"erro": "Você ainda não fez nenhum pedido"}, 404
+
+        # Produtos excluídos depois do pedido ficam com id_produto vazio e são pulados
+        itens = [item for item in ultimo.itens if item.id_produto]
+        if not itens:
+            return {"erro": "Os produtos do último pedido não estão mais à venda"}, 404
+
+        # Reaproveita o adicionar_item: mesmo comportamento de adicionar pelo cardápio
+        for item in itens:
+            resposta, status = ItemPedidoService.adicionar_item(
+                {"id_produto": item.id_produto, "quantidade": item.quantidade})
+        return resposta, status

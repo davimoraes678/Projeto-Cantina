@@ -82,16 +82,18 @@
     border-radius: var(--bs-border-radius);
 }
 
-/* Imagem dos cards de produto e da tabela do admin */
+/* Imagem dos cards de produto e da tabela do admin: todas na mesma altura,
+   e "contain" mostra o produto inteiro (sem cortar) */
 #tabela-produtos .card img {
     width: 100%;
     height: 160px;
-    object-fit: cover;
+    object-fit: contain;
+    background: var(--bs-tertiary-bg);
     border-radius: var(--bs-border-radius);
 }
 
 #tabela-produtos-admin img {
     width: 60px;
     height: 45px;
-    object-fit: cover;
+    object-fit: contain;
 }

@@ -39,6 +39,7 @@ def create_app():
         '/front-end/index.html',
         '/front-end/admin.html',
         '/front-end/conta.html',
+        '/front-end/carteira.html',
     }
     @app.before_request
     def proteger_paginas():
@@ -76,9 +77,12 @@ def create_app():
                 "criar_pedido": "POST /api/pedidos",
                 "buscar_pedido": "GET /api/pedidos/",
                 "atualizar_pedido": "PUT /api/pedidos/",
+                "combinacoes_mais_pedidas": "GET /api/pedidos/combinacoes",
+                "avaliar_pedido": "POST /api/pedidos/<id>",
                 "ver_carrinho": "GET /api/carrinho/",
                 "adicionar_item_carrinho": "POST /api/carrinho/itens",
                 "remover_item_carrinho": "DELETE /api/carrinho/itens/<id_item_pedido>",
+                "repetir_ultimo_pedido": "POST /api/carrinho/repetir",
                 "finalizar_carrinho": "POST /api/carrinho/finalizar"
             }
         })

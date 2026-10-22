@@ -24,6 +24,12 @@ def remover_item(id_item_pedido):
     resposta, status = ItemPedidoService.remover_item(id_item_pedido)
     return jsonify(resposta), status
 
+@bp_item_pedido.route('/repetir', methods=['POST'])
+@login_required
+def repetir_ultimo_pedido():
+    resposta, status = ItemPedidoService.repetir_ultimo_pedido()
+    return jsonify(resposta), status
+
 @bp_item_pedido.route('/finalizar', methods=['POST'])
 @login_required
 def finalizar():

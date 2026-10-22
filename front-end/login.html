@@ -3,26 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cantina Real - Login</title>
+    <title>Login - Cantina Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
-<body>
-    <section class="login-hero">
-        <img src="/front-end/assets/logo.png" alt="Cantina Real">
-        <div class="login-brand">CANTINA<span>REAL</span></div>
-        <div class="login-tag">Peça Antes, Retire<br>Sem Filas.</div>
-    </section>
-
-    <main class="login-panel center-page">
-        <h1>BEM-VINDO(A)!</h1>
-        <h2>Faça Login Para Continuar</h2>
-        <form id="form-aluno-login" class="auth-form">
-            <input class="field" type="email" id="aluno-email" placeholder="E-mail" required>
-            <input class="field" type="password" id="aluno-senha" placeholder="Senha" required>
-            <button class="primary-btn" type="submit" id="btn-salvar-aluno">Entrar</button>
-        </form>
-        <div class="quick-note">◷ &nbsp; Rápido, Prático e Feito<br>para seu intervalo</div>
-        <p><a class="link-red" href="/front-end/cadastro.html">Ainda não tenho cadastro</a></p>
+<body class="bg-cantina">
+    <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
+        <div class="card shadow w-100" style="max-width: 420px;">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <img src="/front-end/assets/logo.png" alt="Cantina Real" width="96" height="96">
+                    <h1 class="h3 fw-bold mt-2 mb-0">Cantina Real</h1>
+                    <p class="text-body-secondary">Peça antes, retire sem filas.</p>
+                </div>
+                <form id="form-aluno-login" class="d-grid gap-3">
+                    <input class="form-control form-control-lg" type="email" id="aluno-email" placeholder="E-mail" required>
+                    <input class="form-control form-control-lg" type="password" id="aluno-senha" placeholder="Senha" required>
+                    <button class="btn btn-primary btn-lg" type="submit" id="btn-salvar-aluno">Entrar</button>
+                </form>
+                <p class="text-center mt-3 mb-0">
+                    Ainda não tem conta? <a href="/front-end/cadastro.html">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
     </main>
 
     <script src="/front-end/js/alunos.js"></script>

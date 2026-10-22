@@ -18,6 +18,12 @@ def listar_pedidos():
     resposta, status = PedidoService.listar_todos()
     return jsonify(resposta), status
 
+@bp_pedido.route('/combinacoes', methods=['GET'])
+@login_required
+def combinacoes_mais_pedidas():
+    resposta, status = PedidoService.combinacoes_mais_pedidas()
+    return jsonify(resposta), status
+
 @bp_pedido.route('/<int:id_pedido>', methods=['GET'])
 @login_required
 def buscar_pedido(id_pedido):

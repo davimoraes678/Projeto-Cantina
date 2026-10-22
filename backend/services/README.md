@@ -21,7 +21,8 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `ver_carrinho()` | Devolve o carrinho do aluno; se ainda não existir, um carrinho vazio (sem gravar nada) |
 | `adicionar_item(data)` | Valida o produto e a quantidade (≥ 1). Cria o carrinho na primeira vez. Se o produto já está no carrinho, **soma** a quantidade. Guarda o nome e o preço do produto naquele momento. Recalcula o total |
 | `remover_item(id_item_pedido)` | Só remove se o item for de um carrinho **do aluno logado**; senão responde `404` |
-| `finalizar()` | Troca o status de `"Carrinho"` para `"Pendente"`; `400` se estiver vazio |
+| `finalizar()` | Confere estoque de cada item e saldo do aluno; se tudo der, desconta os dois e troca o status de `"Carrinho"` para `"Pendente"`. `400` se estiver vazio ou faltar estoque/saldo |
+| `repetir_ultimo_pedido()` | Pega o último pedido do aluno e chama `adicionar_item` para cada produto (os excluídos são pulados) |
 
 ## `pedido_service.py` — pedidos
 
@@ -31,6 +32,8 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `listar_todos()` | Todos os pedidos, **exceto** os que ainda são carrinho |
 | `buscar_por_id(id)` | Um pedido |
 | `atualizar_status(id, data)` | Muda status e horários. Datas chegam como texto (`"2026-10-13T12:30"`) e são convertidas por `_parse_datetime` |
+| `combinacoes_mais_pedidas()` | Conta quantas vezes cada dupla de produtos aparece no mesmo pedido (sem carrinhos e cancelados) e devolve as 3 mais comuns |
+| `AvaliacaoService.criar(data, id)` | Só o dono do pedido avalia, e uma vez só |
 
 ## `produto_service.py` — produtos
 
@@ -47,7 +50,7 @@ O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-d
 
 | Função | O que faz |
 |---|---|
-| `salvar_imagem(produto, arquivo)` | Aceita PNG, JPG ou WEBP até 5 MB, corrige a rotação da foto e salva como PNG |
+| `salvar_imagem(produto, arquivo)` | Aceita PNG, JPG ou WEBP até 5 MB, corrige a rotação da foto, reduz para no máximo 600×600 (mantendo a proporção) e salva como PNG |
 | `renomear_imagem(produto, novo_nome)` | Renomeia o arquivo quando o produto muda de nome |
 | `verificar_nome_disponivel(...)` | Impede dois produtos que gerariam o mesmo nome de arquivo (ex.: "Suco" e "suco!") |
 | `nome_imagem(nome)` | Gera o nome do arquivo a partir do nome do produto |

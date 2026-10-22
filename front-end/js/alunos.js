@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarProdutos();
   carregarCarrinho();
   alunoInf();
+  carregarCombinacoes();
+  verificarAvaliacao();
 
   // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
   // --- EVENTO: SUBMIT DO FORMULÁRIO DE CADASTRO ---
@@ -220,6 +222,62 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnCancelarEdicaoPedido) {
     btnCancelarEdicaoPedido.addEventListener("click", fecharEdicaoPedido);
   }
+
+  // --- EVENTO: RECARGA DA CARTEIRA (usa PUT /alunos/atual com {recarga}) ---
+  const formRecarga = document.getElementById("form-recarga");
+  if (formRecarga) {
+    formRecarga.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const recarga = parseFloat(document.getElementById("recarga-valor").value);
+      try {
+        const res = await fetch(`${API_BASE_URL}/alunos/atual`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recarga }),
+        });
+        if (!res.ok) {
+          const erro = await res.json().catch(() => ({}));
+          alert(erro.erro || "Não foi possível adicionar o saldo.");
+          return;
+        }
+        formRecarga.reset();
+        alunoInf(); // mostra o saldo novo
+      } catch (erro) {
+        console.error("Erro ao adicionar saldo:", erro);
+        alert("Ocorreu um erro ao adicionar o saldo.");
+      }
+    });
+  }
+
+  // --- EVENTO: ENVIAR AVALIAÇÃO DO ÚLTIMO PEDIDO ---
+  const formAvaliacao = document.getElementById("form-avaliacao");
+  if (formAvaliacao) {
+    formAvaliacao.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = localStorage.getItem("pedidoParaAvaliar");
+      const nota = parseInt(document.getElementById("avaliacao-nota").value);
+      const comentario = document.getElementById("avaliacao-comentario").value;
+      try {
+        const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nota, comentario }),
+        });
+        // Avaliado (ou não dá mais para avaliar): não pergunta de novo
+        localStorage.removeItem("pedidoParaAvaliar");
+        bootstrap.Modal.getInstance(document.getElementById("modal-avaliacao")).hide();
+        if (!res.ok) {
+          const erro = await res.json().catch(() => ({}));
+          alert(erro.erro || "Não foi possível enviar a avaliação.");
+          return;
+        }
+        alert("Obrigado pela avaliação!");
+      } catch (erro) {
+        console.error("Erro ao avaliar:", erro);
+        alert("Ocorreu um erro ao enviar a avaliação.");
+      }
+    });
+  }
 });
 
 // --- LÓGICA DE ALUNOS ---
@@ -304,6 +362,7 @@ if (btnLogout) {
         return;
       }
 
+      localStorage.removeItem("pedidoParaAvaliar");
       window.location.href = "/front-end/login.html";
     } catch (erro) {
       console.error("Erro ao realizar logout:", erro);
@@ -377,11 +436,13 @@ async function editarDados() {
 async function alunoInf() {
   const nomeEl = document.getElementById("nome-aluno");
   const emailEl = document.getElementById("email-aluno");
+  const saldoEl = document.getElementById("saldo-aluno");
   const res = await fetch(`${API_BASE_URL}/alunos/atual`);
   if (!res.ok) return;
   const aluno_inf = await res.json();
   if (nomeEl) nomeEl.textContent = aluno_inf.nome;
   if (emailEl) emailEl.textContent = aluno_inf.email;
+  if (saldoEl) saldoEl.textContent = parseFloat(aluno_inf.saldo || 0).toFixed(2);
 
   funcaoPorAluno(aluno_inf.funcao)
 }
@@ -471,7 +532,7 @@ async function buscarProdutos(filtrosForcados) {
             onerror="this.hidden = true">
     <h5 class="mt-2 mb-0">${prod.nome}</h5>
     <h4 class="mt-0 mb-2">R$ ${parseFloat(prod.preco_atual).toFixed(2)}</h4>
-    <p class="card-text fg-2">${prod.descricao}</p>
+    <p class="card-text text-body-secondary">${prod.categoria || ""}</p>
     <button type="button" class="btn btn-primary" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
             <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
 
@@ -643,11 +704,69 @@ async function finalizarPedido() {
       alert(erro.erro || "Não foi possível finalizar o pedido.");
       return;
     }
+    const pedido = await res.json();
+    localStorage.setItem("pedidoParaAvaliar", pedido.id_pedido); // pede a avaliação quando for concluído
     carregarCarrinho();
-    carregarPedidos();
+    alunoInf(); // o saldo diminuiu
   } catch (erro) {
     console.error("Erro ao finalizar pedido:", erro);
     alert("Ocorreu um erro ao finalizar o pedido.");
+  }
+}
+
+// Coloca no carrinho os mesmos produtos e quantidades do último pedido.
+async function repetirUltimoPedido() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/carrinho/repetir`, { method: "POST" });
+    const dados = await res.json();
+    if (!res.ok) {
+      alert(dados.erro || "Não foi possível repetir o último pedido.");
+      return;
+    }
+    renderizarCarrinho(dados);
+  } catch (erro) {
+    console.error("Erro ao repetir pedido:", erro);
+  }
+}
+
+// --- COMBINAÇÕES MAIS PEDIDAS ---
+async function carregarCombinacoes() {
+  const lista = document.getElementById("lista-combinacoes");
+  if (!lista) return; // página sem combinações
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/combinacoes`);
+    if (!res.ok) return;
+    const combinacoes = await res.json();
+    lista.innerHTML = "";
+    combinacoes.forEach((combo) => {
+      const nomes = combo.produtos.map((p) => p.nome).join(" + ");
+      const ids = combo.produtos.map((p) => p.id_produto).join(", ");
+      lista.innerHTML += `
+                <button class="btn btn-outline-primary" onclick="adicionarCombinacao([${ids}])">
+                    ${nomes} <span class="badge text-bg-secondary">${combo.vezes}x</span>
+                </button>
+            `;
+    });
+    if (combinacoes.length) document.getElementById("secao-combinacoes").style.display = "";
+  } catch (erro) {
+    console.error("Erro ao carregar combinações:", erro);
+  }
+}
+
+// Adiciona 1 de cada produto da combinação ao carrinho.
+async function adicionarCombinacao(ids) {
+  for (const id_produto of ids) {
+    const res = await fetch(`${API_BASE_URL}/carrinho/itens`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_produto, quantidade: 1 }),
+    });
+    const dados = await res.json();
+    if (!res.ok) {
+      alert(dados.erro || "Não foi possível adicionar a combinação.");
+      return;
+    }
+    renderizarCarrinho(dados);
   }
 }
 
@@ -747,54 +866,33 @@ async function salvarEdicaoPedido() {
 }
 
 async function concluirPedido(id) {
-  if (confirm("Deseja realmente marcar este pedido como concluído?")) {
-    const dialogAvaliacao = document.getElementById("pedido-avaliacao")
-    dialogAvaliacao.innerHTML = `
-      
-    `;
-    
-    const formAvaliacao = document.getElementById("form-avaliacao");
-    if (formAvaliacao) {
-      formAvaliacao.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const nota = document.getElementById("avaliacao-nota").value;
-        const comentario = document.getElementById(
-          "avaliacao-comentario",
-        ).value;
+  if (!confirm("Deseja realmente marcar este pedido como concluído?")) return;
+  try {
+    await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Concluído" }),
+    });
+    carregarPedidos();
+  } catch (erro) {
+    console.error("Erro ao concluir pedido:", erro);
+    alert("Ocorreu um erro ao atualizar o status do pedido.");
+  }
+}
 
-        try {
-          const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nota, comentario }),
-          });
-
-          if (!res.ok) {
-            const erro = await res.json().catch(() => ({}));
-            alert(erro.erro || "Não foi possível fazer o cadastro.");
-            return;
-          }
-
-          window.location.href = "/"; // cadastrou e já está logado: vai para a cantina
-        } catch (erro) {
-          console.error("Erro ao avaliar:", erro);
-          alert("Ocorreu um erro ao fazer a avaliação.");
-        }
-      });
-    }
-
-    try {
-      await fetch(`${API_BASE_URL}/pedidos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Concluído" }),
-      });
-
-      carregarPedidos();
-    } catch (erro) {
-      console.error("Erro ao concluir pedido:", erro);
-      alert("Ocorreu um erro ao atualizar o status do pedido.");
-    }
+// --- AVALIAÇÃO (lado do aluno) ---
+// Se o último pedido do aluno já foi concluído, abre a janela de avaliação.
+async function verificarAvaliacao() {
+  const id = localStorage.getItem("pedidoParaAvaliar");
+  const modal = document.getElementById("modal-avaliacao");
+  if (!id || !modal) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/${id}`);
+    if (!res.ok) return;
+    const pedido = await res.json();
+    if (pedido.status === "Concluído") bootstrap.Modal.getOrCreateInstance(modal).show();
+  } catch (erro) {
+    console.error("Erro ao verificar avaliação:", erro);
   }
 }
 

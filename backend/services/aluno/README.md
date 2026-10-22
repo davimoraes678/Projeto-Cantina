@@ -7,7 +7,7 @@ Services de **aluno**: um arquivo por operação. As rotas que os chamam ficam e
 | `criar_aluno_service.py` | `CriarAlunoService` | Cadastro: exige nome, e-mail e senha (`400`), recusa e-mail repetido (`409`), salva o **hash** da senha e **já faz login** (`login_user`) |
 | `login_aluno_service.py` | `LoginAlunoService` | `executar`: confere a senha com `check_password_hash` e faz `login_user`. `logout`: faz `logout_user` |
 | `listar_aluno_service.py` | `ListarAlunoService` | Lista todos os alunos |
-| `atualizar_aluno_service.py` | `AtualizarAlunoService` | Edita nome, e-mail e senha; senha vazia mantém a atual |
+| `atualizar_aluno_service.py` | `AtualizarAlunoService` | Edita nome, e-mail e senha (senha vazia mantém a atual) e faz a recarga da carteira (`recarga` soma ao saldo) |
 | `deletar_aluno_service.py` | `DeletarAlunoService` | Exclui o aluno **sem apagar os pedidos dele**: copia o nome para os pedidos e solta o vínculo antes de apagar |
 
 ## Atenção: o `user_loader` mora aqui

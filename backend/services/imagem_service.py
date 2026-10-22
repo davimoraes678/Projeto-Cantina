@@ -47,6 +47,8 @@ def salvar_imagem(produto, arquivo):
             if imagem.width * imagem.height > 20_000_000:
                 raise ValueError("A imagem deve ter no máximo 20 milhões de pixels.")
             imagem = ImageOps.exif_transpose(imagem).convert("RGBA")
+            # Reduz para no máximo 600x600 (mantém a proporção): o card mostra bem menor que isso
+            imagem.thumbnail((600, 600))
             destino = caminho_imagem(produto.nome)
             destino.parent.mkdir(parents=True, exist_ok=True)
             temporario = None

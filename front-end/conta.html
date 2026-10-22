@@ -1,30 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Conta - Cantina Real</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Cantina Real</title>
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
+    <header class="topbar">
+        <a class="icon-btn" href="/front-end/index.html" aria-label="Voltar">←</a>
+        <div class="header-title">Minha Conta</div>
+        <div></div>
+    </header>
 
-<header class="topbar">
-  <a class="icon-btn" href="/front-end/index.html">←</a>
-  <div class="header-title">Minha Conta</div><div></div>
-</header>
-<main class="center-page account">
-  <section class="panel">
-    <h2>Meus dados</h2>
-    <div class="panel"><strong>Nome</strong><p id="nome-aluno">Aluno</p></div>
-    <div class="panel"><strong>Email</strong><p id="email-aluno">Email</p></div>
-    <button class="primary-btn" style="height:70px;font-size:26px" id="editar-dados" onclick="editarDados()">Editar Dados</button>
-    <div id="form-editar-dados"></div>
-    <button class="filter-btn" style="margin-top:18px;width:100%" id="remover-aluno" onclick="removerAluno()">Remover Aluno</button>
-    <button class="primary-btn" style="height:70px;font-size:26px;margin-top:18px" id="btn-logout">Sair</button>
-  </section>
-</main>
+    <main class="center-page account">
+        <section class="panel">
+            <h2>Meus dados</h2>
+            <div class="panel">
+                <strong>Nome</strong>
+                <p id="nome-aluno">Aluno</p>
+            </div>
+            <div class="panel">
+                <strong>Email</strong>
+                <p id="email-aluno">Email</p>
+            </div>
+            <div class="conta-acoes">
+                <button class="primary-btn" type="button" id="editar-dados" onclick="editarDados()">Editar Dados</button>
+                <!-- O alunos.js monta o formulário de edição aqui -->
+                <div id="form-editar-dados"></div>
+                <button class="filter-btn" type="button" id="remover-aluno" onclick="removerAluno()">Remover Aluno</button>
+                <button class="primary-btn" type="button" id="btn-logout">Sair</button>
+            </div>
+        </section>
+    </main>
 
-<script src="/front-end/js/alunos.js"></script>
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

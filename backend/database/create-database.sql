@@ -154,7 +154,23 @@ BEGIN
 END $
 
 drop procedure if exists sp_repetir_ultimo_pedido $
+CREATE PROCEDURE sp_repetir_ultimo_pedido ()
+BEGIN
+    SELECT
+        id_pedido,
+        quantidade_estoque,
+        preco_atual,
+        preco_promocional,
+        ingredientes,
+        categoria,
+        status
+    FROM
+        itens_pedido
+    JOIN
+        pedido USING (id_pedido)
+    ORDER BY
+        data_hora_criacao DESC;
+END $
 
 DELIMITER ;
-
 

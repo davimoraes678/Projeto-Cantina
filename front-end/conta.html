@@ -1,30 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Conta - Cantina Real</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Cantina Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
-<body>
+<body class="bg-body-tertiary">
+    <nav class="navbar navbar-dark bg-cantina">
+        <div class="container">
+            <a class="btn btn-outline-light" href="/">← Voltar</a>
+            <span class="navbar-brand mb-0 fw-bold">Minha Conta</span>
+        </div>
+    </nav>
 
-<header class="topbar">
-  <a class="icon-btn" href="/front-end/index.html">←</a>
-  <div class="header-title">Minha Conta</div><div></div>
-</header>
-<main class="center-page account">
-  <section class="panel">
-    <h2>Meus dados</h2>
-    <div class="panel"><strong>Nome</strong><p id="nome-aluno">Aluno</p></div>
-    <div class="panel"><strong>Email</strong><p id="email-aluno">Email</p></div>
-    <button class="primary-btn" style="height:70px;font-size:26px" id="editar-dados" onclick="editarDados()">Editar Dados</button>
-    <div id="form-editar-dados"></div>
-    <button class="filter-btn" style="margin-top:18px;width:100%" id="remover-aluno" onclick="removerAluno()">Remover Aluno</button>
-    <button class="primary-btn" style="height:70px;font-size:26px;margin-top:18px" id="btn-logout">Sair</button>
-  </section>
-</main>
+    <main class="container py-4" style="max-width: 600px;">
+        <section class="card shadow-sm">
+            <div class="card-body">
+                <dl class="mb-4">
+                    <dt>Nome</dt>
+                    <dd id="nome-aluno">Aluno</dd>
+                    <dt>E-mail</dt>
+                    <dd id="email-aluno">Email</dd>
+                </dl>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="button" id="editar-dados" onclick="editarDados()">Editar Dados</button>
+                    <!-- O alunos.js monta o formulário de edição aqui -->
+                    <div id="form-editar-dados"></div>
+                    <button class="btn btn-outline-secondary" type="button" id="btn-logout">Sair</button>
+                    <button class="btn btn-outline-danger" type="button" id="remover-aluno" onclick="removerAluno()">Remover minha conta</button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-<script src="/front-end/js/alunos.js"></script>
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

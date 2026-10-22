@@ -748,10 +748,11 @@ async function salvarEdicaoPedido() {
 
 async function concluirPedido(id) {
   if (confirm("Deseja realmente marcar este pedido como concluído?")) {
-    const openDialogButton = document.getElementById("open-dialog");
-    if (openDialogButton) {
-      openDialogButton.click();
-    }
+    const dialogAvaliacao = document.getElementById("pedido-avaliacao")
+    dialogAvaliacao.innerHTML = `
+      
+    `;
+    
     const formAvaliacao = document.getElementById("form-avaliacao");
     if (formAvaliacao) {
       formAvaliacao.addEventListener("submit", async (e) => {

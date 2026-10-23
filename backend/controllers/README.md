@@ -24,7 +24,7 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **🔒 = exige login**;
 | `POST` | `/logout` | 🔒 | — | `200` |
 | `GET` | `/atual` | 🔒 | — | `200` aluno logado |
 | `PUT` | `/atual` | 🔒 | `{nome?, email?, senha?, recarga?}`. `recarga` soma ao saldo (carteira) | `200` · `400` recarga fora de R$ 0,01 a R$ 500,00 |
-| `GET` | `` (raiz) | | — | `200` lista de alunos |
+| `GET` | `` (raiz) | só mestre | — | `200` lista de alunos · `403` |
 | `PUT` | `/<id>` | | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` · `404` |
 | `DELETE` | `/<id>` | | — | `200` · `404` |
 
@@ -79,7 +79,7 @@ Formato do carrinho (igual ao de um pedido):
 | `GET` | `` (raiz) | | Lista os pedidos (**sem** os carrinhos em aberto) |
 | `GET` | `/combinacoes` | 🔒 | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
 | `GET` | `/<id>` | | Um pedido |
-| `PUT` | `/<id>` | | `{status?, horario_agendado_retirada?, data_hora_retirada?}`. Status do front: `Pendente`, `Em Preparo`, `Pronto`, `Concluído`, `Cancelado`. Datas em `AAAA-MM-DDTHH:MM` |
+| `PUT` | `/<id>` | admin ou mestre | `{status?, horario_agendado_retirada?, data_hora_retirada?}`. Status do front: `Pendente`, `Em Preparo`, `Pronto`, `Concluído`, `Cancelado`. Datas em `AAAA-MM-DDTHH:MM` |
 | `POST` | `/<id>` | 🔒 | Avalia o pedido: `{nota, comentario?}`. Só o dono do pedido, uma vez (`404` / `400`) |
 | `POST` | `` (raiz) | 🔒 | Cria um pedido direto, sem carrinho: `{itens: [{id_produto, quantidade}]}` (o front não usa) |
 

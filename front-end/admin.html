@@ -16,8 +16,8 @@
     </nav>
 
     <main class="container py-4">
-        <!-- Alunos (a lista só é carregada para o mestre) -->
-        <section class="card shadow-sm mb-4">
+        <!-- Alunos e Produtos: só o mestre vê (o alunos.js mostra) -->
+        <section class="card shadow-sm mb-4 so-mestre" style="display:none;">
             <div class="card-body">
                 <h2 class="h4 card-title">Alunos</h2>
                 <div class="table-responsive">
@@ -39,7 +39,7 @@
         </section>
 
         <!-- Produtos -->
-        <section class="card shadow-sm mb-4">
+        <section class="card shadow-sm mb-4 so-mestre" style="display:none;">
             <div class="card-body">
                 <h2 class="h4 card-title">Produtos</h2>
                 <form id="form-produto" class="row g-2 mb-4">
@@ -120,7 +120,10 @@
         <!-- Pedidos -->
         <section class="card shadow-sm mb-4">
             <div class="card-body">
-                <h2 class="h4 card-title">Pedidos</h2>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h4 card-title mb-0">Pedidos em andamento</h2>
+                    <a class="btn btn-outline-primary" href="/front-end/historico.html">Histórico de pedidos</a>
+                </div>
 
                 <!-- Edição de pedido (status / horário de retirada). O alunos.js mostra ao clicar em "Editar" -->
                 <form id="form-editar-pedido" class="row g-2 mb-3" style="display:none;">

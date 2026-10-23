@@ -336,10 +336,13 @@ function funcaoPorAluno(funcao) {
   const admin = funcao === "admin" || funcao === "mestre";
   const mestre = funcao === "mestre";
 
+  // Elementos com a classe so-admin / so-mestre começam escondidos no HTML
   if (admin) {
+    document.querySelectorAll(".so-admin").forEach((el) => (el.style.display = ""));
     carregarPedidos();
   }
   if (mestre) {
+    document.querySelectorAll(".so-mestre").forEach((el) => (el.style.display = ""));
     carregarAlunos();
   }
 
@@ -783,15 +786,22 @@ async function carregarPedidos() {
 
     tabela.innerHTML = "";
 
-    pedidos.forEach((ped) => {
+    // historico.html mostra os finalizados (mais recente primeiro); admin.html, os em andamento
+    const historico = tabela.dataset.historico === "sim";
+    const lista = pedidos.filter(
+      (ped) => ["Concluído", "Cancelado"].includes(ped.status) === historico,
+    );
+    if (historico) lista.reverse();
+
+    lista.forEach((ped) => {
       const listaProdutos = ped.itens
         .map((item) => `${item.quantidade}x ${item.produto_nome}`)
         .join(", ");
 
-      const botaoConcluir =
-        ped.status !== "Concluído"
-          ? `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`
-          : "";
+      const ultimaColuna = historico
+        ? new Date(ped.data_hora_criacao).toLocaleString("pt-BR")
+        : `<button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
+           <button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`;
 
       tabela.innerHTML += `
                 <tr>
@@ -800,10 +810,7 @@ async function carregarPedidos() {
                     <td>${listaProdutos}</td>
                     <td>${ped.status}</td>
                     <td>R$ ${parseFloat(ped.valor_total).toFixed(2)}</td>
-                    <td>
-                        <button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
-                        ${botaoConcluir}
-                    </td>
+                    <td>${ultimaColuna}</td>
                 </tr>
             `;
     });

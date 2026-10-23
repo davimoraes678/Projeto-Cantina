@@ -26,7 +26,7 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **🔒 = exige login**;
 | `PUT` | `/atual` | 🔒 | `{nome?, email?, senha?, recarga?}`. `recarga` soma ao saldo (carteira) | `200` · `400` recarga fora de R$ 0,01 a R$ 500,00 |
 | `GET` | `` (raiz) | só mestre | — | `200` lista de alunos · `403` |
 | `PUT` | `/<id>` | | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` · `404` |
-| `DELETE` | `/<id>` | | — | `200` · `404` |
+| `DELETE` | `/<id>` | só mestre | — | `200` · `403` · `404` |
 
 Formato de um aluno: `{ "id_aluno": 1, "nome": "Ana", "email": "ana@email.com", "saldo": 0.0 }`. A senha nunca é devolvida.
 

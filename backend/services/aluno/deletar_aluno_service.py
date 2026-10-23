@@ -4,8 +4,9 @@ from backend.models.aluno_model import Aluno
 
 class DeletarAlunoService:
     @staticmethod
-    def executar():
-        aluno = current_user
+    def executar(id_aluno=None):
+        # Sem id: o aluno logado remove a própria conta. Com id: o mestre remove outro aluno.
+        aluno = Aluno.buscar_por_id(id_aluno) if id_aluno else current_user
         if not aluno:
             return {"erro": "Aluno não encontrado"}, 404
 

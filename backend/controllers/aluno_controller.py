@@ -57,6 +57,7 @@ def listar_alunos():
 
 
 @bp_aluno.route('/<int:id_aluno>', methods=['DELETE'])
+@master_required
 def deletar_aluno(id_aluno):
     resposta, status = DeletarAlunoService.executar(id_aluno)
     return jsonify(resposta), status

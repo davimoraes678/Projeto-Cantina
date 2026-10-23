@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from backend.services.produto_service import ProdutoService
+from backend.services.aluno.login_aluno_service import LoginAlunoService, admin_required, master_required
 from backend.models.produto_model import Produto
 from backend.services.imagem_service import salvar_imagem, nome_imagem
 
 bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
 
 @bp_produto.route('', methods=['POST'])
+@master_required
 def criar_produto():
     data = request.json
     resposta, status = ProdutoService.criar(data)
@@ -45,18 +47,21 @@ def buscar_produto(id_produto):
     return jsonify(resposta), status
 
 @bp_produto.route('/<int:id_produto>', methods=['PUT'])
+@master_required
 def atualizar_produto(id_produto):
     data = request.json
     resposta, status = ProdutoService.atualizar(id_produto, data)
     return jsonify(resposta), status
 
 @bp_produto.route('/<int:id_produto>', methods=['DELETE'])
+@master_required
 def deletar_produto(id_produto):
     resposta, status = ProdutoService.deletar(id_produto)
     return jsonify(resposta), status
 
 
 @bp_produto.route('/<int:id_produto>/imagem', methods=['POST'])
+@master_required
 def enviar_imagem_produto(id_produto):
     produto = Produto.buscar_por_id(id_produto)
     if not produto:

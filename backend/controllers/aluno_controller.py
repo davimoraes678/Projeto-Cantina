@@ -50,7 +50,7 @@ def logout_aluno():
     return jsonify({"mensagem": "Logout realizado com sucesso"}), 200
 
 @bp_aluno.route('', methods=['GET', 'PUT'])
-@admin_required
+@master_required
 def listar_alunos():
     resposta, status = ListarAlunoService.executar()
     return jsonify(resposta), status

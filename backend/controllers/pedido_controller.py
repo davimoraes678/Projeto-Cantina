@@ -31,7 +31,7 @@ def buscar_pedido(id_pedido):
     return jsonify(resposta), status
 
 @bp_pedido.route('/<int:id_pedido>', methods=['PUT'])
-@login_required
+@admin_required
 def atualizar_pedido(id_pedido):
     data = request.json
     resposta, status = PedidoService.atualizar_status(id_pedido, data)

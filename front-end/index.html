@@ -26,7 +26,8 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/front-end/conta.html">Minha Conta</a></li>
                         <li><a class="dropdown-item" href="/front-end/carteira.html">Carteira</a></li>
-                        <li><a class="dropdown-item" href="/front-end/admin.html">Administrador</a></li>
+                        <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
+                        <li class="so-admin" style="display:none;"><a class="dropdown-item" href="/front-end/admin.html">Administrador</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item text-danger" type="button" id="btn-logout">Logout</button></li>
                     </ul>

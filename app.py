@@ -40,11 +40,19 @@ def create_app():
         '/front-end/admin.html',
         '/front-end/conta.html',
         '/front-end/carteira.html',
+        '/front-end/historico.html',
+    }
+    # Páginas só para admin e mestre: um aluno comum volta para a cantina
+    PAGINAS_ADMIN = {
+        '/front-end/admin.html',
+        '/front-end/historico.html',
     }
     @app.before_request
     def proteger_paginas():
         if request.path in PAGINAS_PROTEGIDAS and not current_user.is_authenticated:
             return redirect('/front-end/cadastro.html')
+        if request.path in PAGINAS_ADMIN and current_user.funcao not in ('admin', 'mestre'):
+            return redirect('/')
 
     register_routes(app)
 

@@ -107,6 +107,17 @@
         </div>
     </div>
 
+    <!-- Aviso "adicionado ao carrinho": o alunos.js mostra com avisarCarrinho() -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast-carrinho" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
+            <div class="d-flex align-items-center">
+                <div class="toast-body" id="toast-carrinho-texto">Adicionado ao carrinho</div>
+                <button type="button" class="btn btn-light btn-sm ms-auto" data-bs-toggle="offcanvas" data-bs-target="#carrinho">Ver carrinho</button>
+                <button type="button" class="btn-close btn-close-white mx-2" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Avaliação: o alunos.js abre quando o último pedido do aluno foi concluído -->
     <div class="modal fade" id="modal-avaliacao" tabindex="-1" aria-labelledby="modal-avaliacao-titulo" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

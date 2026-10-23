@@ -450,6 +450,13 @@ async function alunoInf() {
   funcaoPorAluno(aluno_inf.funcao)
 }
 
+// Botões + R$ 5 / 10 / 20 da carteira: soma ao valor que já está no campo (até R$ 500).
+function somarRecarga(valor) {
+  const campo = document.getElementById("recarga-valor");
+  const atual = parseFloat(campo.value) || 0; // campo vazio vira 0
+  campo.value = Math.min(atual + valor, 500).toFixed(2);
+}
+
 // --- LÓGICA DE PRODUTOS ---
 async function enviarImagem(idProduto) {
   const imagem = document.getElementById("imagem")?.files[0];
@@ -641,6 +648,8 @@ async function adicionarItemAoCarrinho(id_produto) {
     }
     inputQuantidade.value = 1;
     renderizarCarrinho(dados);
+    const item = dados.itens.find((i) => i.id_produto === id_produto);
+    avisarCarrinho(`${quantidade}x ${item.produto_nome} adicionado ao carrinho`);
   } catch (erro) {
     console.error("Erro ao adicionar item:", erro);
     alert("Ocorreu um erro ao adicionar o produto.");
@@ -727,6 +736,7 @@ async function repetirUltimoPedido() {
       return;
     }
     renderizarCarrinho(dados);
+    avisarCarrinho("Itens do último pedido adicionados ao carrinho");
   } catch (erro) {
     console.error("Erro ao repetir pedido:", erro);
   }
@@ -771,6 +781,13 @@ async function adicionarCombinacao(ids) {
     }
     renderizarCarrinho(dados);
   }
+  avisarCarrinho("Combinação adicionada ao carrinho");
+}
+
+// Mostra o aviso (toast do Bootstrap) de que algo entrou no carrinho.
+function avisarCarrinho(mensagem) {
+  document.getElementById("toast-carrinho-texto").textContent = mensagem;
+  bootstrap.Toast.getOrCreateInstance(document.getElementById("toast-carrinho")).show();
 }
 
 // --- LÓGICA DE PEDIDOS ---

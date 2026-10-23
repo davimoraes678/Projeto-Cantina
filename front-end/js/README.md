@@ -30,10 +30,10 @@ Caminho relativo: a API é chamada no mesmo endereço da página. Funciona no `1
 | Assunto | Funções | Rotas usadas |
 |---|---|---|
 | Login | listener de `#form-aluno-login`, listener de `#btn-logout`, `alunoInf()` (nome, e-mail e saldo) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
-| Carteira | listener de `#form-recarga` | `PUT /alunos/atual` com `{recarga}` |
+| Carteira | listener de `#form-recarga`, `somarRecarga` (botões + R$ 5/10/20, até R$ 500) | `PUT /alunos/atual` com `{recarga}` |
 | Alunos | listener de `#form-aluno`, `carregarAlunos`, `editarAluno`, `sairModoEdicaoAluno`, `removerAluno` | `POST /alunos/registro`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>` |
 | Produtos | listener de `#form-produto`, `enviarImagem`, `carregarProdutos`, `buscarProdutos`, `filtrar`, `editarProduto`, `sairModoEdicaoProduto`, `removerProduto` | `/produtos`, `/produtos/buscar`, `/produtos/<id>/imagem` |
-| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido` | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
+| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido`, `avisarCarrinho` (toast "adicionado ao carrinho") | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
 | Combinações | `carregarCombinacoes`, `adicionarCombinacao` | `GET /pedidos/combinacoes`, `POST /carrinho/itens` |
 | Pedidos | `carregarPedidos` (no `admin.html` mostra os em andamento; no `historico.html`, marcado com `data-historico="sim"`, os concluídos e cancelados), `editarPedido`, `fecharEdicaoPedido`, `salvarEdicaoPedido`, `concluirPedido` | `GET /pedidos`, `PUT /pedidos/<id>` |
 | Avaliação | `verificarAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>` |

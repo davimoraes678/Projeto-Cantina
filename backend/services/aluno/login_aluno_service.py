@@ -5,22 +5,7 @@ from flask_login import logout_user, current_user
 from functools import wraps
 
 
-def funcao_required(*funcoes):
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            if not current_user.is_authenticated:
-                return {"erro": "Faça login para continuar."}, 401
-            if current_user.funcao not in funcoes:
-                return {"erro": "Acesso negado. Você nao tem permissão pra isso."}, 403
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-admin_required = funcao_required('admin', 'mestre')
-master_required = funcao_required('mestre')
-
+## 
 class LoginAlunoService:
     @staticmethod
     def executar(dados):
@@ -36,3 +21,20 @@ class LoginAlunoService:
     @staticmethod
     def logout():
         logout_user()
+
+## Decorator para controle de acesso de admins e mestres
+def funcao_required(*funcoes):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return {"erro": "Faça login para continuar."}, 401
+            if current_user.funcao not in funcoes:
+                return {"erro": "Acesso negado. Você nao tem permissão pra isso."}, 403
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+admin_required = funcao_required('admin', 'mestre')
+master_required = funcao_required('mestre')

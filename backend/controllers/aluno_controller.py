@@ -4,6 +4,7 @@ from backend.services.aluno.login_aluno_service import LoginAlunoService, admin_
 from backend.services.aluno.listar_aluno_service import ListarAlunoService
 from backend.services.aluno.atualizar_aluno_service import AtualizarAlunoService
 from backend.services.aluno.deletar_aluno_service import DeletarAlunoService
+from backend.services.aluno.promover_aluno_service import PromoverAlunoService
 from backend.models.aluno_model import Aluno
 from backend.extensions import db
 
@@ -65,11 +66,5 @@ def deletar_aluno(id_aluno):
 @bp_aluno.route('/<int:id_aluno>', methods=["PUT"])
 @master_required
 def promover_aluno(id_aluno):
-
-    aluno = Aluno.query.get(id_aluno)
-    if not aluno:
-        return {"erro": "Aluno não encontrado"}, 404
-
-    aluno.funcao = 'admin'
-    db.session.commit()
-    return aluno.to_dict(), 200
+    resposta, status = PromoverAlunoService.executar(id_aluno)
+    return jsonify(resposta), status

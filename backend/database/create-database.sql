@@ -153,23 +153,62 @@ BEGIN
         nome;
 END $
 
-drop procedure if exists sp_repetir_ultimo_pedido $
-CREATE PROCEDURE sp_repetir_ultimo_pedido ()
+-- =========================================================================
+-- PROCEDURES DE PEDIDOS (consultas não-CRUD)
+-- Chamadas apenas pelo PedidoRepository (backend/repositories/pedido_repository.py)
+-- =========================================================================
+
+-- Itens (produto e quantidade) do último pedido já feito pelo aluno.
+-- O carrinho não conta, e produtos excluídos depois (id_produto NULL) ficam de fora.
+DROP PROCEDURE IF EXISTS sp_repetir_ultimo_pedido $
+CREATE PROCEDURE sp_repetir_ultimo_pedido (IN p_id_aluno INT)
 BEGIN
     SELECT
-        id_pedido,
-        quantidade_estoque,
-        preco_atual,
-        preco_promocional,
-        ingredientes,
-        categoria,
-        status
+        id_produto,
+        quantidade
     FROM
         itens_pedido
+    WHERE
+        id_produto IS NOT NULL
+        AND id_pedido = (
+            SELECT id_pedido
+            FROM pedido
+            WHERE id_aluno = p_id_aluno AND status <> 'Carrinho'
+            ORDER BY id_pedido DESC
+            LIMIT 1
+        );
+END $
+
+-- As 3 duplas de produtos que mais aparecem juntas num mesmo pedido.
+-- Junta itens_pedido com ela mesma (a = primeiro produto, b = segundo produto do
+-- mesmo pedido); "b.id_produto > a.id_produto" evita contar Coxinha+Refri e
+-- Refri+Coxinha como duplas diferentes. Carrinhos e cancelados não contam.
+DROP PROCEDURE IF EXISTS sp_combinacoes_mais_pedidas $
+CREATE PROCEDURE sp_combinacoes_mais_pedidas ()
+BEGIN
+    SELECT
+        a.id_produto AS id_produto_1,
+        pa.nome AS nome_1,
+        b.id_produto AS id_produto_2,
+        pb.nome AS nome_2,
+        COUNT(DISTINCT a.id_pedido) AS vezes
+    FROM
+        itens_pedido a
     JOIN
-        pedido USING (id_pedido)
+        itens_pedido b ON b.id_pedido = a.id_pedido AND b.id_produto > a.id_produto
+    JOIN
+        pedido p ON p.id_pedido = a.id_pedido
+    JOIN
+        produto pa ON pa.id_produto = a.id_produto
+    JOIN
+        produto pb ON pb.id_produto = b.id_produto
+    WHERE
+        p.status NOT IN ('Carrinho', 'Cancelado')
+    GROUP BY
+        a.id_produto, pa.nome, b.id_produto, pb.nome
     ORDER BY
-        data_hora_criacao DESC;
+        vezes DESC, a.id_produto, b.id_produto
+    LIMIT 3;
 END $
 
 DELIMITER ;

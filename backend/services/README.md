@@ -22,7 +22,7 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `adicionar_item(data)` | Valida o produto e a quantidade (≥ 1). Cria o carrinho na primeira vez. Se o produto já está no carrinho, **soma** a quantidade. Guarda o nome e o preço do produto naquele momento. Recalcula o total |
 | `remover_item(id_item_pedido)` | Só remove se o item for de um carrinho **do aluno logado**; senão responde `404` |
 | `finalizar()` | Confere estoque de cada item e saldo do aluno; se tudo der, desconta os dois e troca o status de `"Carrinho"` para `"Pendente"`. `400` se estiver vazio ou faltar estoque/saldo |
-| `repetir_ultimo_pedido()` | Pega o último pedido do aluno e chama `adicionar_item` para cada produto (os excluídos são pulados) |
+| `repetir_ultimo_pedido()` | Pega os itens do último pedido do aluno (procedure `sp_repetir_ultimo_pedido`; fora do MySQL, `_itens_do_ultimo_pedido_orm`) e chama `adicionar_item` para cada um |
 
 ## `pedido_service.py` — pedidos
 
@@ -32,7 +32,7 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `listar_todos()` | Todos os pedidos, **exceto** os que ainda são carrinho |
 | `buscar_por_id(id)` | Um pedido |
 | `atualizar_status(id, data)` | Muda status e horários. Datas chegam como texto (`"2026-10-13T12:30"`) e são convertidas por `_parse_datetime` |
-| `combinacoes_mais_pedidas()` | Conta quantas vezes cada dupla de produtos aparece no mesmo pedido (sem carrinhos e cancelados) e devolve as 3 mais comuns |
+| `combinacoes_mais_pedidas()` | As 3 duplas de produtos que mais aparecem no mesmo pedido, sem carrinhos e cancelados (procedure `sp_combinacoes_mais_pedidas`; fora do MySQL, `_combinacoes_fallback_orm`) |
 | `AvaliacaoService.criar(data, id)` | Só o dono do pedido avalia, e uma vez só |
 
 ## `produto_service.py` — produtos

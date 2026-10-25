@@ -1,5 +1,5 @@
 from backend.models.produto_model import Produto
-from backend.utils.imagem import salvar_imagem
+from backend.services.produto.imagem import salvar_imagem
 
 
 class EnviarImagemProdutoService:

@@ -74,4 +74,4 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 ## Fora daqui
 
 - **Login e permissões** (`user_loader`, `admin_required`, `master_required`): [`backend/autenticacao.py`](../autenticacao.py).
-- **Funções de apoio das imagens** (nome do arquivo, salvar, renomear): [`backend/utils/imagem.py`](../utils/imagem.py). O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-de-laranja-imagem.png`.
+- **Funções de apoio das imagens** (nome do arquivo, salvar, renomear): [`backend/services/produto/imagem.py`](produto/imagem.py). O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-de-laranja-imagem.png`.

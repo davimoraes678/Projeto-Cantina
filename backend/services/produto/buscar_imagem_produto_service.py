@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import current_app
 
 from backend.models.produto_model import Produto
-from backend.utils.imagem import nome_imagem
+from backend.services.produto.imagem import nome_imagem
 
 
 class BuscarImagemProdutoService:

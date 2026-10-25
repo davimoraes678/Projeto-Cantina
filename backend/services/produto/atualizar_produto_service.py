@@ -1,5 +1,5 @@
 from backend.models.produto_model import Produto
-from backend.utils.imagem import renomear_imagem
+from backend.services.produto.imagem import renomear_imagem
 
 
 class AtualizarProdutoService:

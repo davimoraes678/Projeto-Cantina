@@ -18,7 +18,7 @@ class Aluno(UserMixin, db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, email=None, senha=None, funcao=None):
+    def atualizar(self, nome=None, email=None, senha=None, funcao=None, saldo=None):
         if nome is not None:
             self.nome = nome
         if email is not None:
@@ -27,6 +27,8 @@ class Aluno(UserMixin, db.Model):
             self.senha = senha 
         if funcao is not None:
             self.funcao = funcao
+        if saldo is not None:
+            self.saldo = saldo
         db.session.commit()
 
     def deletar(self):
@@ -43,7 +45,7 @@ class Aluno(UserMixin, db.Model):
 
     @property
     def is_admin(self):
-        return self.funcao in ("admin", "master")
+        return self.funcao in ("admin", "mestre")
 
     def to_dict(self):
         return {

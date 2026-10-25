@@ -1,55 +1,146 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cantina Real</title>
-<link rel="stylesheet" href="/front-end/css/style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantina Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
-<body>
+<body class="bg-body-tertiary">
+    <nav class="navbar navbar-dark bg-cantina sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+                <img src="/front-end/assets/logo.png" alt="" width="40" height="40">
+                Cantina <span class="text-cantina-amarelo">Real</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <!-- Abre o carrinho (painel lateral #carrinho) -->
+                <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-controls="carrinho">
+                    🛒 <span class="d-none d-sm-inline">Meu pedido</span>
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="nome-aluno">Aluno</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/front-end/conta.html">Minha Conta</a></li>
+                        <li><a class="dropdown-item" href="/front-end/carteira.html">Carteira</a></li>
+                        <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
+                        <li class="so-admin" style="display:none;"><a class="dropdown-item" href="/front-end/admin.html">Administrador</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger" type="button" id="btn-logout">Logout</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<header class="topbar">
-  <button class="icon-btn" type="button" aria-label="Menu">☰</button>
-  <div class="header-title">Olá, <span id="nome-aluno">Usuário</span> 👆</div>
-  <a class="header-right" href="#pedido" aria-label="Carrinho">🛒<span class="badge">3</span></a>
-</header>
-<main class="page bottom-space">
-  <form id="form-busca-produto" class="search-box">
-    <input type="hidden" id="busca-categoria" value="">
-    <input class="search-input" type="search" placeholder="Busca no Cardápio...">
-    <button class="search-btn" type="submit">⌕</button>
-    <input type="number" step="0.01" id="busca-preco-min" style="display:none">
-    <input type="number" step="0.01" id="busca-preco-max" style="display:none">
-    <select id="busca-ordenar" style="display:none"><option value="">Sem ordenação</option></select>
-    <button type="button" id="btn-limpar-busca" style="display:none">Limpar</button>
-  </form>
-  <div class="category-row">
-    <button class="active" type="button" onclick="filtrar('')">Todos</button>
-    <button type="button" onclick="filtrar('Salgado')">Salgados</button>
-    <button type="button" onclick="filtrar('Bebida')">Bebidas</button>
-    <button type="button" onclick="filtrar('Doce')">Doces</button>
-  </div>
-  <div id="tabela-produtos"></div>
+    <main class="container py-4">
+        <!-- Categorias -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button class="btn btn-outline-primary" type="button" onclick="filtrar('')">Todos</button>
+            <button class="btn btn-outline-primary" type="button" onclick="filtrar('Salgado')">Salgados</button>
+            <button class="btn btn-outline-primary" type="button" onclick="filtrar('Bebida')">Bebidas</button>
+            <button class="btn btn-outline-primary" type="button" onclick="filtrar('Doce')">Doces</button>
+        </div>
 
-  <section class="panel" id="pedido" style="margin-top:50px">
-    <h2>Meu Pedido</h2>
-    <div class="table-wrap">
-      <table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th><th></th></tr></thead>
-      <tbody id="tabela-carrinho"></tbody></table>
+        <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
+        <form id="form-busca-produto" class="row g-2 mb-4">
+            <input type="hidden" id="busca-categoria" value="">
+            <div class="col-6 col-md-3">
+                <input class="form-control" type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
+            </div>
+            <div class="col-6 col-md-3">
+                <input class="form-control" type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select" id="busca-ordenar">
+                    <option value="">Sem ordenação</option>
+                    <option value="nome">Ordenar por nome</option>
+                    <option value="preco">Ordenar por preço</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button class="btn btn-primary flex-fill" type="submit">Buscar</button>
+                <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-limpar-busca">Limpar</button>
+            </div>
+        </form>
+
+        <!-- Combinações mais pedidas, montadas pelo alunos.js (só aparece quando já há pedidos) -->
+        <section id="secao-combinacoes" class="mb-4" style="display:none;">
+            <h2 class="h5">Combinações mais pedidas</h2>
+            <div id="lista-combinacoes" class="d-flex flex-wrap gap-2"></div>
+        </section>
+
+        <!-- Cards dos produtos, montados pelo alunos.js -->
+        <div id="tabela-produtos" class="d-flex flex-wrap gap-3 justify-content-center"></div>
+    </main>
+
+    <!-- Carrinho: painel lateral aberto pelo botão 🛒 do topo -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="carrinho" aria-labelledby="carrinho-titulo">
+        <div class="offcanvas-header bg-cantina text-white">
+            <h5 class="offcanvas-title" id="carrinho-titulo">Meu Pedido</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <button class="btn btn-outline-primary mb-3" type="button" onclick="repetirUltimoPedido()">↺ Repetir último pedido</button>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Qtd</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-carrinho"></tbody>
+                </table>
+            </div>
+            <div class="mt-auto">
+                <p id="carrinho-total" class="fs-4 fw-bold mb-1">Total: R$ 0,00</p>
+                <p class="text-body-secondary">Saldo na carteira: R$ <span id="saldo-aluno">0.00</span>
+                    · <a href="/front-end/carteira.html">adicionar</a></p>
+                <button class="btn btn-primary btn-lg w-100" type="button" id="btn-finalizar-pedido">Finalizar Pedido</button>
+            </div>
+        </div>
     </div>
-    <div id="carrinho-total" class="total-row">Total: R$ 0,00</div>
-    <div class="pickup-box">◷ &nbsp; Horário Estimado da Retirada:<br><strong>10:20</strong></div>
-    <button id="btn-finalizar-pedido" class="big-action" type="button">Confirmar Pedido</button>
-  </section>
-</main>
 
-<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:30px 0"><a class="filter-btn" href="/front-end/pedido.html" style="padding:18px 28px">Meu Pedido</a><a class="filter-btn" href="/front-end/horario.html" style="padding:18px 28px">Horário</a><a class="filter-btn" href="/front-end/orcamento.html" style="padding:18px 28px">Orçamento</a><a class="filter-btn" href="/front-end/promocoes.html" style="padding:18px 28px">Promoções</a><a class="filter-btn" href="/front-end/cozinha.html" style="padding:18px 28px">Cozinha</a></div><nav class="bottom-nav">
-  <a class="active" href="/front-end/index.html">⌂</a>
-  <a href="#pedido">☷</a>
-  <a href="/front-end/conta.html">♙</a>
-</nav>
-<div id="pedido-avaliacao"></div>
-<script src="/front-end/js/alunos.js"></script>
+    <!-- Aviso "adicionado ao carrinho": o alunos.js mostra com avisarCarrinho() -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast-carrinho" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="3000">
+            <div class="d-flex align-items-center">
+                <div class="toast-body" id="toast-carrinho-texto">Adicionado ao carrinho</div>
+                <button type="button" class="btn btn-light btn-sm ms-auto" data-bs-toggle="offcanvas" data-bs-target="#carrinho">Ver carrinho</button>
+                <button type="button" class="btn-close btn-close-white mx-2" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avaliação: o alunos.js abre quando o último pedido do aluno foi concluído -->
+    <div class="modal fade" id="modal-avaliacao" tabindex="-1" aria-labelledby="modal-avaliacao-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" id="form-avaliacao">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-avaliacao-titulo">Seu pedido foi concluído! O que achou?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label" for="avaliacao-nota">Nota (1 a 5)</label>
+                    <input class="form-control mb-3" type="number" id="avaliacao-nota" min="1" max="5" required>
+                    <label class="form-label" for="avaliacao-comentario">Comentário (opcional)</label>
+                    <textarea class="form-control" id="avaliacao-comentario" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Agora não</button>
+                    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+    <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

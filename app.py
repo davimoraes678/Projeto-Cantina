@@ -69,30 +69,11 @@ def create_app():
     def api_info():
         return jsonify({
             "message": "API Flask + SQLAlchemy funcionando!",
-            "rotas": {
-                "listar_alunos": "GET /api/alunos",
-                "registro_aluno": "POST /api/alunos/registro",
-                "login_aluno": "POST /api/alunos/login",
-                "aluno_atual": "GET /api/alunos/atual",
-                "logout_aluno": "POST /api/alunos/logout",
-                "atualizar_aluno": "PUT /api/alunos/<id>",
-                "deletar_aluno": "DELETE /api/alunos/<id>",
-                "listar_produtos": "GET /api/produtos",
-                "criar_produto": "POST /api/produtos",
-                "atualizar_produto": "PUT /api/produtos/<id>",
-                "deletar_produto": "DELETE /api/produtos/<id>",
-                "listar_pedidos": "GET /api/pedidos",
-                "criar_pedido": "POST /api/pedidos",
-                "buscar_pedido": "GET /api/pedidos/",
-                "atualizar_pedido": "PUT /api/pedidos/",
-                "combinacoes_mais_pedidas": "GET /api/pedidos/combinacoes",
-                "avaliar_pedido": "POST /api/pedidos/<id>",
-                "ver_carrinho": "GET /api/carrinho/",
-                "adicionar_item_carrinho": "POST /api/carrinho/itens",
-                "remover_item_carrinho": "DELETE /api/carrinho/itens/<id_item_pedido>",
-                "repetir_ultimo_pedido": "POST /api/carrinho/repetir",
-                "finalizar_carrinho": "POST /api/carrinho/finalizar"
-            }
+            # Lista gerada a partir das rotas registradas (sempre atualizada)
+            "rotas": sorted(
+                f"{' '.join(sorted(regra.methods - {'HEAD', 'OPTIONS'}))} {regra.rule}"
+                for regra in app.url_map.iter_rules() if regra.rule.startswith('/api/')
+            )
         })
     with app.app_context():
         db.create_all()

@@ -1,4 +1,6 @@
-"""Imagens de produtos: o nome do arquivo é derivado do nome do produto."""
+"""Funções de apoio para as imagens de produtos (usadas pelos services de produto).
+
+O nome do arquivo é derivado do nome do produto."""
 import re
 import unicodedata
 from io import BytesIO

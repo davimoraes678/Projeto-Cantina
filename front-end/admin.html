@@ -125,27 +125,6 @@
                     <a class="btn btn-outline-primary" href="/front-end/historico.html">Histórico de pedidos</a>
                 </div>
 
-                <!-- Edição de pedido (status / horário de retirada). O alunos.js mostra ao clicar em "Editar" -->
-                <form id="form-editar-pedido" class="row g-2 mb-3" style="display:none;">
-                    <input type="hidden" id="editar-pedido-id">
-                    <div class="col-md-4">
-                        <select class="form-select" id="editar-pedido-status" required>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Em Preparo">Em Preparo</option>
-                            <option value="Pronto">Pronto</option>
-                            <option value="Concluído">Concluído</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input class="form-control" type="datetime-local" id="editar-pedido-horario">
-                    </div>
-                    <div class="col-md-4 d-flex gap-2">
-                        <button class="btn btn-primary flex-fill" type="submit">Salvar Pedido</button>
-                        <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
-                    </div>
-                </form>
-
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
                         <thead>

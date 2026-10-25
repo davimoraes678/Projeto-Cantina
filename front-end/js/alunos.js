@@ -241,35 +241,19 @@ document.addEventListener("DOMContentLoaded", () => {
     btnFinalizar.addEventListener("click", finalizarPedido);
   }
 
-  // --- EVENTO: SALVAR EDIÇÃO DE PEDIDO (admin.html: status / horário de retirada) ---
-  const formEditarPedido = document.getElementById("form-editar-pedido");
-  if (formEditarPedido) {
-    formEditarPedido.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await salvarEdicaoPedido();
-    });
-  }
-  // Botão "Cancelar" da edição de pedido: esconde o formulário
-  const btnCancelarEdicaoPedido = document.getElementById(
-    "btn-cancelar-edicao-pedido",
-  );
-  if (btnCancelarEdicaoPedido) {
-    btnCancelarEdicaoPedido.addEventListener("click", fecharEdicaoPedido);
-  }
-
   // --- EVENTO: RECARGA DA CARTEIRA (carteira.html) ---
-  // Envia o valor para PUT /alunos/atual com {recarga}; o back-end soma ao saldo
-  // e recusa valores fora de R$ 0,01 a R$ 500,00.
+  // Envia o valor para POST /alunos/atual/recarga com {valor}; o back-end soma ao
+  // saldo e recusa valores fora de R$ 0,01 a R$ 500,00.
   const formRecarga = document.getElementById("form-recarga");
   if (formRecarga) {
     formRecarga.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const recarga = parseFloat(document.getElementById("recarga-valor").value);
+      const valor = parseFloat(document.getElementById("recarga-valor").value);
       try {
-        const res = await fetch(`${API_BASE_URL}/alunos/atual`, {
-          method: "PUT",
+        const res = await fetch(`${API_BASE_URL}/alunos/atual/recarga`, {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recarga }),
+          body: JSON.stringify({ valor }),
         });
         if (!res.ok) {
           const erro = await res.json().catch(() => ({}));
@@ -287,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- EVENTO: ENVIAR AVALIAÇÃO DO ÚLTIMO PEDIDO (janela do index) ---
   // O número do pedido vem do localStorage (guardado pelo finalizarPedido).
-  // POST /pedidos/<id> com {nota, comentario}; o back-end só aceita o dono do
+  // POST /pedidos/<id>/avaliacao com {nota, comentario}; o back-end só aceita o dono do
   // pedido e uma avaliação por pedido.
   const formAvaliacao = document.getElementById("form-avaliacao");
   if (formAvaliacao) {
@@ -297,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const nota = parseInt(document.getElementById("avaliacao-nota").value);
       const comentario = document.getElementById("avaliacao-comentario").value;
       try {
-        const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/pedidos/${id}/avaliacao`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nota, comentario }),
@@ -346,6 +330,7 @@ async function carregarAlunos() {
                     <td>${aluno.funcao}</td>
                     <td>
                         <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
+                        <button class="excluir" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>
                     </td>
                 </tr>
             `;
@@ -373,6 +358,23 @@ async function promoverAluno(id_aluno) {
     carregarAlunos();
   } catch (erro) {
     console.error("Erro ao promover aluno:", erro);
+  }
+}
+
+// Botão "Excluir" da tabela de alunos (só o mestre): DELETE /alunos/<id>, depois
+// de confirmar. Os pedidos do aluno continuam no histórico com o nome guardado.
+async function excluirAluno(id_aluno) {
+  if (!confirm("Deseja realmente excluir este aluno?")) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, { method: "DELETE" });
+    if (!res.ok) {
+      const erro = await res.json().catch(() => ({}));
+      alert(erro.erro || "Não foi possível excluir o aluno.");
+      return;
+    }
+    carregarAlunos();
+  } catch (erro) {
+    console.error("Erro ao excluir aluno:", erro);
   }
 }
 
@@ -888,17 +890,13 @@ function avisarCarrinho(mensagem) {
 // PEDIDOS (admin.html e historico.html; só admin e mestre)
 // =============================================================================
 
-// Guarda a última lista de pedidos, para o editarPedido achar um pedido sem chamar a API de novo
-let pedidosCache = [];
-
 // Busca todos os pedidos (GET /pedidos) e monta #tabela-pedidos:
-//   admin.html     -> só os em andamento, com Editar/Concluir (ordem de chegada)
+//   admin.html     -> só os em andamento, com Concluir/Cancelar (ordem de chegada)
 //   historico.html -> só os concluídos e cancelados, com a data (mais recente primeiro)
 async function carregarPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos`);
     const pedidos = await res.json();
-    pedidosCache = pedidos;
     const tabela = document.getElementById("tabela-pedidos");
     if (!tabela) return;
 
@@ -921,8 +919,8 @@ async function carregarPedidos() {
 
       const ultimaColuna = historico
         ? new Date(ped.data_hora_criacao).toLocaleString("pt-BR")
-        : `<button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
-           <button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`;
+        : `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>
+           <button class="excluir" onclick="cancelarPedido(${ped.id_pedido})">Cancelar</button>`;
 
       tabela.innerHTML += `
                 <tr>
@@ -940,78 +938,36 @@ async function carregarPedidos() {
   }
 }
 
-// Botão "Editar" de um pedido: preenche e mostra o formulário de edição
-// (status e horário de retirada) com os dados desse pedido.
-function editarPedido(id) {
-  const pedido = pedidosCache.find((p) => p.id_pedido === id);
-  if (!pedido) return;
-
-  document.getElementById("editar-pedido-id").value = pedido.id_pedido;
-  document.getElementById("editar-pedido-status").value = pedido.status;
-
-  // datetime-local espera "YYYY-MM-DDTHH:MM", sem os segundos/timezone do ISO vindo do backend
-  const horarioInput = document.getElementById("editar-pedido-horario");
-  horarioInput.value = pedido.horario_agendado_retirada
-    ? pedido.horario_agendado_retirada.slice(0, 16)
-    : "";
-
-  document.getElementById("form-editar-pedido").style.display = "flex";
-  document
-    .getElementById("form-editar-pedido")
-    .scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-// Esconde e limpa o formulário de edição de pedido.
-function fecharEdicaoPedido() {
-  document.getElementById("form-editar-pedido").style.display = "none";
-  document.getElementById("form-editar-pedido").reset();
-}
-
-// Envia a edição do pedido: PUT /pedidos/<id> com status e horário de retirada.
-async function salvarEdicaoPedido() {
-  const id = document.getElementById("editar-pedido-id").value;
-  const status = document.getElementById("editar-pedido-status").value;
-  const horario = document.getElementById("editar-pedido-horario").value;
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status,
-        horario_agendado_retirada: horario || null,
-      }),
-    });
-
-    if (!res.ok) {
-      const erro = await res.json().catch(() => ({}));
-      alert(erro.erro || "Não foi possível salvar o pedido.");
-      return;
-    }
-
-    fecharEdicaoPedido();
-    carregarPedidos();
-  } catch (erro) {
-    console.error("Erro ao salvar pedido:", erro);
-    alert("Ocorreu um erro ao salvar o pedido.");
-  }
-}
-
-// Botão "Concluir": marca o pedido como "Concluído" (PUT /pedidos/<id>).
+// Botão "Concluir": POST /pedidos/<id>/concluir marca o pedido como "Concluído".
 // O pedido sai da tabela do admin e vai para o histórico; a avaliação é pedida
 // ao aluno quando ele abrir a cantina (ver verificarAvaliacao).
 async function concluirPedido(id) {
   if (!confirm("Deseja realmente marcar este pedido como concluído?")) return;
+  await mudarPedido(id, "concluir");
+}
+
+// Botão "Cancelar": POST /pedidos/<id>/cancelar. O back-end devolve o valor para
+// a carteira do aluno e os produtos para o estoque.
+async function cancelarPedido(id) {
+  if (!confirm("Cancelar este pedido? O valor volta para a carteira do aluno.")) return;
+  await mudarPedido(id, "cancelar");
+}
+
+// Chama a rota de concluir ou cancelar e recarrega as tabelas.
+async function mudarPedido(id, acao) {
   try {
-    await fetch(`${API_BASE_URL}/pedidos/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Concluído" }),
-    });
-    carregarPedidos();
+    const res = await fetch(`${API_BASE_URL}/pedidos/${id}/${acao}`, { method: "POST" });
+    if (!res.ok) {
+      const erro = await res.json().catch(() => ({}));
+      alert(erro.erro || "Não foi possível atualizar o pedido.");
+      return;
+    }
+    // O alunoInf recarrega os pedidos e, para o mestre, a tabela de alunos
+    // (o cancelamento devolve saldo, então o saldo do aluno muda)
+    alunoInf();
   } catch (erro) {
-    console.error("Erro ao concluir pedido:", erro);
-    alert("Ocorreu um erro ao atualizar o status do pedido.");
+    console.error("Erro ao atualizar pedido:", erro);
+    alert("Ocorreu um erro ao atualizar o pedido.");
   }
 }
 

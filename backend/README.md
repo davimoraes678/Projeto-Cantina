@@ -6,10 +6,12 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**; quem desenha as
 |---|---|
 | `extensions.py` | Cria `db` (banco, SQLAlchemy) e `lm` (login, LoginManager) **uma única vez**, para todo o projeto importar daqui |
 | `routes.py` | `register_routes(app)`: registra todos os controllers no app. **Controller novo precisa ser registrado aqui.** |
-| [`controllers/`](controllers/README.md) | Recebem a requisição HTTP e devolvem JSON |
-| [`services/`](services/README.md) | Regras de negócio |
-| [`models/`](models/README.md) | Tabelas do banco |
-| [`repositories/`](repositories/README.md) | Stored procedures do MySQL (busca de produtos) |
+| `autenticacao.py` | Login e permissões: `load_user` (Flask-Login) e os decorators `admin_required` / `master_required` |
+| [`controllers/`](controllers/README.md) | Uma classe por recurso: recebe a requisição HTTP e devolve JSON |
+| [`services/`](services/README.md) | Uma classe por caso de uso, com as regras de negócio |
+| [`models/`](models/README.md) | Entidades do domínio / tabelas do banco |
+| [`repositories/`](repositories/README.md) | Consultas não-CRUD por stored procedures do MySQL |
+| `utils/` | Funções de apoio (imagens dos produtos) |
 | [`database/`](database/README.md) | Script SQL de criação do banco MySQL |
 
 ## Camadas
@@ -21,16 +23,17 @@ flowchart LR
     F["Front-end<br/>(fetch no alunos.js)"] -->|"HTTP + JSON"| C["Controller"]
     C --> S["Service"]
     S --> M["Model"]
-    S -.->|"só na busca de produtos"| R["Repository"]
+    S -.->|"consultas não-CRUD"| R["Repository"]
     M --> DB[("SQLite / MySQL")]
     R -->|"CALL sp_..."| DB
 ```
 
 | Camada | Responsabilidade | O que **não** faz |
 |---|---|---|
-| **Controller** | Define URL e método, lê a requisição, aplica `@login_required`, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
-| **Service** | Regras e validações. Devolve sempre `(dicionário, código_http)` | Não usa `request` nem `jsonify` |
-| **Model** | Uma classe por tabela, com `salvar()`, `buscar_por_id()`, `to_dict()` | Decisões de negócio |
+| **Controller** | Classe por recurso. Liga URL e método, lê a requisição, aplica a permissão, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
+| **Service** | Classe por caso de uso, com `executar()`. Regras e validações. Devolve sempre `(dicionário, código_http)` | Não usa `request` nem `jsonify` |
+| **Model** | Uma classe por tabela (`db.Model`), com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()`, `to_dict()` | Decisões de negócio |
+| **Repository** | Consultas não-CRUD: monta o `CALL sp_...` | CRUD simples (isso fica no Model) |
 
 ### O padrão `resposta, status`
 
@@ -40,7 +43,7 @@ return {"erro": "O carrinho está vazio"}, 400     # deu errado
 return carrinho.to_dict(), 200                     # deu certo
 
 # controller
-resposta, status = ItemPedidoService.finalizar()
+resposta, status = FinalizarPedidoService.executar()
 return jsonify(resposta), status
 ```
 
@@ -61,9 +64,9 @@ O `app.py` fica na raiz do projeto. A função `create_app()`:
 1. Carrega o `.env` (`load_dotenv()`).
 2. Cria o Flask, servindo a pasta `front-end/` em `/front-end`.
 3. Configura o banco (`DATABASE_URL`, padrão SQLite), a pasta de imagens (`arquivos/`), o tamanho máximo de upload (6 MB) e a `SECRET_KEY`.
-4. Liga o banco (`db.init_app`) e o login (`lm.init_app`). Rotas protegidas sem login respondem `401` em JSON.
+4. Liga o banco (`db.init_app`) e o login (`lm.init_app`). Rotas protegidas sem login respondem `401`.
 5. Registra os controllers (`register_routes(app)`).
-6. Define `/` (entrega o `index.html`, ou redireciona para o cadastro se não houver login) e `/api` (lista de rotas).
+6. Protege as páginas: sem login, vai para o cadastro; `admin.html` e `historico.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
 7. Cria as tabelas que ainda não existem (`db.create_all()`).
 
 > ⚠️ O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
@@ -77,8 +80,8 @@ O aluno logado fica num **cookie de sessão** assinado com a `SECRET_KEY`; o nav
 | `lm = LoginManager()` | `extensions.py` | Gerenciador do login |
 | `Aluno(UserMixin, db.Model)` | `models/aluno_model.py` | O aluno é o usuário do login |
 | `Aluno.get_id()` | `models/aluno_model.py` | O que vai no cookie: `str(self.id_aluno)` |
-| `@lm.user_loader` | `services/aluno/criar_aluno_service.py` | Do id no cookie de volta para o `Aluno` |
-| `@lm.unauthorized_handler` | `app.py` | Sem login, rotas protegidas respondem `401` em JSON |
+| `@lm.user_loader` | `autenticacao.py` | Do id no cookie de volta para o `Aluno` |
+| `admin_required` / `master_required` | `autenticacao.py` | Barram a rota por função: `401` sem login, `403` sem permissão |
 | `login_user` / `logout_user` | `services/aluno/` | Grava / apaga o aluno da sessão |
 | `@login_required` | `controllers/` | Barra a rota sem login |
 | `current_user` | services e `app.py` | O aluno da requisição atual |
@@ -103,44 +106,46 @@ O `current_user` é recalculado **a cada requisição** a partir do cookie dela,
 
 ## Passo a passo: funcionalidade nova
 
-Exemplo: permitir que o aluno avalie um pedido (o model `Avaliacao` já existe).
+Exemplo: a avaliação de pedido (é assim que ela está feita no projeto).
 
 **1. Model** (`models/`): se criar uma tabela, importe o arquivo no `app.py` junto com os outros models.
 
-**2. Service** (`services/avaliacao_service.py`):
+**2. Service** (`services/avaliacao/avaliar_pedido_service.py`), **uma classe para o caso de uso**:
 ```python
 from flask_login import current_user
 from backend.models.pedido_model import Pedido
 from backend.models.avaliacao_model import Avaliacao
 
-class AvaliacaoService:
+class AvaliarPedidoService:
+    """Caso de uso: o aluno dá nota (1 a 5) e um comentário opcional para o pedido."""
+
     @staticmethod
-    def avaliar(id_pedido, dados):
+    def executar(id_pedido, dados):
         pedido = Pedido.buscar_por_id(id_pedido)
         if not pedido or pedido.id_aluno != current_user.id_aluno:
             return {"erro": "Pedido não encontrado"}, 404
-        nota = dados.get("nota")
-        if nota not in (1, 2, 3, 4, 5):
-            return {"erro": "A nota deve ser de 1 a 5"}, 400
+        ...
         avaliacao = Avaliacao(id_pedido=id_pedido, nota=nota, comentario=dados.get("comentario"))
         avaliacao.salvar()
         return avaliacao.to_dict(), 201
 ```
 
-**3. Controller** (`controllers/avaliacao_controller.py`):
+**3. Controller** (`controllers/avaliacao_controller.py`), **uma classe por recurso**:
 ```python
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from backend.services.avaliacao_service import AvaliacaoService
+from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
 
-bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/avaliacoes')
+class AvaliacaoController:
+    @staticmethod
+    @login_required
+    def avaliar(id_pedido):
+        dados = request.get_json(silent=True) or {}
+        resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
+        return jsonify(resposta), status
 
-@bp_avaliacao.route('/<int:id_pedido>', methods=['POST'])
-@login_required
-def avaliar(id_pedido):
-    dados = request.get_json(silent=True) or {}
-    resposta, status = AvaliacaoService.avaliar(id_pedido, dados)
-    return jsonify(resposta), status
+bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
+bp_avaliacao.add_url_rule('/<int:id_pedido>/avaliacao', view_func=AvaliacaoController.avaliar, methods=['POST'])
 ```
 
 **4. Registrar** em `routes.py`:
@@ -148,6 +153,8 @@ def avaliar(id_pedido):
     from backend.controllers.avaliacao_controller import bp_avaliacao
     app.register_blueprint(bp_avaliacao)
 ```
-E acrescente a rota na lista do `GET /api` (`app.py`) e em [`controllers/README.md`](controllers/README.md).
+E acrescente a rota em [`controllers/README.md`](controllers/README.md) e a funcionalidade na lista do [README principal](../README.md#funcionalidades-implementadas).
+
+**Consulta especial (ranking, relatório, filtro complexo)?** Crie a stored procedure no `database/create-database.sql`, um método no repository que faz o `CALL` (ver [`repositories/`](repositories/README.md)) e chame o repository no service.
 
 **5. Front-end:** uma função `async` no `alunos.js`, seguindo o padrão de [`front-end/js/README.md`](../front-end/js/README.md).

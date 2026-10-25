@@ -1,26 +1,28 @@
 # backend/services/aluno/
 
-Services de **aluno**: um arquivo por operação. As rotas que os chamam ficam em [`controllers/aluno_controller.py`](../../controllers/README.md#aluno_controllerpy--apialunos).
+Casos de uso de **aluno**: uma classe por arquivo, cada uma com `executar()`. As rotas que os chamam ficam no `AlunoController` ([`controllers/aluno_controller.py`](../../controllers/README.md#aluno_controllerpy--apialunos)).
 
 | Arquivo | Classe | O que faz |
 |---|---|---|
-| `criar_aluno_service.py` | `CriarAlunoService` | Cadastro: exige nome, e-mail e senha (`400`), recusa e-mail repetido (`409`), salva o **hash** da senha e **já faz login** (`login_user`) |
-| `login_aluno_service.py` | `LoginAlunoService` | `executar`: confere a senha com `check_password_hash` e faz `login_user`. `logout`: faz `logout_user` |
+| `criar_aluno_service.py` | `CriarAlunoService` | Cadastro: exige nome, e-mail e senha (`400`), recusa e-mail repetido (`409`), salva o **hash** da senha e **já faz login**. O primeiro cadastro do sistema vira **mestre**; os outros, aluno (a função nunca vem do usuário) |
+| `login_aluno_service.py` | `LoginAlunoService` | Confere a senha com `check_password_hash` e faz `login_user` |
+| `logout_aluno_service.py` | `LogoutAlunoService` | Faz `logout_user` |
+| `buscar_aluno_atual_service.py` | `BuscarAlunoAtualService` | Devolve o aluno logado |
+| `atualizar_aluno_service.py` | `AtualizarAlunoService` | Edita nome, e-mail e senha (senha vazia mantém a atual) |
+| `recarregar_saldo_service.py` | `RecarregarSaldoService` | Soma o valor ao saldo (de R$ 0,01 a R$ 500,00) |
 | `listar_aluno_service.py` | `ListarAlunoService` | Lista todos os alunos |
-| `atualizar_aluno_service.py` | `AtualizarAlunoService` | Edita nome, e-mail e senha (senha vazia mantém a atual) e faz a recarga da carteira (`recarga` soma ao saldo) |
-| `deletar_aluno_service.py` | `DeletarAlunoService` | Exclui o aluno **sem apagar os pedidos dele**: copia o nome para os pedidos e solta o vínculo antes de apagar |
+| `promover_aluno_service.py` | `PromoverAlunoService` | Muda a função do aluno para `admin` |
+| `deletar_aluno_service.py` | `DeletarAlunoService` | Sem id: exclui a própria conta. Com id: o mestre exclui outro aluno (não a si mesmo). **Os pedidos continuam**: copia o nome para eles e solta o vínculo antes de apagar |
 
-## Atenção: o `user_loader` mora aqui
+## Funções
 
-O `criar_aluno_service.py` também contém, dentro da classe, a função que o Flask-Login usa para recarregar o aluno a cada requisição:
+| Função | Pode |
+|---|---|
+| `aluno` | Comprar: cardápio, carrinho, carteira, avaliação |
+| `admin` | Também: painel de pedidos (concluir, cancelar) e histórico |
+| `mestre` | Também: alunos (listar, promover, excluir) e produtos (cadastrar, editar, excluir) |
 
-```python
-@lm.user_loader
-def load_user(id):
-    return Aluno.query.get(int(id))
-```
-
-**Não apague essa função.** Sem ela, nenhum login funciona, porque o `current_user` não consegue ser recuperado do cookie. Ela só é registrada porque este arquivo é importado pelo `aluno_controller`. O funcionamento completo do login está em [`backend/README.md`](../../README.md#login-flask-login).
+Quem barra as rotas são os decorators `admin_required` e `master_required` de [`backend/autenticacao.py`](../../autenticacao.py), usados nos controllers.
 
 ## Senhas
 

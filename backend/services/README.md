@@ -1,56 +1,77 @@
 # backend/services/
 
-As **regras de negócio**. Os [controllers](../controllers/README.md) chamam os services, e os services usam os [models](../models/README.md) para ler e gravar no banco.
+Os **casos de uso** do sistema. **Cada caso de uso é uma classe**, com um único método `executar()`, num arquivo próprio. Os [controllers](../controllers/README.md) chamam os services; os services fazem as validações e usam os [models](../models/README.md) (CRUD) ou os [repositories](../repositories/README.md) (consultas especiais).
 
-Todo método de service devolve uma tupla **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)` ou `(carrinho.to_dict(), 201)`. Os services não usam `request` nem `jsonify`; isso é papel do controller.
+Todo `executar()` devolve uma tupla **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)` ou `(carrinho.to_dict(), 201)`. Os services não usam `request` nem `jsonify`; isso é papel do controller.
 
-| Arquivo | O que faz |
-|---|---|
-| [`aluno/`](aluno/README.md) | Cadastro, login, logout e CRUD de alunos |
-| `item_pedido_service.py` | Carrinho do aluno logado |
-| `pedido_service.py` | Pedidos: criar direto, listar, consultar e mudar status |
-| `produto_service.py` | CRUD e busca de produtos |
-| `imagem_service.py` | Imagens dos produtos em `arquivos/` |
+```python
+class FinalizarPedidoService:
+    """Caso de uso: fechar o carrinho como pedido, descontando estoque e saldo."""
 
-## `item_pedido_service.py` — carrinho
+    @staticmethod
+    def executar():
+        ...
+        return carrinho.to_dict(), 200
+```
 
-O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`), e cada produto é um `ItemPedido`. Todos os métodos usam o **aluno logado** (`current_user`).
+## `aluno/` — conta, login e carteira
 
-| Método | Regra |
-|---|---|
-| `ver_carrinho()` | Devolve o carrinho do aluno; se ainda não existir, um carrinho vazio (sem gravar nada) |
-| `adicionar_item(data)` | Valida o produto e a quantidade (≥ 1). Cria o carrinho na primeira vez. Se o produto já está no carrinho, **soma** a quantidade. Guarda o nome e o preço do produto naquele momento. Recalcula o total |
-| `remover_item(id_item_pedido)` | Só remove se o item for de um carrinho **do aluno logado**; senão responde `404` |
-| `finalizar()` | Confere estoque de cada item e saldo do aluno; se tudo der, desconta os dois e troca o status de `"Carrinho"` para `"Pendente"`. `400` se estiver vazio ou faltar estoque/saldo |
-| `repetir_ultimo_pedido()` | Pega os itens do último pedido do aluno (procedure `sp_repetir_ultimo_pedido`; fora do MySQL, `_itens_do_ultimo_pedido_orm`) e chama `adicionar_item` para cada um |
+Detalhes em [`aluno/README.md`](aluno/README.md).
 
-## `pedido_service.py` — pedidos
+| Arquivo | Classe | Caso de uso |
+|---|---|---|
+| `criar_aluno_service.py` | `CriarAlunoService` | Cadastrar aluno (o primeiro vira mestre) e já logar |
+| `login_aluno_service.py` | `LoginAlunoService` | Entrar com e-mail e senha |
+| `logout_aluno_service.py` | `LogoutAlunoService` | Sair |
+| `buscar_aluno_atual_service.py` | `BuscarAlunoAtualService` | Ver os dados do aluno logado |
+| `atualizar_aluno_service.py` | `AtualizarAlunoService` | Editar nome, e-mail e senha |
+| `recarregar_saldo_service.py` | `RecarregarSaldoService` | Adicionar saldo na carteira (R$ 0,01 a R$ 500,00) |
+| `listar_aluno_service.py` | `ListarAlunoService` | Listar alunos (mestre) |
+| `promover_aluno_service.py` | `PromoverAlunoService` | Tornar um aluno admin (mestre) |
+| `deletar_aluno_service.py` | `DeletarAlunoService` | Excluir a própria conta, ou outro aluno (mestre). Os pedidos continuam no histórico |
 
-| Método | Regra |
-|---|---|
-| `criar(data)` | Cria um pedido direto, sem carrinho, para o aluno logado (o front não usa) |
-| `listar_todos()` | Todos os pedidos, **exceto** os que ainda são carrinho |
-| `buscar_por_id(id)` | Um pedido |
-| `atualizar_status(id, data)` | Muda status e horários. Datas chegam como texto (`"2026-10-13T12:30"`) e são convertidas por `_parse_datetime` |
-| `combinacoes_mais_pedidas()` | As 3 duplas de produtos que mais aparecem no mesmo pedido, sem carrinhos e cancelados (procedure `sp_combinacoes_mais_pedidas`; fora do MySQL, `_combinacoes_fallback_orm`) |
-| `AvaliacaoService.criar(data, id)` | Só o dono do pedido avalia, e uma vez só |
+## `produto/` — cardápio
 
-## `produto_service.py` — produtos
+| Arquivo | Classe | Caso de uso |
+|---|---|---|
+| `criar_produto_service.py` | `CriarProdutoService` | Cadastrar produto (exige `nome` e `preco_atual`) |
+| `listar_produtos_service.py` | `ListarProdutosService` | Listar todos os produtos |
+| `buscar_produto_service.py` | `BuscarProdutoService` | Ver um produto pelo id |
+| `atualizar_produto_service.py` | `AtualizarProdutoService` | Editar produto (só os campos enviados); ao trocar o nome, renomeia a imagem |
+| `deletar_produto_service.py` | `DeletarProdutoService` | Excluir produto; antes, copia o nome para os itens de pedidos antigos e solta o vínculo |
+| `filtrar_produtos_service.py` | `FiltrarProdutosService` | Buscar por categoria, faixa de preço ou ordenar. Usa as procedures pelo `ProdutoRepository`; fora do MySQL, a mesma busca pelo ORM. No MySQL, só o primeiro critério é aplicado: categoria, depois faixa de preço, depois ordenação |
+| `enviar_imagem_produto_service.py` | `EnviarImagemProdutoService` | Salvar a foto do produto (PNG, JPG ou WEBP até 5 MB, reduzida para até 600×600) |
+| `buscar_imagem_produto_service.py` | `BuscarImagemProdutoService` | Achar o arquivo da foto (o controller é quem envia o arquivo) |
 
-| Método | Regra |
-|---|---|
-| `criar(data)` | Exige `nome` e `preco_atual` |
-| `atualizar(id, data)` | Muda só os campos enviados; ao trocar o nome, renomeia a imagem junto |
-| `deletar(id)` | Antes de apagar, copia o nome do produto para os itens de pedidos antigos e solta o vínculo, para o histórico continuar mostrando o nome |
-| `buscar(filtros)` | Usa as stored procedures do MySQL (via [`repositories/`](../repositories/README.md)). Se não estiver no MySQL, ou se a procedure falhar, faz a mesma busca pelo ORM (`_buscar_fallback_orm`). No MySQL, só o primeiro critério é aplicado: categoria, depois faixa de preço, depois ordenação |
+## `carrinho/` — carrinho do aluno logado
 
-## `imagem_service.py` — imagens
+O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO` em `models/pedido_model.py`), e cada produto é um `ItemPedido`. Todos usam o **aluno logado** (`current_user`).
 
-O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-de-laranja-imagem.png` (sem acentos, minúsculo, com hífens).
+| Arquivo | Classe | Caso de uso |
+|---|---|---|
+| `ver_carrinho_service.py` | `VerCarrinhoService` | Ver o carrinho (um vazio, sem gravar nada, se ainda não existir) |
+| `adicionar_item_carrinho_service.py` | `AdicionarItemCarrinhoService` | Adicionar produto: cria o carrinho na primeira vez; se o produto já está lá, **soma** a quantidade; guarda nome e preço do momento |
+| `remover_item_carrinho_service.py` | `RemoverItemCarrinhoService` | Remover item (só se for do carrinho **do aluno logado**) |
+| `finalizar_pedido_service.py` | `FinalizarPedidoService` | Conferir estoque e saldo; se tudo der, descontar os dois e o carrinho vira pedido `"Pendente"` |
+| `repetir_ultimo_pedido_service.py` | `RepetirUltimoPedidoService` | Pegar os itens do último pedido (procedure `sp_repetir_ultimo_pedido` pelo `PedidoRepository`; fora do MySQL, pelo ORM) e adicioná-los com o `AdicionarItemCarrinhoService` |
 
-| Função | O que faz |
-|---|---|
-| `salvar_imagem(produto, arquivo)` | Aceita PNG, JPG ou WEBP até 5 MB, corrige a rotação da foto, reduz para no máximo 600×600 (mantendo a proporção) e salva como PNG |
-| `renomear_imagem(produto, novo_nome)` | Renomeia o arquivo quando o produto muda de nome |
-| `verificar_nome_disponivel(...)` | Impede dois produtos que gerariam o mesmo nome de arquivo (ex.: "Suco" e "suco!") |
-| `nome_imagem(nome)` | Gera o nome do arquivo a partir do nome do produto |
+## `pedido/` — pedidos feitos
+
+| Arquivo | Classe | Caso de uso |
+|---|---|---|
+| `listar_pedidos_service.py` | `ListarPedidosService` | Listar os pedidos, sem os carrinhos (admin/mestre) |
+| `buscar_pedido_service.py` | `BuscarPedidoService` | Ver um pedido (o dono, ou admin/mestre) |
+| `concluir_pedido_service.py` | `ConcluirPedidoService` | Marcar como `"Concluído"` (vai para o histórico) |
+| `cancelar_pedido_service.py` | `CancelarPedidoService` | Marcar como `"Cancelado"`, **devolvendo o valor para a carteira do aluno e os produtos para o estoque** |
+| `combinacoes_mais_pedidas_service.py` | `CombinacoesMaisPedidasService` | As 3 duplas de produtos mais pedidas juntas (procedure `sp_combinacoes_mais_pedidas`; fora do MySQL, pelo ORM) |
+
+## `avaliacao/`
+
+| Arquivo | Classe | Caso de uso |
+|---|---|---|
+| `avaliar_pedido_service.py` | `AvaliarPedidoService` | Avaliar um pedido: só o dono, só pedido concluído, nota de 1 a 5, uma vez só |
+
+## Fora daqui
+
+- **Login e permissões** (`user_loader`, `admin_required`, `master_required`): [`backend/autenticacao.py`](../autenticacao.py).
+- **Funções de apoio das imagens** (nome do arquivo, salvar, renomear): [`backend/utils/imagem.py`](../utils/imagem.py). O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-de-laranja-imagem.png`.

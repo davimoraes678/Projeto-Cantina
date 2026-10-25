@@ -9,7 +9,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
 | `conta.html` | `/front-end/conta.html` | Sim | Ver, editar e remover a própria conta; botão Sair |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
-| `admin.html` | `/front-end/admin.html` | Admin ou mestre | **Admin:** só os pedidos em andamento (editar status e concluir) e o botão do histórico. **Mestre:** também a lista de alunos e o cadastro de produtos. Aluno comum é mandado de volta para `/` |
+| `admin.html` | `/front-end/admin.html` | Admin ou mestre | **Admin:** só os pedidos em andamento (botões Concluir e Cancelar) e o botão do histórico. **Mestre:** também a lista de alunos (promover, excluir) e o cadastro de produtos. Aluno comum é mandado de volta para `/` |
 | `historico.html` | `/front-end/historico.html` | Admin ou mestre | Pedidos concluídos e cancelados, do mais recente para o mais antigo |
 | `css/style.css` | | | Só as cores da cantina e poucos ajustes por cima do Bootstrap |
 | `assets/logo.png` | | | Logo da Cantina Real |
@@ -41,7 +41,7 @@ flowchart LR
 
 - **Caminhos absolutos:** use `/front-end/css/style.css`, `/front-end/js/alunos.js`, `/front-end/admin.html`. O `index.html` é aberto em `/`, então um caminho relativo como `css/style.css` viraria `/css/style.css` e daria 404.
 - **O que depende da função do usuário** usa as classes `so-admin` (admin e mestre) e `so-mestre` (só mestre), começando com `style="display:none;"`. O `funcaoPorAluno()` do `alunos.js` mostra esses elementos. Isso só esconde da tela: quem realmente bloqueia é o back-end (`@admin_required` / `@master_required` nas rotas e `PAGINAS_ADMIN` no `app.py`).
-- **Elementos que o JS mostra e esconde** (ex.: `#form-editar-pedido`, `#btn-cancelar-edicao-produto`) começam com `style="display:none;"`. Não troque pela classe `d-none` do Bootstrap: ela usa `!important` e o JS não conseguiria mostrar o elemento.
+- **Elementos que o JS mostra e esconde** (ex.: `#btn-cancelar-edicao-produto`, `#secao-combinacoes`) começam com `style="display:none;"`. Não troque pela classe `d-none` do Bootstrap: ela usa `!important` e o JS não conseguiria mostrar o elemento.
 - **Abra pelo Flask** (`http://127.0.0.1:5000`), não pelo Live Server nem com duplo clique no arquivo. Senão a API fica em outro endereço e o login não funciona.
 - **Os `id` dos elementos são usados pelo JS.** Ao renomear um `id` no HTML (ex.: `tabela-carrinho`), procure-o no `alunos.js` e troque lá também.
 - **Botões dentro de `<form>`** que não devem enviar o formulário precisam de `type="button"`, senão recarregam a página.

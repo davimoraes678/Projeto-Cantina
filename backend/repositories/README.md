@@ -1,18 +1,16 @@
 # backend/repositories/
 
-Acesso ao banco por **stored procedures do MySQL**. É aqui que ficam as **consultas não-CRUD** do projeto (as que têm regra de negócio: filtrar, ordenar, juntar tabelas, contar): a busca de produtos, o "repetir último pedido" e as combinações mais pedidas.
+Acesso ao banco por **stored procedures do MySQL**. Repository **não** repete CRUD simples (isso fica nos models). É aqui que ficam as **consultas não-CRUD** do projeto (as que têm regra de negócio: filtrar, ordenar, juntar tabelas, contar): a busca de produtos, o "repetir último pedido" e as combinações mais pedidas.
 
 | Arquivo | O que faz |
 |---|---|
 | `produto_repository.py` | `ProdutoRepository`: executa `CALL sp_produtos_...` e devolve as linhas como dicionários. É o único lugar do projeto que monta essas chamadas |
 | `pedido_repository.py` | `PedidoRepository`: `itens_do_ultimo_pedido(id_aluno)` → `CALL sp_repetir_ultimo_pedido` e `combinacoes_mais_pedidas()` → `CALL sp_combinacoes_mais_pedidas`. Reaproveita o `ProdutoRepository._chamar_procedure` |
-| `aluno_repository.py` | **Sem uso** (só tem imports). Pode ser removido |
-| `app.py` | **Sem uso** (importa `create_app` de um lugar onde ela não existe; dá `ImportError` se executado). Pode ser removido |
 
 ## Fluxo da busca de produtos
 
 ```
-GET /api/produtos/buscar → produto_controller → ProdutoService.buscar → ProdutoRepository → CALL sp_... → MySQL
+GET /api/produtos/buscar → ProdutoController.filtrar → FiltrarProdutosService → ProdutoRepository → CALL sp_... → MySQL
 ```
 
 | Método do repository | Procedure |
@@ -24,13 +22,13 @@ GET /api/produtos/buscar → produto_controller → ProdutoService.buscar → Pr
 
 As procedures são criadas pelo [`create-database.sql`](../database/README.md).
 
-**Fora do MySQL** (ex.: SQLite em desenvolvimento), as procedures não existem: o repository lança um `RuntimeError`, e o `ProdutoService.buscar` faz a mesma busca pelo ORM. Por isso a busca funciona nos dois bancos.
+**Fora do MySQL** (ex.: SQLite em desenvolvimento), as procedures não existem: o repository lança um `RuntimeError`, e o `FiltrarProdutosService` faz a mesma busca pelo ORM. Por isso a busca funciona nos dois bancos.
 
 ## Consultas de pedidos
 
 ```
-POST /api/carrinho/repetir     → ItemPedidoService.repetir_ultimo_pedido → PedidoRepository → CALL sp_repetir_ultimo_pedido(id_aluno)
-GET  /api/pedidos/combinacoes  → PedidoService.combinacoes_mais_pedidas  → PedidoRepository → CALL sp_combinacoes_mais_pedidas()
+POST /api/carrinho/repetir     → RepetirUltimoPedidoService     → PedidoRepository → CALL sp_repetir_ultimo_pedido(id_aluno)
+GET  /api/pedidos/combinacoes  → CombinacoesMaisPedidasService  → PedidoRepository → CALL sp_combinacoes_mais_pedidas()
 ```
 
 As duas seguem a mesma regra da busca: fora do MySQL o service faz a mesma consulta pelo ORM (`_itens_do_ultimo_pedido_orm` e `_combinacoes_fallback_orm`), com o mesmo resultado.

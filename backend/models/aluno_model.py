@@ -45,7 +45,7 @@ class Aluno(UserMixin, db.Model):
 
     @property
     def is_admin(self):
-        return self.funcao in ("admin", "master")
+        return self.funcao in ("admin", "mestre")
 
     def to_dict(self):
         return {

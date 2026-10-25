@@ -8,9 +8,12 @@ Uma classe por **tabela do banco** (SQLAlchemy). Os [services](../services/READM
 | `produto_model.py` | `Produto` | `produto` | Itens vendidos pela cantina |
 | `pedido_model.py` | `Pedido` | `pedido` | Um pedido **ou o carrinho** de um aluno |
 | `item_pedido.py` | `ItemPedido` | `itens_pedido` | Cada produto dentro de um pedido |
-| `avaliacao_model.py` | `Avaliacao` | `avaliacao` | Nota de um pedido. **Ainda sem rotas** |
-| `rateio_model.py` | `RateioPagamento` | `rateio` | Divisão do valor entre alunos. **Ainda sem rotas** |
-| `database.py` | — | — | **Sem uso** (cria um segundo `db` nunca inicializado; o projeto usa `backend/extensions.py`). Pode ser removido |
+| `avaliacao_model.py` | `Avaliacao` | `avaliacao` | Nota (1 a 5) e comentário de um pedido concluído |
+| `rateio_model.py` | `RateioPagamento` | `rateio` | Divisão do valor entre alunos. **Ainda sem tela nem rota** |
+
+Todas herdam de `db.Model` e têm `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()` e `to_dict()`. O `Pedido` tem também `calcular_total()` e `buscar_carrinho(id_aluno)`.
+
+**Diagrama de classes** (atributos, herança, composição e agregação): [`docs/diagrama-de-classes.md`](../../docs/diagrama-de-classes.md).
 
 > ⚠️ Todos os models precisam ser **importados no `app.py`**, mesmo os sem rotas. Sem isso, o SQLAlchemy não encontra as classes citadas nos relacionamentos (`'Avaliacao'`, `'RateioPagamento'`) e **toda consulta dá erro 500**. Ao criar um model novo, acrescente-o nesse import.
 

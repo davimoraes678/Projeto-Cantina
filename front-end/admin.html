@@ -16,8 +16,8 @@
     </nav>
 
     <main class="container py-4">
-        <!-- Alunos (a lista só é carregada para o mestre) -->
-        <section class="card shadow-sm mb-4">
+        <!-- Alunos e Produtos: só o mestre vê (o alunos.js mostra) -->
+        <section class="card shadow-sm mb-4 so-mestre" style="display:none;">
             <div class="card-body">
                 <h2 class="h4 card-title">Alunos</h2>
                 <div class="table-responsive">
@@ -39,7 +39,7 @@
         </section>
 
         <!-- Produtos -->
-        <section class="card shadow-sm mb-4">
+        <section class="card shadow-sm mb-4 so-mestre" style="display:none;">
             <div class="card-body">
                 <h2 class="h4 card-title">Produtos</h2>
                 <form id="form-produto" class="row g-2 mb-4">
@@ -120,28 +120,10 @@
         <!-- Pedidos -->
         <section class="card shadow-sm mb-4">
             <div class="card-body">
-                <h2 class="h4 card-title">Pedidos</h2>
-
-                <!-- Edição de pedido (status / horário de retirada). O alunos.js mostra ao clicar em "Editar" -->
-                <form id="form-editar-pedido" class="row g-2 mb-3" style="display:none;">
-                    <input type="hidden" id="editar-pedido-id">
-                    <div class="col-md-4">
-                        <select class="form-select" id="editar-pedido-status" required>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Em Preparo">Em Preparo</option>
-                            <option value="Pronto">Pronto</option>
-                            <option value="Concluído">Concluído</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input class="form-control" type="datetime-local" id="editar-pedido-horario">
-                    </div>
-                    <div class="col-md-4 d-flex gap-2">
-                        <button class="btn btn-primary flex-fill" type="submit">Salvar Pedido</button>
-                        <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-cancelar-edicao-pedido">Cancelar</button>
-                    </div>
-                </form>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h4 card-title mb-0">Pedidos em andamento</h2>
+                    <a class="btn btn-outline-primary" href="/front-end/historico.html">Histórico de pedidos</a>
+                </div>
 
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
@@ -162,30 +144,6 @@
         </section>
     </main>
 
-    <!-- Avaliação do pedido. O concluirPedido() do alunos.js "clica" no #open-dialog, que abre o modal -->
-    <button type="button" id="open-dialog" hidden data-bs-toggle="modal" data-bs-target="#modal-avaliacao"></button>
-    <div class="modal fade" id="modal-avaliacao" tabindex="-1" aria-labelledby="modal-avaliacao-titulo" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content" id="form-avaliacao">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal-avaliacao-titulo">O que você achou do pedido?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <label class="form-label" for="avaliacao-nota">Nota (1 a 5)</label>
-                    <input class="form-control mb-3" type="number" id="avaliacao-nota" min="1" max="5" required>
-                    <label class="form-label" for="avaliacao-comentario">Comentário (opcional)</label>
-                    <textarea class="form-control" id="avaliacao-comentario" rows="3"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Pular</button>
-                    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
     <script src="/front-end/js/alunos.js"></script>
 </body>
 </html>

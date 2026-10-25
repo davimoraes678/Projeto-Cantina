@@ -1,85 +1,85 @@
-from flask import Blueprint, request, jsonify, send_from_directory, current_app
-from backend.services.produto_service import ProdutoService
-from backend.models.produto_model import Produto
-from backend.services.imagem_service import salvar_imagem, nome_imagem
+from flask import Blueprint, current_app, jsonify, request, send_from_directory
 
+from backend.autenticacao import master_required
+from backend.services.produto.atualizar_produto_service import AtualizarProdutoService
+from backend.services.produto.buscar_imagem_produto_service import BuscarImagemProdutoService
+from backend.services.produto.buscar_produto_service import BuscarProdutoService
+from backend.services.produto.criar_produto_service import CriarProdutoService
+from backend.services.produto.deletar_produto_service import DeletarProdutoService
+from backend.services.produto.enviar_imagem_produto_service import EnviarImagemProdutoService
+from backend.services.produto.filtrar_produtos_service import FiltrarProdutosService
+from backend.services.produto.listar_produtos_service import ListarProdutosService
+
+
+class ProdutoController:
+    """Rotas do recurso Produto: lê a requisição, chama o service e devolve JSON."""
+
+    @staticmethod
+    def listar():
+        resposta, status = ListarProdutosService.executar()
+        return jsonify(resposta), status
+
+    @staticmethod
+    def filtrar():
+        # Query params: ?categoria=Bebida  ?preco_min=2&preco_max=10  ?ordenar=preco|nome
+        filtros = {
+            'categoria': request.args.get('categoria') or None,
+            'preco_min': request.args.get('preco_min', type=float),
+            'preco_max': request.args.get('preco_max', type=float),
+            'ordenar': request.args.get('ordenar') or None,
+        }
+        resposta, status = FiltrarProdutosService.executar(filtros)
+        return jsonify(resposta), status
+
+    @staticmethod
+    def buscar(id_produto):
+        resposta, status = BuscarProdutoService.executar(id_produto)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @master_required
+    def criar():
+        dados = request.get_json(silent=True) or {}
+        resposta, status = CriarProdutoService.executar(dados)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @master_required
+    def atualizar(id_produto):
+        dados = request.get_json(silent=True) or {}
+        resposta, status = AtualizarProdutoService.executar(id_produto, dados)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @master_required
+    def excluir(id_produto):
+        resposta, status = DeletarProdutoService.executar(id_produto)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @master_required
+    def enviar_imagem(id_produto):
+        resposta, status = EnviarImagemProdutoService.executar(id_produto, request.files.get("imagem"))
+        return jsonify(resposta), status
+
+    @staticmethod
+    def ver_imagem(id_produto):
+        resposta, status = BuscarImagemProdutoService.executar(id_produto)
+        if status != 200:
+            return jsonify(resposta), status
+        # A resposta aqui é o próprio arquivo da imagem
+        arquivo = send_from_directory(current_app.config["ARQUIVOS_DIR"], resposta["arquivo"])
+        arquivo.headers["Cache-Control"] = "no-cache"
+        return arquivo
+
+
+# URLs do recurso: /api/produtos/...
 bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
-
-@bp_produto.route('', methods=['POST'])
-def criar_produto():
-    data = request.json
-    resposta, status = ProdutoService.criar(data)
-    return jsonify(resposta), status
-
-@bp_produto.route('', methods=['GET'])
-def listar_produtos():
-    resposta, status = ProdutoService.listar_todos()
-    return jsonify(resposta), status
-
-@bp_produto.route('/buscar', methods=['GET'])
-def buscar_produtos():
-    """Busca/filtra/ordena produtos.
-
-    O controller só repassa os query params pro service; quem sabe que isso
-    vira `CALL sp_...` no MySQL é o backend/repositories/produto_repository.py
-    (Controller -> Service -> Repository -> CALL sp_...(...) -> MySQL).
-
-    Query params aceitos:
-      categoria=Bebida                  -> CALL sp_produtos_por_categoria
-      preco_min=2&preco_max=10          -> CALL sp_produtos_por_faixa_de_preco
-      ordenar=preco                     -> CALL sp_produtos_ordenar_por_preco
-      ordenar=nome                      -> CALL sp_produtos_ordenar_por_nome
-    """
-    filtros = {
-        'categoria': request.args.get('categoria') or None,
-        'preco_min': request.args.get('preco_min', type=float),
-        'preco_max': request.args.get('preco_max', type=float),
-        'ordenar': request.args.get('ordenar') or None,
-    }
-    resposta, status = ProdutoService.buscar(filtros)
-    return jsonify(resposta), status
-
-@bp_produto.route('/<int:id_produto>', methods=['GET'])
-def buscar_produto(id_produto):
-    resposta, status = ProdutoService.buscar_por_id(id_produto)
-    return jsonify(resposta), status
-
-@bp_produto.route('/<int:id_produto>', methods=['PUT'])
-def atualizar_produto(id_produto):
-    data = request.json
-    resposta, status = ProdutoService.atualizar(id_produto, data)
-    return jsonify(resposta), status
-
-@bp_produto.route('/<int:id_produto>', methods=['DELETE'])
-def deletar_produto(id_produto):
-    resposta, status = ProdutoService.deletar(id_produto)
-    return jsonify(resposta), status
-
-
-@bp_produto.route('/<int:id_produto>/imagem', methods=['POST'])
-def enviar_imagem_produto(id_produto):
-    produto = Produto.buscar_por_id(id_produto)
-    if not produto:
-        return jsonify(erro="Produto não encontrado"), 404
-    arquivo = request.files.get("imagem")
-    if arquivo is None or not arquivo.filename:
-        return jsonify(erro="Selecione uma imagem."), 400
-    try:
-        nome = salvar_imagem(produto, arquivo)
-    except ValueError as erro:
-        return jsonify(erro=str(erro)), 400
-    return jsonify(nome=nome, url=f"/api/produtos/{id_produto}/imagem"), 201
-
-
-@bp_produto.route('/<int:id_produto>/imagem', methods=['GET'])
-def visualizar_imagem_produto(id_produto):
-    produto = Produto.buscar_por_id(id_produto)
-    if not produto:
-        return jsonify(erro="Produto não encontrado"), 404
-    try:
-        nome = nome_imagem(produto.nome)
-    except ValueError:
-        return jsonify(erro="Produto sem imagem"), 404
-    resposta = send_from_directory(current_app.config["ARQUIVOS_DIR"], nome)
-    resposta.headers["Cache-Control"] = "no-cache"
-    return resposta
+bp_produto.add_url_rule('', view_func=ProdutoController.listar, methods=['GET'])
+bp_produto.add_url_rule('', view_func=ProdutoController.criar, methods=['POST'])
+bp_produto.add_url_rule('/buscar', view_func=ProdutoController.filtrar, methods=['GET'])
+bp_produto.add_url_rule('/<int:id_produto>', view_func=ProdutoController.buscar, methods=['GET'])
+bp_produto.add_url_rule('/<int:id_produto>', view_func=ProdutoController.atualizar, methods=['PUT'])
+bp_produto.add_url_rule('/<int:id_produto>', view_func=ProdutoController.excluir, methods=['DELETE'])
+bp_produto.add_url_rule('/<int:id_produto>/imagem', view_func=ProdutoController.enviar_imagem, methods=['POST'])
+bp_produto.add_url_rule('/<int:id_produto>/imagem', view_func=ProdutoController.ver_imagem, methods=['GET'])

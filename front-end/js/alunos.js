@@ -320,6 +320,11 @@ async function carregarAlunos() {
     if (tabela) tabela.innerHTML = "";
 
     alunos.forEach((aluno) => {
+      // O mestre não pode ser promovido nem excluído: a coluna de ações fica vazia
+      const acoes = aluno.funcao === "mestre" ? "" : `
+                        <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
+                        <button class="excluir" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>`;
+
       if (tabela)
         tabela.innerHTML += `
                 <tr>
@@ -328,9 +333,7 @@ async function carregarAlunos() {
                     <td>${aluno.email}</td>
                     <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
                     <td>${aluno.funcao}</td>
-                    <td>
-                        <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
-                        <button class="excluir" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>
+                    <td>${acoes}
                     </td>
                 </tr>
             `;

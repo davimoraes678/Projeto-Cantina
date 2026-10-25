@@ -1,4 +1,4 @@
-"""Funções de apoio para as imagens de produtos (usadas pelos services de produto).
+"""Funções de apoio usadas pelos services de produto: imagens dos produtos.
 
 O nome do arquivo é derivado do nome do produto."""
 import re

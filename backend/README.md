@@ -11,7 +11,6 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**; quem desenha as
 | [`services/`](services/README.md) | Uma classe por caso de uso, com as regras de negócio |
 | [`models/`](models/README.md) | Entidades do domínio / tabelas do banco |
 | [`repositories/`](repositories/README.md) | Consultas não-CRUD por stored procedures do MySQL |
-| `utils/` | Funções de apoio (imagens dos produtos) |
 | [`database/`](database/README.md) | Script SQL de criação do banco MySQL |
 
 ## Camadas

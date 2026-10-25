@@ -3,16 +3,11 @@ from backend.extensions import db
 from backend.models.aluno_model import Aluno
 
 class DeletarAlunoService:
-    """Caso de uso: excluir aluno (a própria conta, ou outro aluno pelo mestre)."""
-
     @staticmethod
-    def executar(id_aluno=None):
-        # Sem id: o aluno logado remove a própria conta. Com id: o mestre remove outro aluno.
-        aluno = Aluno.buscar_por_id(id_aluno) if id_aluno else current_user
+    def executar():
+        aluno = current_user
         if not aluno:
             return {"erro": "Aluno não encontrado"}, 404
-        if id_aluno and aluno.id_aluno == current_user.id_aluno:
-            return {"erro": "Para excluir a sua própria conta, use \"Remover minha conta\" em Minha Conta"}, 400
 
         try:
             # Antes de apagar o aluno, preserva o histórico dos pedidos já feitos por ele:

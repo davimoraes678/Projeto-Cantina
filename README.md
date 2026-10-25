@@ -39,67 +39,6 @@ FLASK_DEBUG=True
 
 As tabelas são criadas automaticamente na primeira execução. Para recomeçar do zero no SQLite, apague o `cantina.db`.
 
-## Funcionalidades Implementadas
-
-Todas funcionam de ponta a ponta: **Tela → API Flask → Controller → Service → Model/Repository → Banco de dados**.
-Quem pode usar: 🎓 aluno (qualquer usuário logado) · 🛠️ admin · 👑 mestre (o primeiro usuário cadastrado).
-
-| # | Funcionalidade | Quem | Tela | Rota | Service |
-|---|---|---|---|---|---|
-| 1 | Cadastrar aluno (o primeiro cadastro vira mestre) | todos | `cadastro.html` | `POST /api/alunos/registro` | `CriarAlunoService` |
-| 2 | Login | todos | `login.html` | `POST /api/alunos/login` | `LoginAlunoService` |
-| 3 | Logout | 🎓 | menu do usuário / `conta.html` | `POST /api/alunos/logout` | `LogoutAlunoService` |
-| 4 | Ver dados da conta | 🎓 | `conta.html` | `GET /api/alunos/atual` | `BuscarAlunoAtualService` |
-| 5 | Editar dados da conta | 🎓 | `conta.html` | `PUT /api/alunos/atual` | `AtualizarAlunoService` |
-| 6 | Excluir a própria conta | 🎓 | `conta.html` | `DELETE /api/alunos/atual` | `DeletarAlunoService` |
-| 7 | Listar alunos | 👑 | `admin.html` | `GET /api/alunos` | `ListarAlunoService` |
-| 8 | Promover aluno a admin | 👑 | `admin.html` | `PUT /api/alunos/<id>` | `PromoverAlunoService` |
-| 9 | Excluir aluno | 👑 | `admin.html` | `DELETE /api/alunos/<id>` | `DeletarAlunoService` |
-| 10 | Cadastrar produto | 👑 | `admin.html` | `POST /api/produtos` | `CriarProdutoService` |
-| 11 | Enviar foto do produto (reduzida para até 600×600) | 👑 | `admin.html` | `POST /api/produtos/<id>/imagem` | `EnviarImagemProdutoService` (+ `BuscarImagemProdutoService` para exibir) |
-| 12 | Editar produto | 👑 | `admin.html` | `PUT /api/produtos/<id>` | `AtualizarProdutoService` |
-| 13 | Excluir produto (pedidos antigos mantêm o nome) | 👑 | `admin.html` | `DELETE /api/produtos/<id>` | `DeletarProdutoService` |
-| 14 | Ver o cardápio | 🎓 | `index.html` | `GET /api/produtos/buscar` | `FiltrarProdutosService` → `ListarProdutosService` |
-| 15 | Filtrar produtos por categoria | 🎓 | `index.html` | `GET /api/produtos/buscar?categoria=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_categoria`) |
-| 16 | Filtrar produtos por faixa de preço | 🎓 | `index.html` | `GET /api/produtos/buscar?preco_min=&preco_max=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_faixa_de_preco`) |
-| 17 | Ordenar produtos por nome ou preço | 🎓 | `index.html` | `GET /api/produtos/buscar?ordenar=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_ordenar_por_*`) |
-| 18 | Recarregar a carteira (saldo) | 🎓 | `carteira.html` | `POST /api/alunos/atual/recarga` | `RecarregarSaldoService` |
-| 19 | Adicionar produto ao carrinho (total em tempo real) | 🎓 | `index.html` | `POST /api/carrinho/itens` | `AdicionarItemCarrinhoService` (+ `VerCarrinhoService`) |
-| 20 | Remover item do carrinho | 🎓 | `index.html` | `DELETE /api/carrinho/itens/<id>` | `RemoverItemCarrinhoService` |
-| 21 | Finalizar pedido (confere e desconta saldo e estoque) | 🎓 | `index.html` | `POST /api/carrinho/finalizar` | `FinalizarPedidoService` |
-| 22 | Repetir último pedido | 🎓 | `index.html` | `POST /api/carrinho/repetir` | `RepetirUltimoPedidoService` → `PedidoRepository` (`sp_repetir_ultimo_pedido`) |
-| 23 | Combinações mais pedidas (e adicionar a dupla ao carrinho) | 🎓 | `index.html` | `GET /api/pedidos/combinacoes` | `CombinacoesMaisPedidasService` → `PedidoRepository` (`sp_combinacoes_mais_pedidas`) |
-| 24 | Painel de pedidos em andamento | 🛠️ 👑 | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 25 | Concluir pedido | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
-| 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
-| 27 | Histórico de pedidos (concluídos e cancelados) | 🛠️ 👑 | `historico.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | 🎓 | `index.html` (janela automática) | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
-
-## Arquitetura
-
-```mermaid
-flowchart LR
-    T["Tela<br/>(front-end/*.html + alunos.js)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(classe)"]
-    C --> S["Service<br/>(uma classe por caso de uso)"]
-    S --> M["Model<br/>(db.Model)"]
-    S --> R["Repository<br/>(consultas especiais)"]
-    M --> DB[("MySQL / SQLite")]
-    R -->|"CALL sp_..."| DB
-```
-
-| Camada | Pasta | Responsabilidade |
-|---|---|---|
-| Controller | [`backend/controllers/`](backend/controllers/README.md) | Uma classe por recurso (`AlunoController`, `ProdutoController`, `ItemPedidoController`, `PedidoController`, `AvaliacaoController`). Recebe a requisição, lê os dados, chama o service e devolve JSON. Sem regra de negócio |
-| Service | [`backend/services/`](backend/services/README.md) | Uma classe por caso de uso, com o método `executar()` (ex.: `CriarProdutoService`, `FinalizarPedidoService`). Faz as validações e coordena o caso de uso |
-| Model | [`backend/models/`](backend/models/README.md) | Entidades do domínio, herdam de `db.Model`, com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()` e `buscar_por_id()` |
-| Repository | [`backend/repositories/`](backend/repositories/README.md) | Só as consultas não-CRUD, por **stored procedures** do MySQL (`CALL` fica só aqui): busca de produtos, repetir último pedido e combinações mais pedidas |
-
-## Diagrama de classes
-
-O diagrama de classes do domínio (Models, atributos, herança, composição e agregação) está em
-[`docs/diagrama-de-classes.md`](docs/diagrama-de-classes.md), com a imagem em
-[`docs/diagrama-de-classes.png`](docs/diagrama-de-classes.png).
-
 ## Onde está cada coisa
 
 Cada pasta tem um `README.md` explicando o que ela faz:
@@ -108,14 +47,14 @@ Cada pasta tem um `README.md` explicando o que ela faz:
 |---|---|
 | [`backend/`](backend/README.md) | A API: como as camadas se conectam, como o `app.py` monta o sistema e como funciona o login |
 | [`backend/controllers/`](backend/controllers/README.md) | As rotas da API (URLs, corpo, respostas) |
-| [`backend/services/`](backend/services/README.md) | Os casos de uso, um por classe, em pastas: `aluno/`, `produto/`, `carrinho/`, `pedido/`, `avaliacao/` |
+| [`backend/services/`](backend/services/README.md) | As regras de negócio (carrinho, pedidos, produtos, imagens) |
+| [`backend/services/aluno/`](backend/services/aluno/README.md) | Cadastro, login, logout e CRUD de alunos |
 | [`backend/models/`](backend/models/README.md) | As tabelas do banco e como o carrinho é guardado |
-| [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD por stored procedures (busca de produtos, repetir pedido, combinações) |
+| [`backend/repositories/`](backend/repositories/README.md) | Stored procedures da busca de produtos |
 | [`backend/database/`](backend/database/README.md) | Script SQL do MySQL |
 | [`front-end/`](front-end/README.md) | As páginas e como elas se ligam à API |
 | [`front-end/js/`](front-end/js/README.md) | O `alunos.js`: funções e padrões |
 | [`arquivos/`](arquivos/README.md) | Imagens dos produtos |
-| [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes e roteiro do vídeo de demonstração |
 
 Arquivos da raiz:
 
@@ -161,7 +100,6 @@ Erros que já aconteceram neste projeto:
 
 ## Limitações conhecidas
 
-- **Stored procedures só existem no MySQL.** Rodando com SQLite, a busca de produtos, o "repetir último pedido" e as combinações usam a mesma consulta pelo ORM (mesmo resultado). Ao mudar o `create-database.sql`, rode o script de novo no MySQL.
+- **Não há papel de administrador:** rotas de alunos, produtos e de alterar pedidos não exigem login.
+- **Estoque** não é conferido nem baixado nos pedidos.
 - **Preço promocional** não é aplicado; o item usa sempre `preco_atual`.
-- **Dividir conta (rateio):** a classe `RateioPagamento` e a tabela existem, mas ainda não há tela nem rota.
-- **Avaliação:** a janela aparece no navegador onde o pedido foi feito, ao abrir a cantina.

@@ -1,10 +1,6 @@
 from backend.extensions import db
 from datetime import datetime
 
-# O carrinho de um aluno é um Pedido com este status. Os produtos adicionados
-# são gravados como ItemPedido; ao finalizar, o status vira "Pendente".
-STATUS_CARRINHO = "Carrinho"
-
 class Pedido(db.Model):
     __tablename__ = "pedido"
 
@@ -54,11 +50,6 @@ class Pedido(db.Model):
     @staticmethod
     def buscar_por_id(id_pedido):
         return Pedido.query.get(id_pedido)
-
-    @staticmethod
-    def buscar_carrinho(id_aluno):
-        # O carrinho em aberto do aluno (ou None se ele ainda não adicionou nada)
-        return Pedido.query.filter_by(id_aluno=id_aluno, status=STATUS_CARRINHO).first()
 
     def to_dict(self):
         return {

@@ -2,7 +2,7 @@
 
 | Arquivo | O que faz |
 |---|---|
-| `create-database.sql` | Cria o banco **MySQL** `cantina_db`: as tabelas, as stored procedures (busca de produtos, repetir último pedido e combinações mais pedidas) e alguns dados de exemplo (4 alunos e 4 produtos) |
+| `create-database.sql` | Cria o banco **MySQL** `cantina_db`: as tabelas, as stored procedures de busca de produto e alguns dados de exemplo (4 alunos e 4 produtos) |
 
 ## Quando usar
 
@@ -20,7 +20,7 @@
 | Parte | Conteúdo |
 |---|---|
 | Tabelas | `aluno`, `produto`, `pedido`, `itens_pedido`, `avaliacao`, `rateio`. Os mesmos campos dos [models](../models/README.md) |
-| Procedures | `sp_produtos_por_categoria`, `sp_produtos_por_faixa_de_preco`, `sp_produtos_ordenar_por_preco`, `sp_produtos_ordenar_por_nome`, `sp_repetir_ultimo_pedido`, `sp_combinacoes_mais_pedidas`, usadas pelos [repositories](../repositories/README.md) |
+| Procedures | `sp_produtos_por_categoria`, `sp_produtos_por_faixa_de_preco`, `sp_produtos_ordenar_por_preco`, `sp_produtos_ordenar_por_nome`, usadas pelo [repository](../repositories/README.md) |
 | Dados de exemplo | Alunos e produtos (`Bebida`, `Lanche`, `Doce`) |
 
 ## Cuidados

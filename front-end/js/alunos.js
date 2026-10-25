@@ -1,25 +1,9 @@
-// =============================================================================
-// alunos.js: TODO o JavaScript do site. É carregado por todas as páginas.
-//
-// Como um arquivo só atende todas as páginas: cada função primeiro procura os
-// elementos dela (getElementById). Se não achar, a página não tem aquela parte
-// e a função não faz nada (ex.: o login não tem carrinho).
-//
-// Padrão das chamadas à API:
-//   fetch(url, { method, headers, body })  -> envia a requisição
-//   res.ok                                 -> true se o back-end respondeu 2xx
-//   await res.json()                       -> lê a resposta (JSON) como objeto
-//   erro.erro                              -> mensagem de erro que o back-end manda
-// =============================================================================
-
 // URL base da API
 const API_BASE_URL = "/api"; // mesmo endereço da página (funciona local e no Codespaces)
 
 // Guarda o ID do aluno/produto em edição (null = formulário está em modo "cadastrar").
 let editandoProdutoId = null;
 
-// Botões de categoria do index (Todos, Salgados, Bebidas, Doces): guarda a
-// categoria no campo escondido #busca-categoria e refaz a busca de produtos.
 function filtrar(categoria) {
   const buscaCategoria = document.getElementById("busca-categoria");
   if (!buscaCategoria) return;
@@ -27,27 +11,19 @@ function filtrar(categoria) {
   buscarProdutos();
 }
 
-// =============================================================================
-// AO ABRIR A PÁGINA
-// O DOMContentLoaded roda quando o HTML terminou de carregar: aqui buscamos os
-// dados na API e ligamos os formulários e botões aos seus eventos.
-// =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Carrega os dados da página. Cada função sai sozinha se a página não tiver a parte dela.
+  // Carrega as tabelas e selects ao iniciar
 
-  carregarProdutos(); // cards (index) ou tabela de produtos (admin)
-  carregarCarrinho(); // painel do carrinho (index)
-  alunoInf(); // nome/e-mail/saldo e o que aparece para admin e mestre
-  carregarCombinacoes(); // "Combinações mais pedidas" (index)
-  verificarAvaliacao(); // abre a janela de avaliação se o último pedido foi concluído
+  carregarProdutos();
+  carregarCarrinho();
+  alunoInf();
 
-  // --- EVENTO: SUBMIT DO FORMULÁRIO DE CADASTRO (cadastro.html) ---
-  // Envia nome, e-mail e senha para POST /alunos/registro. O back-end já faz o
-  // login, então em caso de sucesso vai direto para a cantina.
+  // --- EVENTO: SUBMIT DO FORMULÁRIO DE ALUNO (cria ou edita, dependendo do modo) ---
+  // --- EVENTO: SUBMIT DO FORMULÁRIO DE CADASTRO ---
   const formAluno = document.getElementById("form-aluno");
   if (formAluno) {
     formAluno.addEventListener("submit", async (e) => {
-      e.preventDefault(); // impede o navegador de recarregar a página ao enviar o form
+      e.preventDefault();
       const nome = document.getElementById("aluno-nome").value;
       const email = document.getElementById("aluno-email").value;
       const senha = document.getElementById("aluno-senha").value;
@@ -78,8 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- EVENTO: SUBMIT DO FORMULÁRIO DE LOGIN (login.html) ---
-  // POST /alunos/login. O back-end grava o login num cookie; depois vai para a cantina.
   const formLogin = document.getElementById("form-aluno-login");
   if (formLogin) {
     formLogin.addEventListener("submit", async (e) => {
@@ -100,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        window.location.href = "/"; // logado: vai para a cantina
+        window.location.href = "/";
       } catch (erro) {
         console.error("Erro ao fazer login:", erro);
         alert("Ocorreu um erro ao fazer login.");
@@ -108,9 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (admin.html, só mestre) ---
-  // Se editandoProdutoId for null, cria (POST); se tiver um id, edita (PUT).
-  // Depois de salvar os dados, envia a imagem (se foi escolhida uma).
+  // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (cria ou edita, dependendo do modo) ---
   const formProduto = document.getElementById("form-produto");
   if (formProduto) {
     formProduto.addEventListener("submit", async (e) => {
@@ -123,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("produto-estoque").value,
       );
       const categoria = document.getElementById("produto-categoria").value;
-      const corpo = { nome, preco_atual, quantidade_estoque, categoria }; // o que vai para a API
+      const corpo = { nome, preco_atual, quantidade_estoque, categoria };
 
       try {
         // Reaproveita as rotas que já existem no backend: POST pra criar, PUT pra editar.
@@ -155,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
           produtoSalvo.categoria || "",
         );
         await enviarImagem(produtoSalvo.id_produto);
-        sairModoEdicaoProduto(); // limpa o formulário e volta ao modo "cadastrar"
-        carregarProdutos(); // atualiza a tabela
+        sairModoEdicaoProduto();
+        carregarProdutos();
       } catch (erro) {
         console.error("Erro ao salvar produto:", erro);
         alert(erro.message || "Ocorreu um erro ao salvar o produto.");
@@ -164,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ATENÇÃO: o contador abaixo (#contador / alterar) não é usado por nenhuma página.
   // Seleciona o elemento de texto pelo ID
   const elementoContador = document.getElementById("contador");
 
@@ -177,9 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
     elementoContador.innerText = valorAtual;
   }
 
-  // Envia a imagem escolhida em #imagem para POST /produtos/<id>/imagem.
-  // Como está dentro do DOMContentLoaded, é ESTA versão que o formulário de produto
-  // usa (existe outra igual, fora daqui, na parte de produtos).
   async function enviarImagem(idProduto) {
     const imagem = document.getElementById("imagem").files[0];
 
@@ -189,11 +157,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const extensao = imagem.name.split(".").pop().toLowerCase();
     const nome = `produto_${idProduto}.${extensao}`;
 
-    // FormData = formulário com arquivo (multipart), que é como uma imagem vai para a API
     const dados = new FormData();
     dados.append("imagem", imagem, nome);
 
-    // (O back-end troca o nome do arquivo pelo nome do produto ao salvar.)
+    // Esta rota precisa ser criada no backend.
     const resposta = await fetch(
       `${API_BASE_URL}/produtos/${idProduto}/imagem`,
       {
@@ -207,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Botão "Cancelar edição" do formulário de produto
   const btnCancelarEdicaoProduto = document.getElementById(
     "btn-cancelar-edicao-produto",
   );
@@ -223,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
       buscarProdutos();
     });
   }
-  // Botão "Limpar": apaga os filtros e mostra todos os produtos de novo
   const btnLimparBusca = document.getElementById("btn-limpar-busca");
   if (btnLimparBusca) {
     btnLimparBusca.addEventListener("click", () => {
@@ -241,74 +206,24 @@ document.addEventListener("DOMContentLoaded", () => {
     btnFinalizar.addEventListener("click", finalizarPedido);
   }
 
-  // --- EVENTO: RECARGA DA CARTEIRA (carteira.html) ---
-  // Envia o valor para POST /alunos/atual/recarga com {valor}; o back-end soma ao
-  // saldo e recusa valores fora de R$ 0,01 a R$ 500,00.
-  const formRecarga = document.getElementById("form-recarga");
-  if (formRecarga) {
-    formRecarga.addEventListener("submit", async (e) => {
+  // --- EVENTO: SALVAR EDIÇÃO DE PEDIDO (status / horário de retirada) ---
+  const formEditarPedido = document.getElementById("form-editar-pedido");
+  if (formEditarPedido) {
+    formEditarPedido.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const valor = parseFloat(document.getElementById("recarga-valor").value);
-      try {
-        const res = await fetch(`${API_BASE_URL}/alunos/atual/recarga`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ valor }),
-        });
-        if (!res.ok) {
-          const erro = await res.json().catch(() => ({}));
-          alert(erro.erro || "Não foi possível adicionar o saldo.");
-          return;
-        }
-        formRecarga.reset();
-        alunoInf(); // mostra o saldo novo
-      } catch (erro) {
-        console.error("Erro ao adicionar saldo:", erro);
-        alert("Ocorreu um erro ao adicionar o saldo.");
-      }
+      await salvarEdicaoPedido();
     });
   }
-
-  // --- EVENTO: ENVIAR AVALIAÇÃO DO ÚLTIMO PEDIDO (janela do index) ---
-  // O número do pedido vem do localStorage (guardado pelo finalizarPedido).
-  // POST /pedidos/<id>/avaliacao com {nota, comentario}; o back-end só aceita o dono do
-  // pedido e uma avaliação por pedido.
-  const formAvaliacao = document.getElementById("form-avaliacao");
-  if (formAvaliacao) {
-    formAvaliacao.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const id = localStorage.getItem("pedidoParaAvaliar");
-      const nota = parseInt(document.getElementById("avaliacao-nota").value);
-      const comentario = document.getElementById("avaliacao-comentario").value;
-      try {
-        const res = await fetch(`${API_BASE_URL}/pedidos/${id}/avaliacao`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nota, comentario }),
-        });
-        // Avaliado (ou não dá mais para avaliar): não pergunta de novo
-        localStorage.removeItem("pedidoParaAvaliar");
-        bootstrap.Modal.getInstance(document.getElementById("modal-avaliacao")).hide(); // fecha a janela
-        if (!res.ok) {
-          const erro = await res.json().catch(() => ({}));
-          alert(erro.erro || "Não foi possível enviar a avaliação.");
-          return;
-        }
-        alert("Obrigado pela avaliação!");
-      } catch (erro) {
-        console.error("Erro ao avaliar:", erro);
-        alert("Ocorreu um erro ao enviar a avaliação.");
-      }
-    });
+  const btnCancelarEdicaoPedido = document.getElementById(
+    "btn-cancelar-edicao-pedido",
+  );
+  if (btnCancelarEdicaoPedido) {
+    btnCancelarEdicaoPedido.addEventListener("click", fecharEdicaoPedido);
   }
 });
 
-// =============================================================================
-// ALUNOS
-// =============================================================================
-
-// Monta a tabela de alunos do admin.html (#tabela-alunos). Só é chamada para o
-// mestre (ver funcaoPorAluno); a rota GET /alunos também só responde ao mestre.
+// --- LÓGICA DE ALUNOS ---
+// Carrega a lista de alunos para o administrador.
 async function carregarAlunos() {
   try {
     const res = await fetch(`${API_BASE_URL}/alunos`);
@@ -320,11 +235,6 @@ async function carregarAlunos() {
     if (tabela) tabela.innerHTML = "";
 
     alunos.forEach((aluno) => {
-      // O mestre não pode ser promovido nem excluído: a coluna de ações fica vazia
-      const acoes = aluno.funcao === "mestre" ? "" : `
-                        <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
-                        <button class="excluir" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>`;
-
       if (tabela)
         tabela.innerHTML += `
                 <tr>
@@ -333,19 +243,19 @@ async function carregarAlunos() {
                     <td>${aluno.email}</td>
                     <td>R$ ${parseFloat(aluno.saldo || 0).toFixed(2)}</td>
                     <td>${aluno.funcao}</td>
-                    <td>${acoes}
+                    <td>
+                        <button onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
                     </td>
                 </tr>
             `;
     });
 
+    // Mantém o aluno selecionado ao recarregar a lista (ex: depois de adicionar um item ao carrinho)
   } catch (erro) {
     console.error("Erro ao carregar alunos:", erro);
   }
 }
 
-// Botão "Promover" da tabela de alunos: PUT /alunos/<id> torna o aluno admin
-// (só o mestre pode). Depois recarrega a tabela para mostrar a nova função.
 async function promoverAluno(id_aluno) {
   try {
     const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, {
@@ -364,39 +274,14 @@ async function promoverAluno(id_aluno) {
   }
 }
 
-// Botão "Excluir" da tabela de alunos (só o mestre): DELETE /alunos/<id>, depois
-// de confirmar. Os pedidos do aluno continuam no histórico com o nome guardado.
-async function excluirAluno(id_aluno) {
-  if (!confirm("Deseja realmente excluir este aluno?")) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, { method: "DELETE" });
-    if (!res.ok) {
-      const erro = await res.json().catch(() => ({}));
-      alert(erro.erro || "Não foi possível excluir o aluno.");
-      return;
-    }
-    carregarAlunos();
-  } catch (erro) {
-    console.error("Erro ao excluir aluno:", erro);
-  }
-}
-
-// Mostra na tela o que cada função pode ver e carrega os dados dela:
-//   aluno  -> nada extra
-//   admin  -> elementos .so-admin (ex.: link "Administrador") + tabela de pedidos
-//   mestre -> tudo do admin + elementos .so-mestre (alunos e produtos no admin.html)
-// Isso só esconde da tela: quem bloqueia de verdade é o back-end (@admin_required etc.).
 function funcaoPorAluno(funcao) {
   const admin = funcao === "admin" || funcao === "mestre";
   const mestre = funcao === "mestre";
 
-  // Elementos com a classe so-admin / so-mestre começam escondidos no HTML
   if (admin) {
-    document.querySelectorAll(".so-admin").forEach((el) => (el.style.display = ""));
     carregarPedidos();
   }
   if (mestre) {
-    document.querySelectorAll(".so-mestre").forEach((el) => (el.style.display = ""));
     carregarAlunos();
   }
 
@@ -404,7 +289,6 @@ function funcaoPorAluno(funcao) {
 
 
 // Realiza o logout do aluno logado, limpando a sessão no backend e redirecionando para a tela de login.
-// Fica fora do DOMContentLoaded porque o <script> está no fim do <body>: o botão já existe aqui.
 const btnLogout = document.getElementById("btn-logout");
 if (btnLogout) {
   btnLogout.addEventListener("click", async () => {
@@ -420,7 +304,6 @@ if (btnLogout) {
         return;
       }
 
-      localStorage.removeItem("pedidoParaAvaliar"); // outro aluno pode entrar neste navegador
       window.location.href = "/front-end/login.html";
     } catch (erro) {
       console.error("Erro ao realizar logout:", erro);
@@ -429,8 +312,6 @@ if (btnLogout) {
   });
 }
 
-// Botão "Remover minha conta" (conta.html): DELETE /alunos/atual apaga o aluno
-// logado. Os pedidos dele continuam no histórico com o nome guardado.
 async function removerAluno() {
   if (
     confirm(
@@ -449,9 +330,7 @@ async function removerAluno() {
   }
 }
 
-// Botão "Editar Dados" (conta.html): monta um formulário dentro de
-// #form-editar-dados já preenchido com os dados atuais. Ao enviar, manda
-// PUT /alunos/atual (senha em branco = não troca) e recarrega a página.
+// Edita os dados do aluno logado (nome, email, senha) no formulário de edição.
 async function editarDados() {
   res = await fetch(`${API_BASE_URL}/alunos/atual`);
   if (!res.ok) return;
@@ -494,36 +373,20 @@ async function editarDados() {
     });
 }
 
-// Mostra as informações do aluno logado (GET /alunos/atual) nos elementos que
-// a página tiver: #nome-aluno, #email-aluno e #saldo-aluno. Depois chama o
-// funcaoPorAluno para mostrar o que é de admin/mestre.
+// Mostra as informações do aluno logado
 async function alunoInf() {
   const nomeEl = document.getElementById("nome-aluno");
   const emailEl = document.getElementById("email-aluno");
-  const saldoEl = document.getElementById("saldo-aluno");
   const res = await fetch(`${API_BASE_URL}/alunos/atual`);
   if (!res.ok) return;
   const aluno_inf = await res.json();
   if (nomeEl) nomeEl.textContent = aluno_inf.nome;
   if (emailEl) emailEl.textContent = aluno_inf.email;
-  if (saldoEl) saldoEl.textContent = parseFloat(aluno_inf.saldo || 0).toFixed(2);
 
   funcaoPorAluno(aluno_inf.funcao)
 }
 
-// Botões + R$ 5 / 10 / 20 da carteira: soma ao valor que já está no campo (até R$ 500).
-function somarRecarga(valor) {
-  const campo = document.getElementById("recarga-valor");
-  const atual = parseFloat(campo.value) || 0; // campo vazio vira 0
-  campo.value = Math.min(atual + valor, 500).toFixed(2);
-}
-
-// =============================================================================
-// PRODUTOS
-// =============================================================================
-
-// Versão "global" do envio de imagem. O formulário de produto usa a versão de
-// dentro do DOMContentLoaded (as duas fazem a mesma coisa).
+// --- LÓGICA DE PRODUTOS ---
 async function enviarImagem(idProduto) {
   const imagem = document.getElementById("imagem")?.files[0];
   if (!imagem) return;
@@ -541,22 +404,17 @@ async function enviarImagem(idProduto) {
   }
 }
 
-// Lista todos os produtos (sem filtro).
 async function carregarProdutos() {
   await buscarProdutos({}); // sem filtros = lista tudo, via a mesma rota de busca
 }
 
 // Busca/filtra/ordena produtos usando a rota GET /api/produtos/buscar.
-// Lê os filtros da tela (ou usa os de filtrosForcados) e monta:
-//   - cards em #tabela-produtos (index.html), com botão "Adicionar ao pedido"
-//   - linhas em #tabela-produtos-admin (admin.html), com Editar/Excluir
 async function buscarProdutos(filtrosForcados) {
   const categoriaEl = document.getElementById("busca-categoria");
   const precoMinEl = document.getElementById("busca-preco-min");
   const precoMaxEl = document.getElementById("busca-preco-max");
   const ordenarEl = document.getElementById("busca-ordenar");
 
-  // URLSearchParams monta a parte "?categoria=...&preco_max=..." da URL
   const params = new URLSearchParams();
   const filtros = filtrosForcados || {
     categoria: categoriaEl ? categoriaEl.value : "",
@@ -565,7 +423,6 @@ async function buscarProdutos(filtrosForcados) {
     ordenar: ordenarEl ? ordenarEl.value : "",
   };
 
-  // Só envia os filtros preenchidos
   if (filtros.categoria) params.set("categoria", filtros.categoria);
   if (filtros.preco_min) params.set("preco_min", filtros.preco_min);
   if (filtros.preco_max) params.set("preco_max", filtros.preco_max);
@@ -592,7 +449,6 @@ async function buscarProdutos(filtrosForcados) {
     if (tabela) tabela.innerHTML = "";
     if (tabela_admin) tabela_admin.innerHTML = "";
 
-    // Nenhum resultado: mostra o aviso
     if (produtos.length === 0) {
       if (tabela) {
         tabela.innerHTML = `
@@ -605,7 +461,6 @@ async function buscarProdutos(filtrosForcados) {
             `;
       }
     }
-    // index.html: um card por produto. A imagem some (onerror) se o produto não tiver foto.
     if (tabela) {
       produtos.forEach((prod) => {
         tabela.innerHTML += `
@@ -616,7 +471,7 @@ async function buscarProdutos(filtrosForcados) {
             onerror="this.hidden = true">
     <h5 class="mt-2 mb-0">${prod.nome}</h5>
     <h4 class="mt-0 mb-2">R$ ${parseFloat(prod.preco_atual).toFixed(2)}</h4>
-    <p class="card-text text-body-secondary">${prod.categoria || ""}</p>
+    <p class="card-text fg-2">${prod.descricao}</p>
     <button type="button" class="btn btn-primary" onclick="adicionarItemAoCarrinho(${prod.id_produto})">Adicionar ao pedido</button>
             <input type="number" id="qtd-produto-${prod.id_produto}" value="1" min="1" style="width: 70px; min-width: 70px;">
 
@@ -625,7 +480,6 @@ async function buscarProdutos(filtrosForcados) {
             `;
       });
     }
-    // admin.html: uma linha por produto. O escapeAttr evita que uma aspa no nome quebre o onclick.
     if (tabela_admin) {
       produtos.forEach((prod) => {
         tabela_admin.innerHTML += `
@@ -656,8 +510,6 @@ async function buscarProdutos(filtrosForcados) {
   }
 }
 
-// Botão "Editar" de um produto: preenche o formulário com os dados dele e
-// entra no "modo edição" (o próximo envio do formulário faz PUT em vez de POST).
 function editarProduto(id, nome, preco, estoque, categoria) {
   editandoProdutoId = id;
   document.getElementById("produto-nome").value = nome;
@@ -672,7 +524,6 @@ function editarProduto(id, nome, preco, estoque, categoria) {
     .scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// Volta o formulário de produto para o modo "cadastrar" e limpa os campos.
 function sairModoEdicaoProduto() {
   editandoProdutoId = null;
   document.getElementById("form-produto").reset();
@@ -681,8 +532,6 @@ function sairModoEdicaoProduto() {
   document.getElementById("btn-cancelar-edicao-produto").style.display = "none";
 }
 
-// Botão "Excluir" de um produto: DELETE /produtos/<id>, depois de confirmar.
-// Os pedidos antigos continuam mostrando o nome do produto.
 async function removerProduto(id) {
   if (
     confirm(
@@ -703,14 +552,10 @@ async function removerProduto(id) {
   }
 }
 
-// =============================================================================
-// CARRINHO
-// O carrinho fica no back-end: é um pedido com status "Carrinho" do aluno logado.
-// Toda rota do carrinho devolve o carrinho inteiro, que o renderizarCarrinho desenha.
-// =============================================================================
+// LOGICA DO LOGIN DO USUARIO
 
-// Botão "Adicionar ao pedido" de um card: lê a quantidade do campo ao lado e
-// grava o produto no carrinho (POST /carrinho/itens). Se já estiver lá, soma.
+// --- LÓGICA DO CARRINHO (permite adicionar vários produtos a um mesmo pedido) ---
+// Grava o produto como ItemPedido no carrinho (pedido "Carrinho") do aluno.
 async function adicionarItemAoCarrinho(id_produto) {
   const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
   const quantidade = parseInt(inputQuantidade.value);
@@ -730,18 +575,14 @@ async function adicionarItemAoCarrinho(id_produto) {
       alert(dados.erro || "Não foi possível adicionar o produto.");
       return;
     }
-    inputQuantidade.value = 1; // volta o campo de quantidade para 1
+    inputQuantidade.value = 1;
     renderizarCarrinho(dados);
-    // Acha o produto no carrinho só para pegar o nome e mostrar no aviso
-    const item = dados.itens.find((i) => i.id_produto === id_produto);
-    avisarCarrinho(`${quantidade}x ${item.produto_nome} adicionado ao carrinho`);
   } catch (erro) {
     console.error("Erro ao adicionar item:", erro);
     alert("Ocorreu um erro ao adicionar o produto.");
   }
 }
 
-// Botão "Remover" de uma linha do carrinho: DELETE /carrinho/itens/<id>.
 async function removerItemDoCarrinho(id_item_pedido) {
   try {
     const res = await fetch(
@@ -770,8 +611,6 @@ async function carregarCarrinho() {
   }
 }
 
-// Desenha o carrinho no painel: uma linha por item e o total.
-// carrinho = null (ex.: erro ao carregar) mostra o carrinho vazio.
 function renderizarCarrinho(carrinho) {
   const tabela = document.getElementById("tabela-carrinho");
   const totalEl = document.getElementById("carrinho-total");
@@ -794,8 +633,6 @@ function renderizarCarrinho(carrinho) {
   totalEl.textContent = `Total: R$ ${total.toFixed(2)}`;
 }
 
-// Botão "Finalizar Pedido": POST /carrinho/finalizar. O back-end confere estoque
-// e saldo, desconta os dois e transforma o carrinho em pedido "Pendente".
 async function finalizarPedido() {
   try {
     const res = await fetch(`${API_BASE_URL}/carrinho/finalizar`, {
@@ -806,124 +643,36 @@ async function finalizarPedido() {
       alert(erro.erro || "Não foi possível finalizar o pedido.");
       return;
     }
-    const pedido = await res.json();
-    localStorage.setItem("pedidoParaAvaliar", pedido.id_pedido); // pede a avaliação quando for concluído
     carregarCarrinho();
-    alunoInf(); // o saldo diminuiu
+    carregarPedidos();
   } catch (erro) {
     console.error("Erro ao finalizar pedido:", erro);
     alert("Ocorreu um erro ao finalizar o pedido.");
   }
 }
 
-// Botão "Repetir último pedido" (painel do carrinho): POST /carrinho/repetir
-// coloca no carrinho os mesmos produtos e quantidades do último pedido.
-async function repetirUltimoPedido() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/carrinho/repetir`, { method: "POST" });
-    const dados = await res.json();
-    if (!res.ok) {
-      alert(dados.erro || "Não foi possível repetir o último pedido.");
-      return;
-    }
-    renderizarCarrinho(dados);
-    avisarCarrinho("Itens do último pedido adicionados ao carrinho");
-  } catch (erro) {
-    console.error("Erro ao repetir pedido:", erro);
-  }
-}
+// --- LÓGICA DE PEDIDOS ---
+let pedidosCache = [];
 
-// =============================================================================
-// COMBINAÇÕES MAIS PEDIDAS (index.html)
-// =============================================================================
-
-// Busca as 3 duplas de produtos mais pedidas juntas (GET /pedidos/combinacoes)
-// e monta um botão para cada uma: "Coxinha + Refri 2x".
-async function carregarCombinacoes() {
-  const lista = document.getElementById("lista-combinacoes");
-  if (!lista) return; // página sem combinações
-  try {
-    const res = await fetch(`${API_BASE_URL}/pedidos/combinacoes`);
-    if (!res.ok) return;
-    const combinacoes = await res.json();
-    lista.innerHTML = "";
-    combinacoes.forEach((combo) => {
-      const nomes = combo.produtos.map((p) => p.nome).join(" + "); // "Coxinha + Refri"
-      const ids = combo.produtos.map((p) => p.id_produto).join(", "); // "1, 2" -> vai no onclick
-      lista.innerHTML += `
-                <button class="btn btn-outline-primary" onclick="adicionarCombinacao([${ids}])">
-                    ${nomes} <span class="badge text-bg-secondary">${combo.vezes}x</span>
-                </button>
-            `;
-    });
-    // A seção começa escondida no HTML; só aparece se houver alguma combinação
-    if (combinacoes.length) document.getElementById("secao-combinacoes").style.display = "";
-  } catch (erro) {
-    console.error("Erro ao carregar combinações:", erro);
-  }
-}
-
-// Clique numa combinação: adiciona 1 de cada produto ao carrinho, usando a
-// mesma rota do "Adicionar ao pedido" (POST /carrinho/itens), um por vez.
-async function adicionarCombinacao(ids) {
-  for (const id_produto of ids) {
-    const res = await fetch(`${API_BASE_URL}/carrinho/itens`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_produto, quantidade: 1 }),
-    });
-    const dados = await res.json();
-    if (!res.ok) {
-      alert(dados.erro || "Não foi possível adicionar a combinação.");
-      return;
-    }
-    renderizarCarrinho(dados);
-  }
-  avisarCarrinho("Combinação adicionada ao carrinho");
-}
-
-// Mostra o aviso (toast do Bootstrap) de que algo entrou no carrinho.
-// O toast fica no index.html (#toast-carrinho) e some sozinho depois de 5 segundos.
-function avisarCarrinho(mensagem) {
-  document.getElementById("toast-carrinho-texto").textContent = mensagem;
-  bootstrap.Toast.getOrCreateInstance(document.getElementById("toast-carrinho")).show();
-}
-
-// =============================================================================
-// PEDIDOS (admin.html e historico.html; só admin e mestre)
-// =============================================================================
-
-// Busca todos os pedidos (GET /pedidos) e monta #tabela-pedidos:
-//   admin.html     -> só os em andamento, com Concluir/Cancelar (ordem de chegada)
-//   historico.html -> só os concluídos e cancelados, com a data (mais recente primeiro)
 async function carregarPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos`);
     const pedidos = await res.json();
+    pedidosCache = pedidos;
     const tabela = document.getElementById("tabela-pedidos");
     if (!tabela) return;
 
     tabela.innerHTML = "";
 
-    // historico.html mostra os finalizados (mais recente primeiro); admin.html, os em andamento
-    const historico = tabela.dataset.historico === "sim"; // lê o data-historico="sim" do HTML
-    const lista = pedidos.filter(
-      (ped) => ["Concluído", "Cancelado"].includes(ped.status) === historico,
-    );
-    if (historico) lista.reverse();
-
-    lista.forEach((ped) => {
-      // "2x Coxinha, 1x Refri"
+    pedidos.forEach((ped) => {
       const listaProdutos = ped.itens
         .map((item) => `${item.quantidade}x ${item.produto_nome}`)
         .join(", ");
 
-      // Última coluna: a data no histórico, os botões no admin
-
-      const ultimaColuna = historico
-        ? new Date(ped.data_hora_criacao).toLocaleString("pt-BR")
-        : `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>
-           <button class="excluir" onclick="cancelarPedido(${ped.id_pedido})">Cancelar</button>`;
+      const botaoConcluir =
+        ped.status !== "Concluído"
+          ? `<button class="concluir" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>`
+          : "";
 
       tabela.innerHTML += `
                 <tr>
@@ -932,7 +681,10 @@ async function carregarPedidos() {
                     <td>${listaProdutos}</td>
                     <td>${ped.status}</td>
                     <td>R$ ${parseFloat(ped.valor_total).toFixed(2)}</td>
-                    <td>${ultimaColuna}</td>
+                    <td>
+                        <button class="editar" onclick="editarPedido(${ped.id_pedido})">Editar</button>
+                        ${botaoConcluir}
+                    </td>
                 </tr>
             `;
     });
@@ -941,63 +693,112 @@ async function carregarPedidos() {
   }
 }
 
-// Botão "Concluir": POST /pedidos/<id>/concluir marca o pedido como "Concluído".
-// O pedido sai da tabela do admin e vai para o histórico; a avaliação é pedida
-// ao aluno quando ele abrir a cantina (ver verificarAvaliacao).
-async function concluirPedido(id) {
-  if (!confirm("Deseja realmente marcar este pedido como concluído?")) return;
-  await mudarPedido(id, "concluir");
+function editarPedido(id) {
+  const pedido = pedidosCache.find((p) => p.id_pedido === id);
+  if (!pedido) return;
+
+  document.getElementById("editar-pedido-id").value = pedido.id_pedido;
+  document.getElementById("editar-pedido-status").value = pedido.status;
+
+  // datetime-local espera "YYYY-MM-DDTHH:MM", sem os segundos/timezone do ISO vindo do backend
+  const horarioInput = document.getElementById("editar-pedido-horario");
+  horarioInput.value = pedido.horario_agendado_retirada
+    ? pedido.horario_agendado_retirada.slice(0, 16)
+    : "";
+
+  document.getElementById("form-editar-pedido").style.display = "flex";
+  document
+    .getElementById("form-editar-pedido")
+    .scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// Botão "Cancelar": POST /pedidos/<id>/cancelar. O back-end devolve o valor para
-// a carteira do aluno e os produtos para o estoque.
-async function cancelarPedido(id) {
-  if (!confirm("Cancelar este pedido? O valor volta para a carteira do aluno.")) return;
-  await mudarPedido(id, "cancelar");
+function fecharEdicaoPedido() {
+  document.getElementById("form-editar-pedido").style.display = "none";
+  document.getElementById("form-editar-pedido").reset();
 }
 
-// Chama a rota de concluir ou cancelar e recarrega as tabelas.
-async function mudarPedido(id, acao) {
+async function salvarEdicaoPedido() {
+  const id = document.getElementById("editar-pedido-id").value;
+  const status = document.getElementById("editar-pedido-status").value;
+  const horario = document.getElementById("editar-pedido-horario").value;
+
   try {
-    const res = await fetch(`${API_BASE_URL}/pedidos/${id}/${acao}`, { method: "POST" });
+    const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status,
+        horario_agendado_retirada: horario || null,
+      }),
+    });
+
     if (!res.ok) {
       const erro = await res.json().catch(() => ({}));
-      alert(erro.erro || "Não foi possível atualizar o pedido.");
+      alert(erro.erro || "Não foi possível salvar o pedido.");
       return;
     }
-    // O alunoInf recarrega os pedidos e, para o mestre, a tabela de alunos
-    // (o cancelamento devolve saldo, então o saldo do aluno muda)
-    alunoInf();
+
+    fecharEdicaoPedido();
+    carregarPedidos();
   } catch (erro) {
-    console.error("Erro ao atualizar pedido:", erro);
-    alert("Ocorreu um erro ao atualizar o pedido.");
+    console.error("Erro ao salvar pedido:", erro);
+    alert("Ocorreu um erro ao salvar o pedido.");
   }
 }
 
-// =============================================================================
-// AVALIAÇÃO (lado do aluno, index.html)
-// =============================================================================
+async function concluirPedido(id) {
+  if (confirm("Deseja realmente marcar este pedido como concluído?")) {
+    const dialogAvaliacao = document.getElementById("pedido-avaliacao")
+    dialogAvaliacao.innerHTML = `
+      
+    `;
+    
+    const formAvaliacao = document.getElementById("form-avaliacao");
+    if (formAvaliacao) {
+      formAvaliacao.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nota = document.getElementById("avaliacao-nota").value;
+        const comentario = document.getElementById(
+          "avaliacao-comentario",
+        ).value;
 
-// Se o último pedido do aluno já foi concluído, abre a janela de avaliação.
-// O número do pedido foi guardado no localStorage (memória do navegador) pelo
-// finalizarPedido; ele é apagado depois de avaliar ou no logout.
-async function verificarAvaliacao() {
-  const id = localStorage.getItem("pedidoParaAvaliar");
-  const modal = document.getElementById("modal-avaliacao");
-  if (!id || !modal) return;
-  try {
-    const res = await fetch(`${API_BASE_URL}/pedidos/${id}`);
-    if (!res.ok) return;
-    const pedido = await res.json();
-    if (pedido.status === "Concluído") bootstrap.Modal.getOrCreateInstance(modal).show();
-  } catch (erro) {
-    console.error("Erro ao verificar avaliação:", erro);
+        try {
+          const res = await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nota, comentario }),
+          });
+
+          if (!res.ok) {
+            const erro = await res.json().catch(() => ({}));
+            alert(erro.erro || "Não foi possível fazer o cadastro.");
+            return;
+          }
+
+          window.location.href = "/"; // cadastrou e já está logado: vai para a cantina
+        } catch (erro) {
+          console.error("Erro ao avaliar:", erro);
+          alert("Ocorreu um erro ao fazer a avaliação.");
+        }
+      });
+    }
+
+    try {
+      await fetch(`${API_BASE_URL}/pedidos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Concluído" }),
+      });
+
+      carregarPedidos();
+    } catch (erro) {
+      console.error("Erro ao concluir pedido:", erro);
+      alert("Ocorreu um erro ao atualizar o status do pedido.");
+    }
   }
 }
 
-// =============================================================================
-// UTIL
-// =============================================================================
+// --- UTIL ---
 // Escapa aspas simples pra não quebrar o HTML gerado nos onclick com nome/email do aluno.
 function escapeAttr(texto) {
   return String(texto).replace(/'/g, "\\'");

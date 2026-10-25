@@ -1,16 +1,20 @@
 from flask_login import current_user
 from werkzeug.security import generate_password_hash
+from backend.models.aluno_model import Aluno
 
 
 class AtualizarAlunoService:
-    """Caso de uso: editar os dados do aluno logado (senha vazia mantém a atual)."""
-
     @staticmethod
     def executar(dados):
+        aluno = current_user
+        if not aluno:
+            return {"erro": "Aluno não encontrado"}, 404
+
         senha = dados.get('senha')
-        current_user.atualizar(
+        aluno.atualizar(
             nome=dados.get('nome'),
             email=dados.get('email'),
             senha=generate_password_hash(senha) if senha else None,
         )
-        return current_user.to_dict(), 200
+        return aluno.to_dict(), 200
+    

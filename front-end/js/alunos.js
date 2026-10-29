@@ -735,6 +735,7 @@ async function adicionarItemAoCarrinho(id_produto) {
     // Acha o produto no carrinho só para pegar o nome e mostrar no aviso
     const item = dados.itens.find((i) => i.id_produto === id_produto);
     avisarCarrinho(`${quantidade}x ${item.produto_nome} adicionado ao carrinho`);
+    notficaoCarrinho(quantidade)
   } catch (erro) {
     console.error("Erro ao adicionar item:", erro);
     alert("Ocorreu um erro ao adicionar o produto.");
@@ -887,6 +888,19 @@ async function adicionarCombinacao(ids) {
 function avisarCarrinho(mensagem) {
   document.getElementById("toast-carrinho-texto").textContent = mensagem;
   bootstrap.Toast.getOrCreateInstance(document.getElementById("toast-carrinho")).show();
+}
+function notficaoCarrinho(quantidade) {
+  const badge = document.getElementById("badge-contador");
+  if (!badge) return;
+    if (quantidade > 0) {
+    badge.innerText = quantidade;             
+    badge.classList.remove("d-none");
+    badge.classList.remove("animation-pop");
+    badge.classList.add("animation-pop-reverse");
+  } else {
+    badge.classList.add("d-none");
+    badge.classList.add("animation-pop");
+  }
 }
 
 // =============================================================================

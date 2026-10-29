@@ -812,6 +812,8 @@ async function finalizarPedido() {
     }
     const pedido = await res.json();
     localStorage.setItem("pedidoParaAvaliar", pedido.id_pedido); // pede a avaliação quando for concluído
+    quantidade_acumulada = 0;
+
     carregarCarrinho();
     alunoInf(); // o saldo diminuiu
   } catch (erro) {

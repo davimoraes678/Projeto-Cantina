@@ -463,7 +463,7 @@ async function editarDados() {
                 <input type="text" id="aluno-nome" value="${aluno_inf.nome}" placeholder="Nome do Aluno" required>
                 <input type="email" id="aluno-email" value="${aluno_inf.email}" placeholder="E-mail" required>
                 <input type="password" id="aluno-senha" placeholder="Senha">
-                <button type="submit" id="btn-salvar-aluno">Cadastrar Aluno</button>
+                <button type="submit" id="btn-salvar-aluno">Finalizar Edição</button>
                 <button type="button" id="btn-cancelar-edicao-aluno">Cancelar edição</button>
             </form>
             <p id="aviso-edicao-aluno">Editando aluno - deixe a senha em branco pra não alterá-la.</p>
@@ -711,9 +711,12 @@ async function removerProduto(id) {
 
 // Botão "Adicionar ao pedido" de um card: lê a quantidade do campo ao lado e
 // grava o produto no carrinho (POST /carrinho/itens). Se já estiver lá, soma.
+let quantidade_acumulada = 0;
+
 async function adicionarItemAoCarrinho(id_produto) {
   const inputQuantidade = document.getElementById(`qtd-produto-${id_produto}`);
   const quantidade = parseInt(inputQuantidade.value);
+  quantidade_acumulada += quantidade;
   if (!quantidade || quantidade < 1) {
     alert("Informe uma quantidade válida.");
     return;
@@ -735,7 +738,7 @@ async function adicionarItemAoCarrinho(id_produto) {
     // Acha o produto no carrinho só para pegar o nome e mostrar no aviso
     const item = dados.itens.find((i) => i.id_produto === id_produto);
     avisarCarrinho(`${quantidade}x ${item.produto_nome} adicionado ao carrinho`);
-    notficaoCarrinho(quantidade)
+    notficaoCarrinho(quantidade_acumulada)
   } catch (erro) {
     console.error("Erro ao adicionar item:", erro);
     alert("Ocorreu um erro ao adicionar o produto.");
@@ -879,8 +882,14 @@ async function adicionarCombinacao(ids) {
       return;
     }
     renderizarCarrinho(dados);
+
   }
+  quantidade_acumulada += 1
+  notficaoCarrinho(quantidade_acumulada);
+
   avisarCarrinho("Combinação adicionada ao carrinho");
+
+
 }
 
 // Mostra o aviso (toast do Bootstrap) de que algo entrou no carrinho.
@@ -894,12 +903,9 @@ function notficaoCarrinho(quantidade) {
   if (!badge) return;
     if (quantidade > 0) {
     badge.innerText = quantidade;             
-    badge.classList.remove("d-none");
-    badge.classList.remove("animation-pop");
-    badge.classList.add("animation-pop-reverse");
+    badge.classList.remove("d-none"); 
   } else {
     badge.classList.add("d-none");
-    badge.classList.add("animation-pop");
   }
 }
 

@@ -1060,7 +1060,7 @@ function cardPedidoAndamento(pedido) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h2 class="h6 fw-bold mb-0">Pedido #${pedido.id_pedido}</h2>
+                        <h2 class="h6 fw-bold mb-0">Pedido ${pedido.codigo}</h2>
                         <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
                     </div>
                     <span class="badge rounded-pill text-bg-warning d-flex align-items-center gap-1">

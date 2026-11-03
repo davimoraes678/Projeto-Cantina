@@ -14,6 +14,7 @@ class Pedido(db.Model):
     valor_total = db.Column(db.Float, nullable=False, default=0.0)
     horario_agendado_retirada = db.Column(db.DateTime, nullable=True)
     data_hora_retirada = db.Column(db.DateTime, nullable=True)
+    codigo = db.Column(db.Integer)
 
     # nullable=True: permite apagar o aluno sem apagar/travar o pedido (o histórico é preservado).
     id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno'), nullable=True)
@@ -34,9 +35,11 @@ class Pedido(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, status=None, data_hora_retirada=None, horario_agendado_retirada=None):
+    def atualizar(self, status=None, codigo=None, data_hora_retirada=None, horario_agendado_retirada=None):
         if status is not None:
             self.status = status
+        if codigo is not None:
+            self.codigo = codigo
         if data_hora_retirada is not None:
             self.data_hora_retirada = data_hora_retirada
         if horario_agendado_retirada is not None:
@@ -66,6 +69,7 @@ class Pedido(db.Model):
             'data_hora_criacao': self.data_hora_criacao.isoformat() if self.data_hora_criacao else None,
             'status': self.status,
             'valor_total': self.valor_total,
+            'codigo': self.codigo,
             'horario_agendado_retirada': self.horario_agendado_retirada.isoformat() if self.horario_agendado_retirada else None,
             'data_hora_retirada': self.data_hora_retirada.isoformat() if self.data_hora_retirada else None,
             'id_aluno': self.id_aluno,

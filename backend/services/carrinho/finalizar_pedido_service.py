@@ -1,5 +1,6 @@
 from flask_login import current_user
-
+import random
+import string
 from backend.extensions import db
 from backend.models.pedido_model import Pedido
 
@@ -10,6 +11,7 @@ class FinalizarPedidoService:
     @staticmethod
     def executar():
         carrinho = Pedido.buscar_carrinho(current_user.id_aluno)
+        pedido = Pedido.buscar_por_id(current_userid_pedido)
         if not carrinho or not carrinho.itens:
             return {"erro": "O carrinho está vazio"}, 400
 
@@ -24,6 +26,14 @@ class FinalizarPedidoService:
         if current_user.saldo < carrinho.valor_total:
             return {"erro": "Saldo insuficiente. Adicione saldo na sua carteira."}, 400
 
+        # Cria o codigo de retirada
+        numeros = random.choices(string.digits, k=2)  # Ex: ['4', '9']
+        letras = random.choices(string.ascii_letters, k=2)  # Ex: ['a', 'Z']
+        codigo_lista = numeros + letras
+        random.shuffle(codigo_lista)
+        codigo_final = "".join(codigo_lista)
+        pedido.atualizar(codigo=codigo_final)
+        
         # Tudo certo: baixa o estoque, desconta o saldo e o carrinho vira pedido
         for item in carrinho.itens:
             item.produto.quantidade_estoque -= item.quantidade

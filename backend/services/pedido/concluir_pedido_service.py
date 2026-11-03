@@ -1,6 +1,5 @@
 from backend.models.pedido_model import Pedido
 
-
 class ConcluirPedidoService:
     """Caso de uso: marcar o pedido como entregue/concluído (admin/mestre).
 

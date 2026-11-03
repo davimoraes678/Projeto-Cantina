@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS produto (
 );
 
 -- id_aluno é NULLABLE de propósito: permite apagar o aluno sem apagar o pedido.
--- nome_aluno guarda uma "foto" do nome no momento do pedido, usada quando o
+-- nome_aluno guarda o nome no momento do pedido, usado quando o
 -- aluno já não existe mais.
 CREATE TABLE IF NOT EXISTS pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS pedido (
     data_hora_retirada DATETIME DEFAULT NULL,
     id_aluno INT NULL,
     nome_aluno VARCHAR(100) NULL,
+    codigo INT,
     FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE SET NULL
 );
 

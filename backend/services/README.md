@@ -53,6 +53,7 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `adicionar_item_carrinho_service.py` | `AdicionarItemCarrinhoService` | Adicionar produto: cria o carrinho na primeira vez; se o produto já está lá, **soma** a quantidade; guarda nome e preço do momento |
 | `remover_item_carrinho_service.py` | `RemoverItemCarrinhoService` | Remover item (só se for do carrinho **do aluno logado**) |
 | `finalizar_pedido_service.py` | `FinalizarPedidoService` | Conferir estoque e saldo; se tudo der, descontar os dois e o carrinho vira pedido `"Pendente"` |
+| `repetir_pedido_service.py` | `RepetirPedidoService` | "Pedir de novo": confere se o pedido é do aluno e adiciona os itens dele com o `AdicionarItemCarrinhoService` (pula produtos excluídos) |
 | `repetir_ultimo_pedido_service.py` | `RepetirUltimoPedidoService` | Pegar os itens do último pedido (procedure `sp_repetir_ultimo_pedido` pelo `PedidoRepository`; fora do MySQL, pelo ORM) e adicioná-los com o `AdicionarItemCarrinhoService` |
 
 ## `pedido/` — pedidos feitos
@@ -63,6 +64,7 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 | `buscar_pedido_service.py` | `BuscarPedidoService` | Ver um pedido (o dono, ou admin/mestre) |
 | `concluir_pedido_service.py` | `ConcluirPedidoService` | Marcar como `"Concluído"` (vai para o histórico) |
 | `cancelar_pedido_service.py` | `CancelarPedidoService` | Marcar como `"Cancelado"`, **devolvendo o valor para a carteira do aluno e os produtos para o estoque** |
+| `listar_meus_pedidos_service.py` | `ListarMeusPedidosService` | Os pedidos do aluno logado, sem o carrinho, o mais recente primeiro (página "Meus pedidos") |
 | `combinacoes_mais_pedidas_service.py` | `CombinacoesMaisPedidasService` | As 3 duplas de produtos mais pedidas juntas (procedure `sp_combinacoes_mais_pedidas`; fora do MySQL, pelo ORM) |
 
 ## `avaliacao/`

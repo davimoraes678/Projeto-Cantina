@@ -4,6 +4,7 @@ from flask_login import login_required
 from backend.services.carrinho.adicionar_item_carrinho_service import AdicionarItemCarrinhoService
 from backend.services.carrinho.finalizar_pedido_service import FinalizarPedidoService
 from backend.services.carrinho.remover_item_carrinho_service import RemoverItemCarrinhoService
+from backend.services.carrinho.repetir_pedido_service import RepetirPedidoService
 from backend.services.carrinho.repetir_ultimo_pedido_service import RepetirUltimoPedidoService
 from backend.services.carrinho.ver_carrinho_service import VerCarrinhoService
 
@@ -41,6 +42,12 @@ class ItemPedidoController:
 
     @staticmethod
     @login_required
+    def repetir_pedido(id_pedido):
+        resposta, status = RepetirPedidoService.executar(id_pedido)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @login_required
     def finalizar():
         resposta, status = FinalizarPedidoService.executar()
         return jsonify(resposta), status
@@ -52,4 +59,5 @@ bp_item_pedido.add_url_rule('', view_func=ItemPedidoController.ver_carrinho, met
 bp_item_pedido.add_url_rule('/itens', view_func=ItemPedidoController.adicionar_item, methods=['POST'])
 bp_item_pedido.add_url_rule('/itens/<int:id_item_pedido>', view_func=ItemPedidoController.remover_item, methods=['DELETE'])
 bp_item_pedido.add_url_rule('/repetir', view_func=ItemPedidoController.repetir_ultimo_pedido, methods=['POST'])
+bp_item_pedido.add_url_rule('/repetir/<int:id_pedido>', view_func=ItemPedidoController.repetir_pedido, methods=['POST'])
 bp_item_pedido.add_url_rule('/finalizar', view_func=ItemPedidoController.finalizar, methods=['POST'])

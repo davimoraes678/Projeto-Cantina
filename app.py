@@ -41,6 +41,7 @@ def create_app():
         '/front-end/conta.html',
         '/front-end/carteira.html',
         '/front-end/historico.html',
+        '/front-end/pedidos.html',
     }
     # Páginas só para admin e mestre: um aluno comum volta para a cantina
     PAGINAS_ADMIN = {

@@ -71,5 +71,7 @@ class Pedido(db.Model):
             'id_aluno': self.id_aluno,
             # Se o aluno ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'aluno_nome': self.aluno.nome if self.aluno else (self.nome_aluno or 'Aluno removido'),
-            'itens': [item.to_dict() for item in self.itens]
+            'itens': [item.to_dict() for item in self.itens],
+            # A tela "Meus pedidos" usa para mostrar o botão "Avaliar" só uma vez
+            'avaliado': self.avaliacao is not None
         }

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#aa0e1b">
+    <title>Meus pedidos - Cantina Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="/front-end/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+                <img src="/front-end/assets/logo.png" alt="" width="36" height="36">
+                <span>Cantina <span class="text-cantina-amarelo">Real</span></span>
+            </a>
+            <ul class="navbar-nav d-none d-md-flex me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Cardápio</a></li>
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="/front-end/pedidos.html">Meus pedidos</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
+                <li class="nav-item so-admin" style="display:none;"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
+                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>R$ <span data-aluno="saldo">0,00</span>
+                </a>
+                <div class="dropdown d-none d-md-block">
+                    <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-aluno="primeiro-nome">Aluno</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="/front-end/conta.html">Meu perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger btn-logout" type="button">Sair</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-3 py-md-4" style="max-width: 760px;">
+        <h1 class="h4 fw-bold mb-3">Meus pedidos</h1>
+
+        <!-- Abas do Bootstrap (nav-pills + tab-content): em andamento / histórico -->
+        <ul class="nav nav-pills nav-fill bg-white rounded-pill shadow-sm p-1 mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill active" id="aba-andamento-btn" data-bs-toggle="pill" data-bs-target="#aba-andamento" type="button" role="tab" aria-controls="aba-andamento" aria-selected="true">
+                    Em andamento <span class="badge rounded-pill bg-warning text-dark ms-1 d-none" id="contador-andamento"></span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill" id="aba-historico-btn" data-bs-toggle="pill" data-bs-target="#aba-historico" type="button" role="tab" aria-controls="aba-historico" aria-selected="false">
+                    Histórico
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Pedidos "Pendente", montados pelo alunos.js (carregarMeusPedidos) -->
+            <div class="tab-pane fade show active" id="aba-andamento" role="tabpanel" aria-labelledby="aba-andamento-btn" tabindex="0">
+                <div id="lista-andamento">
+                    <div class="card border-0 shadow-sm placeholder-glow" aria-hidden="true"><div class="card-body"><span class="placeholder col-4 mb-3"></span><span class="placeholder col-12 mb-2"></span><span class="placeholder col-7"></span></div></div>
+                </div>
+            </div>
+            <!-- Pedidos concluídos e cancelados, com "Pedir de novo" e "Avaliar" -->
+            <div class="tab-pane fade" id="aba-historico" role="tabpanel" aria-labelledby="aba-historico-btn" tabindex="0">
+                <div id="lista-historico"></div>
+            </div>
+        </div>
+
+        <div class="d-md-none py-5"></div>
+    </main>
+
+    <!-- Celular: barra de navegação de baixo -->
+    <div class="fixed-bottom d-md-none">
+        <nav class="nav nav-justified bg-white border-top shadow" aria-label="Navegação principal">
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#shop"></use></svg>Cardápio
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 active" aria-current="page" href="/front-end/pedidos.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>Pedidos
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/carteira.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>Carteira
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/conta.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person-circle"></use></svg>Perfil
+            </a>
+        </nav>
+    </div>
+
+    <!-- Avaliação: aberta pelo botão "Avaliar" de um pedido concluído -->
+    <div class="modal fade" id="modal-avaliacao" tabindex="-1" aria-labelledby="modal-avaliacao-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content border-0 rounded-4" id="form-avaliacao">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="modal-avaliacao-titulo">O que achou do pedido?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="btn-group mb-3" role="group" aria-label="Nota de 1 a 5">
+                        <input type="radio" class="btn-check" name="nota" id="nota-1" value="1" required><label class="btn btn-outline-warning" for="nota-1">1 ★</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-2" value="2"><label class="btn btn-outline-warning" for="nota-2">2 ★</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-3" value="3"><label class="btn btn-outline-warning" for="nota-3">3 ★</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-4" value="4"><label class="btn btn-outline-warning" for="nota-4">4 ★</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-5" value="5"><label class="btn btn-outline-warning" for="nota-5">5 ★</label>
+                    </div>
+                    <div class="form-floating text-start">
+                        <textarea class="form-control" id="avaliacao-comentario" placeholder="Comentário" style="height: 90px"></textarea>
+                        <label for="avaliacao-comentario">Comentário (opcional)</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-link text-body-secondary" data-bs-dismiss="modal">Agora não</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Enviar avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+    <script src="/front-end/js/alunos.js" defer></script>
+</body>
+</html>

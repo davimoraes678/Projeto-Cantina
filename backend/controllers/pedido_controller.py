@@ -6,6 +6,7 @@ from backend.services.pedido.buscar_pedido_service import BuscarPedidoService
 from backend.services.pedido.cancelar_pedido_service import CancelarPedidoService
 from backend.services.pedido.combinacoes_mais_pedidas_service import CombinacoesMaisPedidasService
 from backend.services.pedido.concluir_pedido_service import ConcluirPedidoService
+from backend.services.pedido.listar_meus_pedidos_service import ListarMeusPedidosService
 from backend.services.pedido.listar_pedidos_service import ListarPedidosService
 
 
@@ -16,6 +17,12 @@ class PedidoController:
     @admin_required
     def listar():
         resposta, status = ListarPedidosService.executar()
+        return jsonify(resposta), status
+
+    @staticmethod
+    @login_required
+    def listar_meus():
+        resposta, status = ListarMeusPedidosService.executar()
         return jsonify(resposta), status
 
     @staticmethod
@@ -46,6 +53,7 @@ class PedidoController:
 # URLs do recurso: /api/pedidos/...
 bp_pedido = Blueprint('pedidos', __name__, url_prefix='/api/pedidos')
 bp_pedido.add_url_rule('', view_func=PedidoController.listar, methods=['GET'])
+bp_pedido.add_url_rule('/meus', view_func=PedidoController.listar_meus, methods=['GET'])
 bp_pedido.add_url_rule('/combinacoes', view_func=PedidoController.combinacoes_mais_pedidas, methods=['GET'])
 bp_pedido.add_url_rule('/<int:id_pedido>', view_func=PedidoController.buscar, methods=['GET'])
 bp_pedido.add_url_rule('/<int:id_pedido>/concluir', view_func=PedidoController.concluir, methods=['POST'])

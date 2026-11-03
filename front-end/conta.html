@@ -3,37 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Conta - Cantina Real</title>
+    <meta name="theme-color" content="#aa0e1b">
+    <title>Meu perfil - Cantina Real</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
-<body class="bg-body-tertiary">
-    <nav class="navbar navbar-dark bg-cantina">
+<body>
+    <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
-            <a class="btn btn-outline-light" href="/">← Voltar</a>
-            <span class="navbar-brand mb-0 fw-bold">Minha Conta</span>
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+                <img src="/front-end/assets/logo.png" alt="" width="36" height="36">
+                <span>Cantina <span class="text-cantina-amarelo">Real</span></span>
+            </a>
+            <ul class="navbar-nav d-none d-md-flex me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Cardápio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
+                <li class="nav-item so-admin" style="display:none;"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
+                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>R$ <span data-aluno="saldo">0,00</span>
+                </a>
+                <div class="dropdown d-none d-md-block">
+                    <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-aluno="primeiro-nome">Aluno</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="/front-end/conta.html">Meu perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger btn-logout" type="button">Sair</button></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main class="container py-4" style="max-width: 600px;">
-        <section class="card shadow-sm">
-            <div class="card-body">
-                <dl class="mb-4">
-                    <h3>Olá, <span id="nome-aluno">Aluno</span>!</h3>
-                    <dt>E-mail</dt>
-                    <dd id="email-aluno">Email</dd>
-                </dl>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" type="button" id="editar-dados" onclick="editarDados()">Editar Dados</button>
-                    <!-- O alunos.js monta o formulário de edição aqui -->
-                    <div id="form-editar-dados"></div>
-                    <button class="btn btn-outline-secondary" type="button" id="btn-logout">Sair</button>
-                    <button class="btn btn-outline-danger" type="button" id="remover-aluno" onclick="removerAluno()">Remover minha conta</button>
+    <main class="container py-3 py-md-4" style="max-width: 560px;">
+        <!-- Cabeçalho do perfil: iniciais, nome, e-mail e função -->
+        <section class="card border-0 shadow-sm rounded-4 mb-3">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-warning text-danger-emphasis fw-bold fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 64px; height: 64px;" data-aluno="iniciais">A</div>
+                <div class="flex-grow-1 text-truncate">
+                    <h1 class="h5 fw-bold mb-0 text-truncate" data-aluno="nome">Aluno</h1>
+                    <p class="text-body-secondary small mb-1 text-truncate" data-aluno="email">e-mail</p>
+                    <span class="badge rounded-pill text-bg-light border text-capitalize" data-aluno="funcao">aluno</span>
                 </div>
             </div>
         </section>
+
+        <!-- Atalhos -->
+        <div class="list-group shadow-sm rounded-4 mb-3">
+            <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/carteira.html">
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>
+                <span class="flex-grow-1">Carteira</span>
+                <span class="badge rounded-pill text-bg-warning">R$ <span data-aluno="saldo">0,00</span></span>
+            </a>
+            <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/pedidos.html">
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>
+                <span class="flex-grow-1">Meus pedidos</span>
+                <span aria-hidden="true">›</span>
+            </a>
+            <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
+            <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 so-admin" style="display:none;" href="/front-end/admin.html">
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#gear"></use></svg>
+                <span class="flex-grow-1">Administração</span>
+                <span aria-hidden="true">›</span>
+            </a>
+            <button class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#form-editar-dados" aria-expanded="false" aria-controls="form-editar-dados">
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#pencil-square"></use></svg>
+                <span class="flex-grow-1">Editar dados</span>
+                <span aria-hidden="true">›</span>
+            </button>
+        </div>
+
+        <!-- Editar dados: abre com o collapse do Bootstrap. O alunos.js preenche e envia PUT /api/alunos/atual -->
+        <div class="collapse" id="form-editar-dados">
+            <form class="card card-body border-0 shadow-sm rounded-4 mb-3 d-grid gap-2" id="form-editar-aluno">
+                <div class="form-floating">
+                    <input class="form-control" type="text" id="aluno-nome" placeholder="Nome" required>
+                    <label for="aluno-nome">Nome</label>
+                </div>
+                <div class="form-floating">
+                    <input class="form-control" type="email" id="aluno-email" placeholder="E-mail" required>
+                    <label for="aluno-email">E-mail</label>
+                </div>
+                <div class="form-floating">
+                    <input class="form-control" type="password" id="aluno-senha" placeholder="Nova senha" autocomplete="new-password">
+                    <label for="aluno-senha">Nova senha (deixe em branco para manter)</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary rounded-pill flex-fill" type="submit">Salvar</button>
+                    <button class="btn btn-outline-secondary rounded-pill flex-fill" type="button" data-bs-toggle="collapse" data-bs-target="#form-editar-dados">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="list-group shadow-sm rounded-4 mb-3">
+            <button class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 text-danger btn-logout" type="button">
+                <svg class="icone fs-5" aria-hidden="true"><use href="/front-end/assets/icones.svg#box-arrow-right"></use></svg>
+                <span>Sair</span>
+            </button>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-link btn-sm text-body-secondary" type="button" onclick="removerAluno()">Remover minha conta</button>
+        </div>
+
+        <div class="d-md-none py-5"></div>
     </main>
 
-    <script src="/front-end/js/alunos.js"></script>
+    <!-- Celular: barra de navegação de baixo -->
+    <div class="fixed-bottom d-md-none">
+        <nav class="nav nav-justified bg-white border-top shadow" aria-label="Navegação principal">
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#shop"></use></svg>Cardápio
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/pedidos.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>Pedidos
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/carteira.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>Carteira
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 active" aria-current="page" href="/front-end/conta.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person-circle"></use></svg>Perfil
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+    <script src="/front-end/js/alunos.js" defer></script>
 </body>
 </html>

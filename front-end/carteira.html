@@ -3,39 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#aa0e1b">
     <title>Carteira - Cantina Real</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
-<body class="bg-body-tertiary">
-    <nav class="navbar navbar-dark bg-cantina">
+<body>
+    <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
-            <a class="btn btn-outline-light" href="/">← Voltar</a>
-            <span class="navbar-brand mb-0 fw-bold">Carteira</span>
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+                <img src="/front-end/assets/logo.png" alt="" width="36" height="36">
+                <span>Cantina <span class="text-cantina-amarelo">Real</span></span>
+            </a>
+            <ul class="navbar-nav d-none d-md-flex me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Cardápio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="/front-end/carteira.html">Carteira</a></li>
+                <li class="nav-item so-admin" style="display:none;"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
+                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>R$ <span data-aluno="saldo">0,00</span>
+                </a>
+                <div class="dropdown d-none d-md-block">
+                    <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-aluno="primeiro-nome">Aluno</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="/front-end/conta.html">Meu perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger btn-logout" type="button">Sair</button></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main class="container py-4" style="max-width: 600px;">
-        <section class="card shadow-sm">
-            <div class="card-body">
-                <p class="text-body-secondary mb-1">Saldo atual</p>
-                <p class="display-6 fw-bold">R$ <span id="saldo-aluno">0.00</span></p>
+    <main class="container py-3 py-md-4" style="max-width: 560px;">
+        <h1 class="h4 fw-bold mb-3">Carteira</h1>
 
-                <!-- Recarga: o alunos.js envia POST /api/alunos/atual/recarga com {valor} -->
-                <form id="form-recarga" class="d-grid gap-2">
-                    <label class="form-label mb-0" for="recarga-valor">Quanto quer adicionar?</label>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="somarRecarga(5)">+ R$ 5</button>
-                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="somarRecarga(10)">+ R$ 10</button>
-                        <button class="btn btn-outline-primary flex-fill" type="button" onclick="somarRecarga(20)">+ R$ 20</button>
-                    </div>
-                    <input class="form-control form-control-lg" type="number" step="0.01" min="0.01" max="500" id="recarga-valor" placeholder="Outro valor (R$)" required>
-                    <button class="btn btn-primary btn-lg" type="submit">Adicionar saldo</button>
-                </form>
+        <!-- Cartão com o saldo -->
+        <section class="bg-cantina bg-gradient text-white rounded-4 shadow p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <span class="opacity-75">Saldo disponível</span>
+                <img src="/front-end/assets/logo.png" alt="" width="40" height="40">
             </div>
+            <p class="display-5 fw-bold mb-1">R$ <span data-aluno="saldo">0,00</span></p>
+            <p class="mb-0 text-uppercase small opacity-75" data-aluno="nome">Aluno</p>
         </section>
+
+        <!-- Recarga: o alunos.js envia POST /api/alunos/atual/recarga com {valor} -->
+        <section class="card border-0 shadow-sm rounded-4">
+            <form id="form-recarga" class="card-body d-grid gap-3">
+                <h2 class="h6 fw-bold mb-0">Adicionar saldo</h2>
+                <!-- Atalhos: cada toque soma ao valor do campo -->
+                <div class="d-flex gap-2" role="group" aria-label="Atalhos de valor">
+                    <button class="btn btn-outline-primary rounded-pill flex-fill px-0 text-nowrap" type="button" onclick="somarRecarga(5)">+ R$ 5</button>
+                    <button class="btn btn-outline-primary rounded-pill flex-fill px-0 text-nowrap" type="button" onclick="somarRecarga(10)">+ R$ 10</button>
+                    <button class="btn btn-outline-primary rounded-pill flex-fill px-0 text-nowrap" type="button" onclick="somarRecarga(20)">+ R$ 20</button>
+                    <button class="btn btn-outline-primary rounded-pill flex-fill px-0 text-nowrap" type="button" onclick="somarRecarga(50)">+ R$ 50</button>
+                </div>
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text">R$</span>
+                    <input class="form-control" type="number" step="0.01" min="0.01" max="500" id="recarga-valor" placeholder="0,00" inputmode="decimal" required aria-label="Valor da recarga">
+                </div>
+                <button class="btn btn-warning btn-lg rounded-pill fw-semibold" type="submit">Adicionar saldo</button>
+                <p class="small text-body-secondary text-center mb-0">Até R$ 500,00 por recarga.</p>
+            </form>
+        </section>
+
+        <div class="d-md-none py-5"></div>
     </main>
 
-    <script src="/front-end/js/alunos.js"></script>
+    <!-- Celular: barra de navegação de baixo -->
+    <div class="fixed-bottom d-md-none">
+        <nav class="nav nav-justified bg-white border-top shadow" aria-label="Navegação principal">
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#shop"></use></svg>Cardápio
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/pedidos.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>Pedidos
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 active" aria-current="page" href="/front-end/carteira.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>Carteira
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/conta.html">
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person-circle"></use></svg>Perfil
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+    <script src="/front-end/js/alunos.js" defer></script>
 </body>
 </html>

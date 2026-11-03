@@ -74,6 +74,7 @@ Todas as rotas usam o **aluno logado** (`current_user`), então nenhuma recebe `
 | `POST` | `/itens` | `{id_produto, quantidade}` | `201` carrinho atualizado (soma se o produto já estiver) · `400` quantidade inválida · `404` produto |
 | `DELETE` | `/itens/<id_item_pedido>` | — | `200` · `404` se o item não for do carrinho do aluno |
 | `POST` | `/repetir` | — | `201` carrinho com os itens do último pedido somados · `404` se não houver pedido anterior |
+| `POST` | `/repetir/<id_pedido>` | — | `201` carrinho com os itens daquele pedido somados (botão "Pedir de novo") · `404` se o pedido não for do aluno ou nenhum produto dele estiver à venda |
 | `POST` | `/finalizar` | — | `200` pedido agora `"Pendente"`, estoque e saldo descontados · `400` carrinho vazio, estoque ou saldo insuficiente |
 
 Formato do carrinho (igual ao de um pedido):
@@ -87,7 +88,8 @@ Formato do carrinho (igual ao de um pedido):
   "itens": [
     { "id_item_pedido": 5, "id_produto": 1, "produto_nome": "Suco de Laranja",
       "quantidade": 2, "preco_unitario_cobrado": 5.0, "subtotal": 10.0, "id_pedido": 3 }
-  ]
+  ],
+  "avaliado": false
 }
 ```
 
@@ -96,6 +98,7 @@ Formato do carrinho (igual ao de um pedido):
 | Método | Rota | | O que faz |
 |---|---|---|---|
 | `GET` | `` (raiz) | admin ou mestre | Lista os pedidos (**sem** os carrinhos em aberto) |
+| `GET` | `/meus` | 🔒 | Os pedidos do aluno logado (sem o carrinho), o mais recente primeiro |
 | `GET` | `/combinacoes` | 🔒 | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
 | `GET` | `/<id>` | 🔒 | Um pedido (só o dono ou admin/mestre; senão `404`) |
 | `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` · `400` se já estiver concluído ou cancelado |

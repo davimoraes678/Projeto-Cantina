@@ -29,17 +29,18 @@ Caminho relativo: a API é chamada no mesmo endereço da página. Funciona no `1
 
 | Assunto | Funções | Rotas usadas |
 |---|---|---|
-| Login | listener de `#form-aluno-login`, listener de `#btn-logout`, `alunoInf()` (nome, e-mail e saldo) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
-| Carteira | listener de `#form-recarga`, `somarRecarga` (botões + R$ 5/10/20, até R$ 500) | `POST /alunos/atual/recarga` com `{valor}` |
-| Alunos | listener de `#form-aluno`, `carregarAlunos`, `promoverAluno`, `excluirAluno`, `editarDados`, `removerAluno`, `funcaoPorAluno` | `POST /alunos/registro`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>`, `PUT` e `DELETE /alunos/atual` |
-| Produtos | listener de `#form-produto`, `enviarImagem`, `carregarProdutos`, `buscarProdutos`, `filtrar`, `editarProduto`, `sairModoEdicaoProduto`, `removerProduto` | `/produtos`, `/produtos/buscar`, `/produtos/<id>/imagem` |
-| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido`, `avisarCarrinho` (toast "adicionado ao carrinho") | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
+| Login | listener de `#form-aluno-login`, `sair` (botões `.btn-logout`), `alunoInf()` (preenche todos os `data-aluno="nome\|primeiro-nome\|email\|saldo\|iniciais\|funcao"`) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
+| Carteira | listener de `#form-recarga`, `somarRecarga` (botões + R$ 5/10/20/50, até R$ 500) | `POST /alunos/atual/recarga` com `{valor}` |
+| Alunos | listener de `#form-aluno`, `carregarAlunos`, `promoverAluno`, `excluirAluno`, listener de `#form-editar-aluno`, `removerAluno`, `funcaoPorAluno` | `POST /alunos/registro`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>`, `PUT` e `DELETE /alunos/atual` |
+| Produtos | listener de `#form-produto`, `enviarImagem`, `carregarProdutos`, `buscarProdutos`, `desenharCardsProdutos` (busca pelo nome sem chamar a API), `cardProduto`, `mudarQuantidade`, `desenharTabelaProdutosAdmin`, `filtrar`, `editarProduto`, `sairModoEdicaoProduto`, `removerProduto` | `/produtos`, `/produtos/buscar`, `/produtos/<id>/imagem` |
+| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido`, `atualizarAvisoSaldo` ("Saldo insuficiente") | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
 | Combinações | `carregarCombinacoes`, `adicionarCombinacao` | `GET /pedidos/combinacoes`, `POST /carrinho/itens` |
+| Meus pedidos | `carregarMeusPedidos` (aviso no cardápio e as abas do `pedidos.html`), `cardPedidoAndamento`, `cardPedidoHistorico`, `pedirDeNovo` | `GET /pedidos/meus`, `POST /carrinho/repetir/<id>` |
 | Pedidos | `carregarPedidos` (no `admin.html` mostra os em andamento; no `historico.html`, marcado com `data-historico="sim"`, os concluídos e cancelados), `concluirPedido`, `cancelarPedido` (os dois usam `mudarPedido`) | `GET /pedidos`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar` |
-| Avaliação | `verificarAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>/avaliacao` |
+| Avaliação | `verificarAvaliacao`, `abrirAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>/avaliacao` |
 
-**Como a avaliação chega ao aluno:** ao finalizar, o `finalizarPedido` guarda o número do pedido no navegador (`localStorage`, chave `pedidoParaAvaliar`). Ao abrir o `index.html`, o `verificarAvaliacao` consulta esse pedido e, se estiver `Concluído`, abre a janela. Depois de avaliar (ou no logout) a chave é apagada. A janela só aparece no navegador onde o pedido foi feito.
-| Util | `escapeAttr` | — |
+**Como a avaliação chega ao aluno:** ao finalizar, o `finalizarPedido` guarda o número do pedido no navegador (`localStorage`, chave `pedidoParaAvaliar`). Ao abrir o cardápio, o `verificarAvaliacao` consulta esse pedido e, se estiver `Concluído` e ainda sem avaliação, abre a janela. Depois de avaliar (ou no logout) a chave é apagada. Em qualquer navegador, o aluno também pode avaliar pelo botão "Avaliar" do histórico em `pedidos.html`.
+| Util | `avisar` (toast do Bootstrap no topo da tela), `reais` (12.5 → "R$ 12,50"), `formatarData` (UTC do back-end → horário local), `escapeHtml`, `escapeAttr` | — |
 
 **O formulário `#form-aluno` faz duas coisas.** Com `editandoAlunoId = null`, ele **cadastra** (`POST /alunos/registro`) e leva para `/`. Com um número, ele **edita** no admin (`PUT /alunos/<id>`). O formulário de produto funciona igual, com `editandoProdutoId`.
 

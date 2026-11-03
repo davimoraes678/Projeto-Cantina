@@ -73,7 +73,9 @@ Quem pode usar: 🎓 aluno (qualquer usuário logado) · 🛠️ admin · 👑 m
 | 25 | Concluir pedido | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
 | 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
 | 27 | Histórico de pedidos (concluídos e cancelados) | 🛠️ 👑 | `historico.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | 🎓 | `index.html` (janela automática) | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
+| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | 🎓 | `index.html` (janela automática) e `pedidos.html` (botão "Avaliar") | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
+| 29 | Meus pedidos: em andamento e histórico | 🎓 | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
+| 30 | Pedir de novo um pedido antigo | 🎓 | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
 
 ## Arquitetura
 

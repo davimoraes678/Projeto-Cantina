@@ -4,7 +4,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 
 | Arquivo | Endereço | Login | Para quê |
 |---|---|---|---|
-| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: busca pelo nome, categorias, filtros de preço, combos mais pedidos e os cards dos produtos. O botão 🛒 abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo; a janela de avaliação abre quando o último pedido é concluído |
+| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: busca pelo nome, categorias, filtros de preço, combos mais pedidos e os cards dos produtos. O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo; a janela de avaliação abre quando o último pedido é concluído |
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (pedidos `Pendente`, atualiza a cada 30 s) e "Histórico" (concluídos e cancelados, com "Pedir de novo" e "Avaliar") |
@@ -13,7 +13,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `admin.html` | `/front-end/admin.html` | Admin ou mestre | **Admin:** só os pedidos em andamento (botões Concluir e Cancelar) e o botão do histórico. **Mestre:** também a lista de alunos (promover, excluir) e o cadastro de produtos. Aluno comum é mandado de volta para `/` |
 | `historico.html` | `/front-end/historico.html` | Admin ou mestre | Pedidos concluídos e cancelados, do mais recente para o mais antigo |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
-| `assets/icones.svg` | | | Os ícones usados no site (Bootstrap Icons, num arquivo só): `<svg class="icone"><use href="/front-end/assets/icones.svg#cart3"></use></svg>` |
+| `assets/icones.svg` | | | Os ícones usados no site ([Material Symbols](https://fonts.google.com/icons) do Google Fonts, estilo Rounded, num arquivo só): `<svg class="icone"><use href="/front-end/assets/icones.svg#shopping_cart"></use></svg>`. Para adicionar um ícone, copie o `<path>` do SVG baixado no Google Fonts para um novo `<symbol id="nome" viewBox="0 -960 960 960">` |
 | `assets/logo.png` | | | Logo da Cantina Real |
 | [`js/alunos.js`](js/README.md) | | | **Todo** o JavaScript das páginas |
 

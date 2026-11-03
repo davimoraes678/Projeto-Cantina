@@ -23,7 +23,7 @@
             </ul>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
-                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>R$ <span data-aluno="saldo">0,00</span>
+                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#account_balance_wallet"></use></svg>R$ <span data-aluno="saldo">0,00</span>
                 </a>
                 <div class="dropdown d-none d-md-block">
                     <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -55,25 +55,25 @@
         <!-- Atalhos -->
         <div class="list-group shadow-sm rounded-4 mb-3">
             <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/carteira.html">
-                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#account_balance_wallet"></use></svg>
                 <span class="flex-grow-1">Carteira</span>
                 <span class="badge rounded-pill text-bg-warning">R$ <span data-aluno="saldo">0,00</span></span>
             </a>
             <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/pedidos.html">
-                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt_long"></use></svg>
                 <span class="flex-grow-1">Meus pedidos</span>
-                <span aria-hidden="true">›</span>
+                <svg class="icone text-body-tertiary" aria-hidden="true"><use href="/front-end/assets/icones.svg#chevron_right"></use></svg>
             </a>
             <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
             <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 so-admin" style="display:none;" href="/front-end/admin.html">
-                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#gear"></use></svg>
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#settings"></use></svg>
                 <span class="flex-grow-1">Administração</span>
-                <span aria-hidden="true">›</span>
+                <svg class="icone text-body-tertiary" aria-hidden="true"><use href="/front-end/assets/icones.svg#chevron_right"></use></svg>
             </a>
             <button class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#form-editar-dados" aria-expanded="false" aria-controls="form-editar-dados">
-                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#pencil-square"></use></svg>
+                <svg class="icone fs-5 text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#edit"></use></svg>
                 <span class="flex-grow-1">Editar dados</span>
-                <span aria-hidden="true">›</span>
+                <svg class="icone text-body-tertiary" aria-hidden="true"><use href="/front-end/assets/icones.svg#chevron_right"></use></svg>
             </button>
         </div>
 
@@ -101,7 +101,7 @@
 
         <div class="list-group shadow-sm rounded-4 mb-3">
             <button class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 text-danger btn-logout" type="button">
-                <svg class="icone fs-5" aria-hidden="true"><use href="/front-end/assets/icones.svg#box-arrow-right"></use></svg>
+                <svg class="icone fs-5" aria-hidden="true"><use href="/front-end/assets/icones.svg#logout"></use></svg>
                 <span>Sair</span>
             </button>
         </div>
@@ -117,16 +117,16 @@
     <div class="fixed-bottom d-md-none">
         <nav class="nav nav-justified bg-white border-top shadow" aria-label="Navegação principal">
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#shop"></use></svg>Cardápio
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#restaurant"></use></svg>Cardápio
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/pedidos.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>Pedidos
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt_long"></use></svg>Pedidos
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/carteira.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>Carteira
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#account_balance_wallet"></use></svg>Carteira
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2 active" aria-current="page" href="/front-end/conta.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person-circle"></use></svg>Perfil
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person"></use></svg>Perfil
             </a>
         </nav>
     </div>

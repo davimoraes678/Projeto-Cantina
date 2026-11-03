@@ -539,7 +539,7 @@ function mostrarSaudacao() {
   const el = document.getElementById("saudacao-periodo");
   if (!el) return;
   const hora = new Date().getHours();
-  el.textContent = hora < 12 ? "Bom dia ☀️" : hora < 18 ? "Boa tarde 🌤️" : "Boa noite 🌙";
+  el.textContent = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 }
 
 // =============================================================================
@@ -635,7 +635,7 @@ function desenharCardsProdutos() {
   if (produtos.length === 0) {
     tabela.innerHTML = `
             <div class="col-12 text-center text-body-secondary py-5">
-                <p class="display-6 mb-2">🔎</p>
+                <p class="display-6 mb-2"><svg class="icone" aria-hidden="true"><use href="${ICONES}#search_off"></use></svg></p>
                 <p class="mb-0">Nenhum produto encontrado.</p>
             </div>
         `;
@@ -646,13 +646,13 @@ function desenharCardsProdutos() {
 }
 
 // Monta o HTML do card de um produto.
-//   - foto: emoji da categoria por trás; a imagem cobre o emoji e some (onerror) se não houver foto
+//   - foto: ícone da categoria por trás; a imagem cobre o ícone e some (onerror) se não houver foto
 //   - selo: "Esgotado" (estoque 0) ou "Últimas N" (estoque até 5)
 function cardProduto(prod) {
   const id = prod.id_produto;
   const estoque = parseInt(prod.quantidade_estoque) || 0;
   const esgotado = estoque <= 0;
-  const emojis = { Salgado: "🥟", Bebida: "🥤", Doce: "🍫" };
+  const icones = { Salgado: "bakery_dining", Bebida: "local_cafe", Doce: "cake" };
 
   let selo = "";
   if (esgotado) selo = `<span class="badge text-bg-secondary position-absolute top-0 start-0 m-2">Esgotado</span>`;
@@ -663,7 +663,7 @@ function cardProduto(prod) {
             <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="position-relative">
                     <div class="ratio ratio-4x3 bg-warning-subtle rounded-top-4">
-                        <div class="d-flex align-items-center justify-content-center fs-1" aria-hidden="true">${emojis[prod.categoria] || "🍽️"}</div>
+                        <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true"><svg class="icone"><use href="${ICONES}#${icones[prod.categoria] || "restaurant"}"></use></svg></div>
                         <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="${escapeHtml(prod.nome)}"
                              class="object-fit-contain p-2 ${esgotado ? "opacity-50" : ""}" loading="lazy" onerror="this.remove()">
                     </div>
@@ -675,12 +675,12 @@ function cardProduto(prod) {
                     <p class="fw-bold text-primary mb-2">${reais(prod.preco_atual)}</p>
                     <div class="mt-auto d-flex align-items-center justify-content-between gap-1">
                         <div class="input-group input-group-sm seletor-qtd w-auto flex-nowrap">
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}>−</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}><svg class="icone" aria-hidden="true"><use href="${ICONES}#remove"></use></svg></button>
                             <input class="form-control text-center px-0" type="number" id="qtd-produto-${id}" value="1" min="1" max="${estoque}" inputmode="numeric" aria-label="Quantidade de ${escapeHtml(prod.nome)}" ${esgotado ? "disabled" : ""}>
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}>+</button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}><svg class="icone" aria-hidden="true"><use href="${ICONES}#add"></use></svg></button>
                         </div>
                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-2" onclick="adicionarItemAoCarrinho(${id})" aria-label="Adicionar ${escapeHtml(prod.nome)} ao carrinho" ${esgotado ? "disabled" : ""}>
-                            <svg class="icone fs-6" aria-hidden="true"><use href="${ICONES}#cart3"></use></svg>
+                            <svg class="icone fs-6" aria-hidden="true"><use href="${ICONES}#shopping_cart"></use></svg>
                         </button>
                     </div>
                 </div>
@@ -859,7 +859,7 @@ function renderizarCarrinho(carrinho) {
                 </div>
                 <span class="fw-semibold text-nowrap">${reais(item.subtotal)}</span>
                 <button class="btn btn-sm btn-link text-danger p-1" onclick="removerItemDoCarrinho(${item.id_item_pedido})" aria-label="Remover ${escapeHtml(item.produto_nome)}">
-                    <svg class="icone" aria-hidden="true"><use href="${ICONES}#trash3"></use></svg>
+                    <svg class="icone" aria-hidden="true"><use href="${ICONES}#delete"></use></svg>
                 </button>
             </li>
         `).join("");
@@ -1033,10 +1033,10 @@ async function carregarMeusPedidos() {
 
       listaAndamento.innerHTML = andamento.length
         ? andamento.map(cardPedidoAndamento).join("")
-        : estadoVazio("🍽️", "Nenhum pedido em andamento", "Que tal um lanche?");
+        : estadoVazio("restaurant", "Nenhum pedido em andamento", "Que tal um lanche?");
       listaHistorico.innerHTML = historico.length
         ? historico.map(cardPedidoHistorico).join("")
-        : estadoVazio("🧾", "Nenhum pedido finalizado ainda", "Seus pedidos concluídos aparecem aqui.");
+        : estadoVazio("receipt_long", "Nenhum pedido finalizado ainda", "Seus pedidos concluídos aparecem aqui.");
     }
   } catch (erro) {
     console.error("Erro ao carregar meus pedidos:", erro);
@@ -1064,7 +1064,7 @@ function cardPedidoAndamento(pedido) {
                         <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
                     </div>
                     <span class="badge rounded-pill text-bg-warning d-flex align-items-center gap-1">
-                        <svg class="icone" aria-hidden="true"><use href="${ICONES}#hourglass-split"></use></svg> Em preparo
+                        <svg class="icone" aria-hidden="true"><use href="${ICONES}#hourglass_top"></use></svg> Em preparo
                     </span>
                 </div>
                 <div class="progress mb-1" role="progressbar" aria-label="Andamento do pedido" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="height: 8px;">
@@ -1089,9 +1089,9 @@ function cardPedidoHistorico(pedido) {
   let avaliar = "";
   if (concluido && !pedido.avaliado) {
     avaliar = `<button class="btn btn-warning btn-sm rounded-pill" type="button" onclick="abrirAvaliacao(${pedido.id_pedido})">
-                       <svg class="icone" aria-hidden="true"><use href="${ICONES}#star-fill"></use></svg> Avaliar</button>`;
+                       <svg class="icone" aria-hidden="true"><use href="${ICONES}#star"></use></svg> Avaliar</button>`;
   } else if (pedido.avaliado) {
-    avaliar = `<small class="text-body-secondary align-self-center">★ Avaliado</small>`;
+    avaliar = `<small class="text-body-secondary align-self-center"><svg class="icone text-warning" aria-hidden="true"><use href="${ICONES}#star"></use></svg> Avaliado</small>`;
   }
 
   return `
@@ -1111,7 +1111,7 @@ function cardPedidoHistorico(pedido) {
                     <div class="d-flex gap-2">
                         ${avaliar}
                         <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">
-                            <svg class="icone" aria-hidden="true"><use href="${ICONES}#arrow-repeat"></use></svg> Pedir de novo
+                            <svg class="icone" aria-hidden="true"><use href="${ICONES}#replay"></use></svg> Pedir de novo
                         </button>
                     </div>
                 </div>
@@ -1120,11 +1120,11 @@ function cardPedidoHistorico(pedido) {
     `;
 }
 
-// Mensagem de lista vazia com um botão para o cardápio.
-function estadoVazio(emoji, titulo, texto) {
+// Mensagem de lista vazia (com um ícone) e um botão para o cardápio.
+function estadoVazio(icone, titulo, texto) {
   return `
         <div class="text-center text-body-secondary py-5">
-            <p class="display-5 mb-2">${emoji}</p>
+            <p class="display-5 mb-2 text-body-tertiary"><svg class="icone" aria-hidden="true"><use href="${ICONES}#${icone}"></use></svg></p>
             <p class="fw-semibold mb-1 text-body">${titulo}</p>
             <p class="small">${texto}</p>
             <a class="btn btn-primary rounded-pill" href="/">Ver cardápio</a>

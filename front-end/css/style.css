@@ -23,12 +23,13 @@
     color: var(--cantina-amarelo);
 }
 
-/* Ícones do arquivo assets/icones.svg: <svg class="icone"><use href="...#nome"></use></svg>
-   (ficam do tamanho da letra, como um ícone de fonte) */
+/* Ícones do arquivo assets/icones.svg (Material Symbols): <svg class="icone"><use href="...#nome"></use></svg>
+   Ficam do tamanho da letra, como um ícone de fonte (o desenho do Material tem uma
+   margem interna, por isso 1.25em) */
 .icone {
-    width: 1em;
-    height: 1em;
-    vertical-align: -.125em;
+    width: 1.25em;
+    height: 1.25em;
+    vertical-align: -.3em;
 }
 
 /* Botões "primary" e "outline-primary" em vermelho em vez de azul */

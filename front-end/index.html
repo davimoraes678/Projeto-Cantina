@@ -26,11 +26,11 @@
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <!-- Saldo: leva para a carteira -->
                 <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
-                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>R$ <span data-aluno="saldo">0,00</span>
+                    <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#account_balance_wallet"></use></svg>R$ <span data-aluno="saldo">0,00</span>
                 </a>
                 <!-- Abre o carrinho (painel lateral #carrinho) -->
                 <button class="btn btn-light rounded-pill position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-controls="carrinho" aria-label="Abrir carrinho">
-                    <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#cart3"></use></svg>
+                    <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#shopping_cart"></use></svg>
                     <span class="d-none d-md-inline ms-1">Carrinho</span>
                     <span id="badge-contador" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
                 </button>
@@ -52,7 +52,7 @@
         <!-- Boas-vindas -->
         <section class="bg-cantina bg-gradient text-white rounded-4 shadow-sm p-4 mb-3">
             <p class="mb-1 opacity-75" id="saudacao-periodo">Olá</p>
-            <h1 class="h3 fw-bold mb-1">E aí, <span data-aluno="primeiro-nome">aluno</span>! O que vai ser hoje?</h1>
+            <h1 class="h3 fw-bold mb-1">Olá, <span data-aluno="primeiro-nome">aluno</span>! O que vai ser hoje?</h1>
             <p class="mb-0 opacity-75">Peça pelo site e retire na cantina, sem fila.</p>
         </section>
 
@@ -63,7 +63,7 @@
                 <strong id="aviso-pedido-titulo">Seu pedido está em preparo</strong>
                 <span class="d-block small">Toque para acompanhar</span>
             </span>
-            <span class="fs-4" aria-hidden="true">›</span>
+            <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#chevron_right"></use></svg>
         </a>
 
         <!-- Busca pelo nome + botão que abre os filtros de preço e ordenação -->
@@ -75,7 +75,7 @@
                 <input class="form-control border-start-0" type="search" id="busca-nome" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio">
             </div>
             <button class="btn btn-light border shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros" aria-label="Filtros">
-                <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#sliders"></use></svg>
+                <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#tune"></use></svg>
             </button>
         </div>
 
@@ -114,15 +114,15 @@
         <!-- Categorias: rolam para o lado no celular. O alunos.js marca a escolhida (active) -->
         <div class="d-flex gap-2 overflow-x-auto flex-nowrap py-2 mb-2" id="categorias">
             <button class="btn btn-primary rounded-pill text-nowrap active" type="button" data-categoria="" onclick="filtrar('')">Tudo</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Salgado" onclick="filtrar('Salgado')">🥟 Salgados</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Bebida" onclick="filtrar('Bebida')">🥤 Bebidas</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Doce" onclick="filtrar('Doce')">🍫 Doces</button>
+            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Salgado" onclick="filtrar('Salgado')"><svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#bakery_dining"></use></svg>Salgados</button>
+            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Bebida" onclick="filtrar('Bebida')"><svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#local_cafe"></use></svg>Bebidas</button>
+            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Doce" onclick="filtrar('Doce')"><svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#cake"></use></svg>Doces</button>
         </div>
 
         <!-- Combinações mais pedidas, montadas pelo alunos.js (só aparece quando já há pedidos) -->
         <section id="secao-combinacoes" class="mb-3" style="display:none;">
             <h2 class="h6 fw-bold text-uppercase text-body-secondary mb-2">
-                <svg class="icone text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#fire"></use></svg> Combos mais pedidos
+                <svg class="icone text-danger" aria-hidden="true"><use href="/front-end/assets/icones.svg#local_fire_department"></use></svg> Combos mais pedidos
             </h2>
             <div id="lista-combinacoes" class="d-flex gap-2 overflow-x-auto flex-nowrap pb-2"></div>
         </section>
@@ -155,16 +155,16 @@
         </div>
         <nav class="nav nav-justified bg-white border-top shadow" aria-label="Navegação principal">
             <a class="nav-link d-flex flex-column align-items-center small py-2 active" aria-current="page" href="/">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#shop"></use></svg>Cardápio
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#restaurant"></use></svg>Cardápio
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/pedidos.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt"></use></svg>Pedidos
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#receipt_long"></use></svg>Pedidos
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/carteira.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#wallet2"></use></svg>Carteira
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#account_balance_wallet"></use></svg>Carteira
             </a>
             <a class="nav-link d-flex flex-column align-items-center small py-2" href="/front-end/conta.html">
-                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person-circle"></use></svg>Perfil
+                <svg class="icone fs-4" aria-hidden="true"><use href="/front-end/assets/icones.svg#person"></use></svg>Perfil
             </a>
         </nav>
     </div>
@@ -173,14 +173,14 @@
     <div class="offcanvas offcanvas-end" tabindex="-1" id="carrinho" aria-labelledby="carrinho-titulo">
         <div class="offcanvas-header bg-cantina text-white">
             <h5 class="offcanvas-title d-flex align-items-center gap-2" id="carrinho-titulo">
-                <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#basket2"></use></svg> Seu pedido
+                <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#shopping_basket"></use></svg> Seu pedido
             </h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
         </div>
         <div class="offcanvas-body d-flex flex-column">
             <!-- Carrinho vazio: o alunos.js troca d-none conforme o carrinho -->
             <div id="carrinho-vazio" class="text-center text-body-secondary my-auto">
-                <p class="display-4 mb-2">🛒</p>
+                <p class="display-4 mb-2"><svg class="icone text-body-tertiary" aria-hidden="true"><use href="/front-end/assets/icones.svg#shopping_cart"></use></svg></p>
                 <p class="fw-semibold mb-1">Seu carrinho está vazio</p>
                 <p class="small">Escolha algo no cardápio ou repita seu último pedido.</p>
             </div>
@@ -189,7 +189,7 @@
             <ul class="list-group list-group-flush mb-3" id="tabela-carrinho"></ul>
 
             <button class="btn btn-outline-primary btn-sm rounded-pill align-self-center mb-3" type="button" onclick="repetirUltimoPedido()">
-                <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#arrow-repeat"></use></svg>Repetir último pedido
+                <svg class="icone me-1" aria-hidden="true"><use href="/front-end/assets/icones.svg#replay"></use></svg>Repetir último pedido
             </button>
 
             <div class="mt-auto border-top pt-3" id="carrinho-rodape">
@@ -215,7 +215,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 text-center">
                 <div class="modal-body p-4">
-                    <svg class="icone text-success display-3 mb-3" aria-hidden="true"><use href="/front-end/assets/icones.svg#bag-check"></use></svg>
+                    <svg class="icone text-success display-3 mb-3" aria-hidden="true"><use href="/front-end/assets/icones.svg#check_circle"></use></svg>
                     <h5 class="fw-bold" id="modal-pedido-feito-titulo">Pedido <span id="pedido-feito-numero"></span> enviado!</h5>
                     <p class="text-body-secondary mb-1">A cantina já recebeu seu pedido. É só retirar no balcão quando estiver pronto.</p>
                     <p class="fw-semibold">Total pago: <span id="pedido-feito-total"></span></p>
@@ -239,11 +239,11 @@
                 <div class="modal-body text-center">
                     <!-- Nota de 1 a 5: radios do Bootstrap (btn-check) com cara de botão -->
                     <div class="btn-group mb-3" role="group" aria-label="Nota de 1 a 5">
-                        <input type="radio" class="btn-check" name="nota" id="nota-1" value="1" required><label class="btn btn-outline-warning" for="nota-1">1 ★</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-2" value="2"><label class="btn btn-outline-warning" for="nota-2">2 ★</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-3" value="3"><label class="btn btn-outline-warning" for="nota-3">3 ★</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-4" value="4"><label class="btn btn-outline-warning" for="nota-4">4 ★</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-5" value="5"><label class="btn btn-outline-warning" for="nota-5">5 ★</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-1" value="1" required><label class="btn btn-outline-warning" for="nota-1"><svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#star"></use></svg> 1</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-2" value="2"><label class="btn btn-outline-warning" for="nota-2"><svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#star"></use></svg> 2</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-3" value="3"><label class="btn btn-outline-warning" for="nota-3"><svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#star"></use></svg> 3</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-4" value="4"><label class="btn btn-outline-warning" for="nota-4"><svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#star"></use></svg> 4</label>
+                        <input type="radio" class="btn-check" name="nota" id="nota-5" value="5"><label class="btn btn-outline-warning" for="nota-5"><svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#star"></use></svg> 5</label>
                     </div>
                     <div class="form-floating text-start">
                         <textarea class="form-control" id="avaliacao-comentario" placeholder="Comentário" style="height: 90px"></textarea>

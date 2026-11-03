@@ -30,7 +30,7 @@ O `Blueprint` de cada arquivo é registrado em [`backend/routes.py`](../routes.p
 
 ## Referência das rotas
 
-Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **🔒 = exige login**; sem login, respondem `401` com `{"erro": "Faça login para continuar."}`. A rota `GET /api` lista tudo o que está registrado.
+Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **"login" = exige login**; sem login, respondem `401` com `{"erro": "Faça login para continuar."}`. A rota `GET /api` lista tudo o que está registrado.
 
 ### `aluno_controller.py` — `/api/alunos`
 
@@ -38,11 +38,11 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **🔒 = exige login**;
 |---|---|---|---|---|
 | `POST` | `/registro` | | `{nome, email, senha}` | `201` cadastrado **e logado** · `400` faltou campo · `409` e-mail já existe |
 | `POST` | `/login` | | `{email, senha}` | `200` logado · `400` faltou campo · `401` e-mail ou senha errados |
-| `POST` | `/logout` | 🔒 | — | `200` |
-| `GET` | `/atual` | 🔒 | — | `200` aluno logado |
-| `PUT` | `/atual` | 🔒 | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` |
-| `DELETE` | `/atual` | 🔒 | — | `200` conta excluída |
-| `POST` | `/atual/recarga` | 🔒 | `{valor}` | `200` saldo novo · `400` fora de R$ 0,01 a R$ 500,00 |
+| `POST` | `/logout` | login | — | `200` |
+| `GET` | `/atual` | login | — | `200` aluno logado |
+| `PUT` | `/atual` | login | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` |
+| `DELETE` | `/atual` | login | — | `200` conta excluída |
+| `POST` | `/atual/recarga` | login | `{valor}` | `200` saldo novo · `400` fora de R$ 0,01 a R$ 500,00 |
 | `GET` | `` (raiz) | só mestre | — | `200` lista de alunos · `403` |
 | `PUT` | `/<id>` | só mestre | — | `200` aluno promovido a `admin` · `404` |
 | `DELETE` | `/<id>` | só mestre | — | `200` · `400` se for o próprio mestre · `403` · `404` |
@@ -64,7 +64,7 @@ Formato de um aluno: `{ "id_aluno": 1, "nome": "Ana", "email": "ana@email.com", 
 
 Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "status", "imagem" }`. Categorias usadas no front: `Bebida`, `Lanche` (exibido como "Salgado") e `Doce`.
 
-### `item_pedido_controller.py` — `/api/carrinho` 🔒
+### `item_pedido_controller.py` — `/api/carrinho` (todas exigem login)
 
 Todas as rotas usam o **aluno logado** (`current_user`), então nenhuma recebe `id_aluno`. Cada aluno só vê e altera o próprio carrinho.
 
@@ -98,9 +98,9 @@ Formato do carrinho (igual ao de um pedido):
 | Método | Rota | | O que faz |
 |---|---|---|---|
 | `GET` | `` (raiz) | admin ou mestre | Lista os pedidos (**sem** os carrinhos em aberto) |
-| `GET` | `/meus` | 🔒 | Os pedidos do aluno logado (sem o carrinho), o mais recente primeiro |
-| `GET` | `/combinacoes` | 🔒 | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
-| `GET` | `/<id>` | 🔒 | Um pedido (só o dono ou admin/mestre; senão `404`) |
+| `GET` | `/meus` | login | Os pedidos do aluno logado (sem o carrinho), o mais recente primeiro |
+| `GET` | `/combinacoes` | login | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
+| `GET` | `/<id>` | login | Um pedido (só o dono ou admin/mestre; senão `404`) |
 | `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` · `400` se já estiver concluído ou cancelado |
 | `POST` | `/<id>/cancelar` | admin ou mestre | Marca como `"Cancelado"` e **devolve o valor ao aluno e os produtos ao estoque** · `400` se já estiver concluído ou cancelado |
 
@@ -110,7 +110,7 @@ Status de um pedido: `Carrinho` → `Pendente` (ao finalizar) → `Concluído` o
 
 | Método | Rota | | Corpo | Respostas |
 |---|---|---|---|---|
-| `POST` | `/<id>/avaliacao` | 🔒 | `{nota, comentario?}` | `201` · `400` pedido não concluído, já avaliado ou nota fora de 1 a 5 · `404` pedido de outro aluno |
+| `POST` | `/<id>/avaliacao` | login | `{nota, comentario?}` | `201` · `400` pedido não concluído, já avaliado ou nota fora de 1 a 5 · `404` pedido de outro aluno |
 
 ## Ao criar uma rota
 

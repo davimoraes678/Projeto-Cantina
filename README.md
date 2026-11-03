@@ -42,40 +42,40 @@ As tabelas são criadas automaticamente na primeira execução. Para recomeçar 
 ## Funcionalidades Implementadas
 
 Todas funcionam de ponta a ponta: **Tela → API Flask → Controller → Service → Model/Repository → Banco de dados**.
-Quem pode usar: 🎓 aluno (qualquer usuário logado) · 🛠️ admin · 👑 mestre (o primeiro usuário cadastrado).
+Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** (o primeiro usuário cadastrado).
 
 | # | Funcionalidade | Quem | Tela | Rota | Service |
 |---|---|---|---|---|---|
 | 1 | Cadastrar aluno (o primeiro cadastro vira mestre) | todos | `cadastro.html` | `POST /api/alunos/registro` | `CriarAlunoService` |
 | 2 | Login | todos | `login.html` | `POST /api/alunos/login` | `LoginAlunoService` |
-| 3 | Logout | 🎓 | menu do usuário / `conta.html` | `POST /api/alunos/logout` | `LogoutAlunoService` |
-| 4 | Ver dados da conta | 🎓 | `conta.html` | `GET /api/alunos/atual` | `BuscarAlunoAtualService` |
-| 5 | Editar dados da conta | 🎓 | `conta.html` | `PUT /api/alunos/atual` | `AtualizarAlunoService` |
-| 6 | Excluir a própria conta | 🎓 | `conta.html` | `DELETE /api/alunos/atual` | `DeletarAlunoService` |
-| 7 | Listar alunos | 👑 | `admin.html` | `GET /api/alunos` | `ListarAlunoService` |
-| 8 | Promover aluno a admin | 👑 | `admin.html` | `PUT /api/alunos/<id>` | `PromoverAlunoService` |
-| 9 | Excluir aluno | 👑 | `admin.html` | `DELETE /api/alunos/<id>` | `DeletarAlunoService` |
-| 10 | Cadastrar produto | 👑 | `admin.html` | `POST /api/produtos` | `CriarProdutoService` |
-| 11 | Enviar foto do produto (reduzida para até 600×600) | 👑 | `admin.html` | `POST /api/produtos/<id>/imagem` | `EnviarImagemProdutoService` (+ `BuscarImagemProdutoService` para exibir) |
-| 12 | Editar produto | 👑 | `admin.html` | `PUT /api/produtos/<id>` | `AtualizarProdutoService` |
-| 13 | Excluir produto (pedidos antigos mantêm o nome) | 👑 | `admin.html` | `DELETE /api/produtos/<id>` | `DeletarProdutoService` |
-| 14 | Ver o cardápio | 🎓 | `index.html` | `GET /api/produtos/buscar` | `FiltrarProdutosService` → `ListarProdutosService` |
-| 15 | Filtrar produtos por categoria | 🎓 | `index.html` | `GET /api/produtos/buscar?categoria=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_categoria`) |
-| 16 | Filtrar produtos por faixa de preço | 🎓 | `index.html` | `GET /api/produtos/buscar?preco_min=&preco_max=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_faixa_de_preco`) |
-| 17 | Ordenar produtos por nome ou preço | 🎓 | `index.html` | `GET /api/produtos/buscar?ordenar=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_ordenar_por_*`) |
-| 18 | Recarregar a carteira (saldo) | 🎓 | `carteira.html` | `POST /api/alunos/atual/recarga` | `RecarregarSaldoService` |
-| 19 | Adicionar produto ao carrinho (total em tempo real) | 🎓 | `index.html` | `POST /api/carrinho/itens` | `AdicionarItemCarrinhoService` (+ `VerCarrinhoService`) |
-| 20 | Remover item do carrinho | 🎓 | `index.html` | `DELETE /api/carrinho/itens/<id>` | `RemoverItemCarrinhoService` |
-| 21 | Finalizar pedido (confere e desconta saldo e estoque) | 🎓 | `index.html` | `POST /api/carrinho/finalizar` | `FinalizarPedidoService` |
-| 22 | Repetir último pedido | 🎓 | `index.html` | `POST /api/carrinho/repetir` | `RepetirUltimoPedidoService` → `PedidoRepository` (`sp_repetir_ultimo_pedido`) |
-| 23 | Combinações mais pedidas (e adicionar a dupla ao carrinho) | 🎓 | `index.html` | `GET /api/pedidos/combinacoes` | `CombinacoesMaisPedidasService` → `PedidoRepository` (`sp_combinacoes_mais_pedidas`) |
-| 24 | Painel de pedidos em andamento | 🛠️ 👑 | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 25 | Concluir pedido | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
-| 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | 🛠️ 👑 | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
-| 27 | Histórico de pedidos (concluídos e cancelados) | 🛠️ 👑 | `historico.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | 🎓 | `index.html` (janela automática) e `pedidos.html` (botão "Avaliar") | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
-| 29 | Meus pedidos: em andamento e histórico | 🎓 | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
-| 30 | Pedir de novo um pedido antigo | 🎓 | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
+| 3 | Logout | aluno | menu do usuário / `conta.html` | `POST /api/alunos/logout` | `LogoutAlunoService` |
+| 4 | Ver dados da conta | aluno | `conta.html` | `GET /api/alunos/atual` | `BuscarAlunoAtualService` |
+| 5 | Editar dados da conta | aluno | `conta.html` | `PUT /api/alunos/atual` | `AtualizarAlunoService` |
+| 6 | Excluir a própria conta | aluno | `conta.html` | `DELETE /api/alunos/atual` | `DeletarAlunoService` |
+| 7 | Listar alunos | mestre | `admin.html` | `GET /api/alunos` | `ListarAlunoService` |
+| 8 | Promover aluno a admin | mestre | `admin.html` | `PUT /api/alunos/<id>` | `PromoverAlunoService` |
+| 9 | Excluir aluno | mestre | `admin.html` | `DELETE /api/alunos/<id>` | `DeletarAlunoService` |
+| 10 | Cadastrar produto | mestre | `admin.html` | `POST /api/produtos` | `CriarProdutoService` |
+| 11 | Enviar foto do produto (reduzida para até 600×600) | mestre | `admin.html` | `POST /api/produtos/<id>/imagem` | `EnviarImagemProdutoService` (+ `BuscarImagemProdutoService` para exibir) |
+| 12 | Editar produto | mestre | `admin.html` | `PUT /api/produtos/<id>` | `AtualizarProdutoService` |
+| 13 | Excluir produto (pedidos antigos mantêm o nome) | mestre | `admin.html` | `DELETE /api/produtos/<id>` | `DeletarProdutoService` |
+| 14 | Ver o cardápio | aluno | `index.html` | `GET /api/produtos/buscar` | `FiltrarProdutosService` → `ListarProdutosService` |
+| 15 | Filtrar produtos por categoria | aluno | `index.html` | `GET /api/produtos/buscar?categoria=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_categoria`) |
+| 16 | Filtrar produtos por faixa de preço | aluno | `index.html` | `GET /api/produtos/buscar?preco_min=&preco_max=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_faixa_de_preco`) |
+| 17 | Ordenar produtos por nome ou preço | aluno | `index.html` | `GET /api/produtos/buscar?ordenar=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_ordenar_por_*`) |
+| 18 | Recarregar a carteira (saldo) | aluno | `carteira.html` | `POST /api/alunos/atual/recarga` | `RecarregarSaldoService` |
+| 19 | Adicionar produto ao carrinho (total em tempo real) | aluno | `index.html` | `POST /api/carrinho/itens` | `AdicionarItemCarrinhoService` (+ `VerCarrinhoService`) |
+| 20 | Remover item do carrinho | aluno | `index.html` | `DELETE /api/carrinho/itens/<id>` | `RemoverItemCarrinhoService` |
+| 21 | Finalizar pedido (confere e desconta saldo e estoque) | aluno | `index.html` | `POST /api/carrinho/finalizar` | `FinalizarPedidoService` |
+| 22 | Repetir último pedido | aluno | `index.html` | `POST /api/carrinho/repetir` | `RepetirUltimoPedidoService` → `PedidoRepository` (`sp_repetir_ultimo_pedido`) |
+| 23 | Combinações mais pedidas (e adicionar a dupla ao carrinho) | aluno | `index.html` | `GET /api/pedidos/combinacoes` | `CombinacoesMaisPedidasService` → `PedidoRepository` (`sp_combinacoes_mais_pedidas`) |
+| 24 | Painel de pedidos em andamento | admin, mestre | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
+| 25 | Concluir pedido | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
+| 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
+| 27 | Histórico de pedidos (concluídos e cancelados) | admin, mestre | `historico.html` | `GET /api/pedidos` | `ListarPedidosService` |
+| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | aluno | `index.html` (janela automática) e `pedidos.html` (botão "Avaliar") | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
+| 29 | Meus pedidos: em andamento e histórico | aluno | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
+| 30 | Pedir de novo um pedido antigo | aluno | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
 
 ## Arquitetura
 

@@ -68,7 +68,7 @@ O `app.py` fica na raiz do projeto. A função `create_app()`:
 6. Protege as páginas: sem login, vai para o cadastro; `admin.html` e `historico.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
 7. Cria as tabelas que ainda não existem (`db.create_all()`).
 
-> ⚠️ O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
+> **Atenção:** O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
 
 ## Login (Flask-Login)
 

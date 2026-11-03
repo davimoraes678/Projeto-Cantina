@@ -15,7 +15,7 @@ if (!tabela) return;          // esta página não tem carrinho: não faz nada
 
 É isso que permite o mesmo arquivo rodar no login, que não tem produtos, e na cantina, que não tem formulário de login.
 
-> ⚠️ **Um erro no topo do arquivo derruba todas as páginas.** Um erro de sintaxe, ou uma função chamada com o nome errado dentro do `DOMContentLoaded` (ex.: `AlunoInf()` em vez de `alunoInf()`), impede que os formulários sejam ligados: eles passam a recarregar a página sem chamar a API. Depois de mexer, abra o console (F12) e confira se não há erros em vermelho.
+> **Atenção:** **Um erro no topo do arquivo derruba todas as páginas.** Um erro de sintaxe, ou uma função chamada com o nome errado dentro do `DOMContentLoaded` (ex.: `AlunoInf()` em vez de `alunoInf()`), impede que os formulários sejam ligados: eles passam a recarregar a página sem chamar a API. Depois de mexer, abra o console (F12) e confira se não há erros em vermelho.
 
 ## `API_BASE_URL`
 

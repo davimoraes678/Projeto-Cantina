@@ -15,7 +15,7 @@ Todas herdam de `db.Model` e têm `salvar()`, `atualizar()`, `deletar()`, `lista
 
 **Diagrama de classes** (atributos, herança, composição e agregação): [`docs/diagrama-de-classes.md`](../../docs/diagrama-de-classes.md).
 
-> ⚠️ Todos os models precisam ser **importados no `app.py`**, mesmo os sem rotas. Sem isso, o SQLAlchemy não encontra as classes citadas nos relacionamentos (`'Avaliacao'`, `'RateioPagamento'`) e **toda consulta dá erro 500**. Ao criar um model novo, acrescente-o nesse import.
+> **Atenção:** Todos os models precisam ser **importados no `app.py`**, mesmo os sem rotas. Sem isso, o SQLAlchemy não encontra as classes citadas nos relacionamentos (`'Avaliacao'`, `'RateioPagamento'`) e **toda consulta dá erro 500**. Ao criar um model novo, acrescente-o nesse import.
 
 ## Relacionamentos
 

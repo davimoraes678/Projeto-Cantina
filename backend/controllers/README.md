@@ -62,7 +62,7 @@ Formato de um aluno: `{ "id_aluno": 1, "nome": "Ana", "email": "ana@email.com", 
 | `POST` | `/<id>/imagem` | Upload `multipart/form-data`, campo `imagem`. PNG, JPG ou WEBP até 5 MB |
 | `GET` | `/<id>/imagem` | Devolve a imagem (PNG), ou `404` |
 
-Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "status", "imagem" }`. Categorias usadas no front: `Bebida`, `Lanche` (exibido como "Salgado") e `Doce`.
+Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "ingredientes", "status", "imagem" }`. O `ingredientes` é a descrição mostrada na janela de detalhes do cardápio. Categorias usadas no front: `Bebida`, `Lanche` (exibido como "Salgado") e `Doce`.
 
 ### `item_pedido_controller.py` — `/api/carrinho` (todas exigem login)
 

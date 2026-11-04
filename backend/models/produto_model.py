@@ -21,7 +21,7 @@ class Produto(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None, imagem=None):
+    def atualizar(self, nome=None, quantidade_estoque=None, preco_atual=None, preco_promocional=None, categoria=None, status=None, imagem=None, ingredientes=None):
         if nome is not None:
             self.nome = nome
         if quantidade_estoque is not None:
@@ -36,6 +36,8 @@ class Produto(db.Model):
             self.status = status
         if imagem is not None:
             self.imagem = imagem
+        if ingredientes is not None:
+            self.ingredientes = ingredientes
         db.session.commit()
 
     def deletar(self):
@@ -58,6 +60,7 @@ class Produto(db.Model):
             'preco_atual': self.preco_atual,
             'preco_promocional': self.preco_promocional,
             'categoria': self.categoria,
+            'ingredientes': self.ingredientes,
             'status': self.status,
             'imagem': self.imagem
         }

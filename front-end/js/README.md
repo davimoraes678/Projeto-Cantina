@@ -6,7 +6,7 @@ O JavaScript do site: **um arquivo por página**, mais o `comum.js`, que todas u
 |---|---|---|
 | `comum.js` | todas | `api()` (chama o back-end), `avisar()` (aviso rápido), `carregarAluno()` (nome, saldo e o que é de admin/mestre), botões Sair, `reais()`, `formatarData()`, `escapeHtml()`, `codigoPedido()` |
 | `login.js` | `login.html` e `cadastro.html` | Envia o login e o cadastro |
-| `cardapio.js` | `index.html` | Produtos, categorias e filtros; combos; carrinho (adicionar, remover, repetir, finalizar); aviso de pedido em andamento |
+| `cardapio.js` | `index.html` | Produtos, janela de detalhes do produto, categorias e filtros; combos; carrinho (adicionar, remover, repetir, finalizar); aviso de pedido em andamento |
 | `pedidos.js` | `pedidos.html` | Meus pedidos: em andamento e histórico; "Pedir de novo"; avaliação |
 | `carteira.js` | `carteira.html` | Recarga de saldo |
 | `conta.js` | `conta.html` | Editar dados e remover a conta |

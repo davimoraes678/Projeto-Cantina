@@ -155,6 +155,7 @@ function editarProduto(id_produto) {
   document.getElementById("produto-preco").value = produto.preco_atual;
   document.getElementById("produto-estoque").value = produto.quantidade_estoque;
   document.getElementById("produto-categoria").value = produto.categoria || "";
+  document.getElementById("produto-ingredientes").value = produto.ingredientes || "";
   document.getElementById("modal-produto-titulo").textContent = "Editar produto";
   mostrarPrevia(`/api/produtos/${id_produto}/imagem?v=${Date.now()}`); // ?v= evita a foto antiga guardada no navegador
   bootstrap.Modal.getOrCreateInstance("#modal-produto").show();
@@ -182,6 +183,7 @@ document.getElementById("form-produto").addEventListener("submit", async (e) => 
     preco_atual: Number(document.getElementById("produto-preco").value),
     quantidade_estoque: Number(document.getElementById("produto-estoque").value),
     categoria: document.getElementById("produto-categoria").value,
+    ingredientes: document.getElementById("produto-ingredientes").value,
   };
   const resposta = editandoProdutoId
     ? await api(`/produtos/${editandoProdutoId}`, "PUT", dados)

@@ -4,7 +4,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 
 | Arquivo | Endereço | Login | Para quê |
 |---|---|---|---|
-| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: categorias, filtros de preço e ordenação, combos mais pedidos e os cards dos produtos. O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo |
+| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: categorias, filtros de preço e ordenação, combos mais pedidos e os cards dos produtos. Tocar num card abre a janela de detalhes (foto, preço, descrição e estoque). O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo |
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (em preparo e **pronto para retirar**, com o código) e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |

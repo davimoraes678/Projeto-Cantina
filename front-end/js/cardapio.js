@@ -1,6 +1,6 @@
 // =============================================================================
 // cardapio.js: a página principal (index.html).
-//   1. Produtos: cards, categorias e filtros (rota de busca com procedures)
+//   1. Produtos: cards, janela de detalhes, categorias e filtros (rota de busca com procedures)
 //   2. Combos mais pedidos
 //   3. Carrinho: adicionar, remover, repetir último pedido e finalizar
 //   4. Aviso de pedido em andamento
@@ -8,6 +8,8 @@
 
 let saldo = 0;            // saldo do aluno (o carrinho avisa quando não dá para pagar)
 let categoriaAtual = "";  // categoria escolhida nos botões (vazio = todas)
+let produtos = [];        // produtos na tela (a janela de detalhes pega os dados daqui)
+let produtoAberto = null; // id do produto mostrado na janela de detalhes
 
 iniciar();
 
@@ -41,8 +43,9 @@ async function carregarProdutos() {
   if (precoMax) filtros.set("preco_max", precoMax);
   if (ordenar) filtros.set("ordenar", ordenar);
 
-  const { ok, dados: produtos } = await api("/produtos/buscar?" + filtros);
-  if (!ok) return avisar(produtos.erro || "Não foi possível carregar o cardápio.", "erro");
+  const { ok, dados } = await api("/produtos/buscar?" + filtros);
+  if (!ok) return avisar(dados.erro || "Não foi possível carregar o cardápio.", "erro");
+  produtos = dados;
 
   const lista = document.getElementById("lista-produtos");
   lista.innerHTML = produtos.length
@@ -51,6 +54,8 @@ async function carregarProdutos() {
 }
 
 // HTML do card de um produto. Se o produto não tiver foto, a imagem some (onerror).
+// Tocar no card abre a janela de detalhes (abrirProduto). Na área dos botões, o
+// event.stopPropagation() impede que o toque "suba" até o card e abra a janela.
 function cardProduto(produto) {
   const id = produto.id_produto;
   const esgotado = produto.quantidade_estoque <= 0;
@@ -58,7 +63,7 @@ function cardProduto(produto) {
   // Esgotado: só o aviso. Senão: o seletor de quantidade (- 1 +) e o botão de adicionar.
   const comprar = esgotado
     ? `<span class="badge text-bg-secondary mt-auto">Esgotado</span>`
-    : `<div class="mt-auto d-grid gap-1">
+    : `<div class="mt-auto d-grid gap-1" onclick="event.stopPropagation()">
          <div class="input-group input-group-sm">
            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir">−</button>
            <input class="form-control text-center" id="qtd-${id}" value="1" data-max="${produto.quantidade_estoque}" readonly aria-label="Quantidade">
@@ -69,8 +74,8 @@ function cardProduto(produto) {
 
   return `
     <div class="col">
-      <div class="card h-100 border-0 shadow-sm rounded-4">
-        <div class="ratio ratio-4x3 bg-warning-subtle rounded-top-4">
+      <div class="card card-produto h-100 border-0 shadow-sm rounded-4" role="button" onclick="abrirProduto(${id})">
+        <div class="ratio ratio-4x3 rounded-top-4">
           <img src="/api/produtos/${id}/imagem" alt="" class="object-fit-contain p-2" loading="lazy" onerror="this.remove()">
         </div>
         <div class="card-body p-2 p-md-3 d-flex flex-column">
@@ -83,7 +88,46 @@ function cardProduto(produto) {
     </div>`;
 }
 
-// Botões - e + do card: muda a quantidade, sem passar de 1 nem do estoque.
+// Janela de detalhes do produto: foto, categoria, nome, preço, descrição (coluna
+// ingredientes), estoque e o mesmo seletor de quantidade do card.
+function abrirProduto(id_produto) {
+  const produto = produtos.find((p) => p.id_produto === id_produto);
+  const esgotado = produto.quantidade_estoque <= 0;
+  produtoAberto = id_produto;
+
+  // A foto: se o produto não tiver, o onerror esconde a área da foto
+  const foto = document.getElementById("detalhe-foto");
+  foto.classList.remove("d-none");
+  foto.innerHTML = `<img src="/api/produtos/${id_produto}/imagem" alt="" class="object-fit-contain p-3"
+                      onerror="this.parentElement.classList.add('d-none')">`;
+
+  document.getElementById("detalhe-categoria").textContent = produto.categoria || "";
+  document.getElementById("detalhe-nome").textContent = produto.nome;
+  document.getElementById("detalhe-preco").textContent = reais(produto.preco_atual);
+  document.getElementById("detalhe-descricao").textContent = produto.ingredientes || "Sem descrição.";
+  document.getElementById("detalhe-estoque").textContent = esgotado ? "Esgotado" : `${produto.quantidade_estoque} disponíveis`;
+
+  // Seletor de quantidade da janela: o campo se chama "qtd-modal", então os
+  // botões - e + usam a mesma mudarQuantidade do card: mudarQuantidade("modal", 1)
+  const campo = document.getElementById("qtd-modal");
+  campo.value = 1;
+  campo.dataset.max = produto.quantidade_estoque;
+  document.getElementById("detalhe-comprar").classList.toggle("d-none", esgotado);
+
+  bootstrap.Modal.getOrCreateInstance("#modal-detalhe").show();
+}
+
+// Botão "Adicionar" da janela: adiciona a quantidade escolhida e fecha a janela.
+async function adicionarDoModal() {
+  const quantidade = Number(document.getElementById("qtd-modal").value);
+  const deuCerto = await adicionarAoCarrinho(produtoAberto, quantidade);
+  if (deuCerto) {
+    bootstrap.Modal.getInstance("#modal-detalhe").hide();
+    avisar("Adicionado ao carrinho");
+  }
+}
+
+// Botões - e + (do card e da janela): muda a quantidade, sem passar de 1 nem do estoque.
 // Só muda o número na tela; o carrinho só é alterado no botão "Adicionar".
 function mudarQuantidade(id_produto, mudanca) {
   const campo = document.getElementById(`qtd-${id_produto}`);

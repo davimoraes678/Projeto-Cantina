@@ -24,6 +24,7 @@ class AtualizarProdutoService:
             preco_atual=dados.get('preco_atual'),
             preco_promocional=dados.get('preco_promocional'),
             categoria=dados.get('categoria'),
-            status=dados.get('status')
+            status=dados.get('status'),
+            ingredientes=dados.get('ingredientes')
         )
         return produto.to_dict(), 200

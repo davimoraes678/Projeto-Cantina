@@ -78,3 +78,8 @@
     border-color: #d98a91;
     box-shadow: 0 0 0 .25rem rgba(170, 14, 27, .2);
 }
+
+/* Card de produto do cardápio: tocar abre a janela de detalhes (mãozinha no mouse) */
+.card-produto {
+    cursor: pointer;
+}

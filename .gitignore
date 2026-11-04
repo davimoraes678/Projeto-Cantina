@@ -2,4 +2,6 @@
 __pycache__/
 *.pyc
 .env
-*.db
+*.db# Ambiente virtual do Python (cada um cria o seu com python -m venv venv)
+venv/
+.venv/

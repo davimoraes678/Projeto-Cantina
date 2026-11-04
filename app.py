@@ -66,13 +66,15 @@ def create_app():
     @app.get('/api')
     @login_required
     def api_info():
+        # Monta a lista de rotas a partir das que o Flask conhece (assim nunca fica desatualizada)
+        rotas = []
+        for regra in app.url_map.iter_rules():               # todas as rotas registradas
+            if regra.rule.startswith('/api/'):                # só as da API
+                metodos = regra.methods - {'HEAD', 'OPTIONS'}  # tira os que o Flask cria sozinho
+                rotas.append(f"{' '.join(sorted(metodos))} {regra.rule}")  # ex.: "GET /api/pedidos"
         return jsonify({
             "message": "API Flask + SQLAlchemy funcionando!",
-            # Lista gerada a partir das rotas registradas (sempre atualizada)
-            "rotas": sorted(
-                f"{' '.join(sorted(regra.methods - {'HEAD', 'OPTIONS'}))} {regra.rule}"
-                for regra in app.url_map.iter_rules() if regra.rule.startswith('/api/')
-            )
+            "rotas": sorted(rotas)
         })
     with app.app_context():
         db.create_all()

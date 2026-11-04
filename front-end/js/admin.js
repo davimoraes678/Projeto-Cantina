@@ -38,15 +38,27 @@ async function carregarPedidos() {
   const prontos = pedidos.filter((p) => p.status === "Pronto");
   const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado").reverse();
 
-  document.getElementById("lista-preparo").innerHTML = preparo.length
-    ? preparo.map(cardPedidoAdmin).join("")
-    : `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
-  document.getElementById("lista-prontos").innerHTML = prontos.length
-    ? prontos.map(cardPedidoAdmin).join("")
-    : `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
-  document.getElementById("lista-historico-admin").innerHTML = historico.length
-    ? historico.map(linhaHistorico).join("")
-    : `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
+  // Para cada pedido, acrescenta o card dele na coluna certa
+  const listaPreparo = document.getElementById("lista-preparo");
+  listaPreparo.innerHTML = "";
+  preparo.forEach((pedido) => {
+    listaPreparo.innerHTML += cardPedidoAdmin(pedido);
+  });
+  if (preparo.length === 0) listaPreparo.innerHTML = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
+
+  const listaProntos = document.getElementById("lista-prontos");
+  listaProntos.innerHTML = "";
+  prontos.forEach((pedido) => {
+    listaProntos.innerHTML += cardPedidoAdmin(pedido);
+  });
+  if (prontos.length === 0) listaProntos.innerHTML = `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
+
+  const listaHistorico = document.getElementById("lista-historico-admin");
+  listaHistorico.innerHTML = "";
+  historico.forEach((pedido) => {
+    listaHistorico.innerHTML += linhaHistorico(pedido);
+  });
+  if (historico.length === 0) listaHistorico.innerHTML = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
 
   // Números: nas colunas, no menu e no título da aba do navegador ("(3) Administração")
   const esperando = preparo.length + prontos.length;
@@ -68,7 +80,10 @@ async function carregarPedidos() {
 //   Pronto   -> "Entregar" (o aluno retirou no balcão: fecha o pedido)
 function cardPedidoAdmin(pedido) {
   const pronto = pedido.status === "Pronto";
-  const itens = pedido.itens.map((item) => `<li>${item.quantidade}x ${escapeHtml(item.produto_nome)}</li>`).join("");
+  let itens = "";
+  pedido.itens.forEach((item) => {
+    itens += `<li>${item.quantidade}x ${escapeHtml(item.produto_nome)}</li>`;
+  });
   const botao = pronto
     ? `<button class="btn btn-success rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'concluir')">Entregar</button>`
     : `<button class="btn btn-warning rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'pronto')">Pronto</button>`;
@@ -95,7 +110,10 @@ function cardPedidoAdmin(pedido) {
 // Linha do histórico: aluno, código, itens, status, total e data.
 function linhaHistorico(pedido) {
   const entregue = pedido.status === "Concluído";
-  const itens = pedido.itens.map((item) => `${item.quantidade}x ${escapeHtml(item.produto_nome)}`).join(", ");
+  let itens = "";
+  pedido.itens.forEach((item) => {
+    itens += `${item.quantidade}x ${escapeHtml(item.produto_nome)}<br>`;
+  });
   return `
     <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
       <div>
@@ -139,7 +157,10 @@ async function carregarProdutos() {
   if (!ok) return;
   produtos = dados;
 
-  document.getElementById("lista-produtos-admin").innerHTML = produtos.map((produto) => `
+  const lista = document.getElementById("lista-produtos-admin");
+  lista.innerHTML = "";
+  produtos.forEach((produto) => {
+    lista.innerHTML += `
     <div class="list-group-item d-flex align-items-center gap-3 py-2">
       <img src="/api/produtos/${produto.id_produto}/imagem" alt="" width="48" height="48"
            class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy" onerror="this.style.visibility='hidden'">
@@ -149,7 +170,8 @@ async function carregarProdutos() {
       </div>
       <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="editarProduto(${produto.id_produto})">Editar</button>
       <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirProduto(${produto.id_produto})">Excluir</button>
-    </div>`).join("");
+    </div>`;
+  });
 }
 
 // "Novo produto": abre a janela vazia.
@@ -254,12 +276,14 @@ async function carregarAlunos() {
   if (!ok) return;
   alunos = dados;
 
-  document.getElementById("lista-alunos").innerHTML = alunos.map((aluno) => {
+  const lista = document.getElementById("lista-alunos");
+  lista.innerHTML = "";
+  alunos.forEach((aluno) => {
     const promover = aluno.funcao === "aluno"
       ? `<button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="promoverAluno(${aluno.id_aluno})">Tornar admin</button>` : "";
     const excluir = aluno.funcao !== "mestre"
       ? `<button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>` : "";
-    return `
+    lista.innerHTML += `
       <div class="list-group-item d-flex flex-wrap align-items-center gap-2 py-2">
         <div class="flex-grow-1">
           <div class="fw-semibold">${escapeHtml(aluno.nome)}
@@ -268,7 +292,7 @@ async function carregarAlunos() {
         </div>
         ${promover} ${excluir}
       </div>`;
-  }).join("");
+  });
 }
 
 // "Tornar admin": PUT /alunos/<id>. O admin pode entregar e cancelar pedidos.

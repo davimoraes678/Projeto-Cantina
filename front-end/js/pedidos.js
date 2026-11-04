@@ -17,12 +17,20 @@ async function carregarMeusPedidos() {
   const andamento = pedidos.filter((p) => p.status === "Pendente" || p.status === "Pronto");
   const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado");
 
-  document.getElementById("lista-andamento").innerHTML = andamento.length
-    ? andamento.map(cardPedido).join("")
-    : `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
-  document.getElementById("lista-historico").innerHTML = historico.length
-    ? historico.map(cardPedido).join("")
-    : `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
+  // Para cada pedido, acrescenta o card dele na aba certa
+  const listaAndamento = document.getElementById("lista-andamento");
+  listaAndamento.innerHTML = "";
+  andamento.forEach((pedido) => {
+    listaAndamento.innerHTML += cardPedido(pedido);
+  });
+  if (andamento.length === 0) listaAndamento.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
+
+  const listaHistorico = document.getElementById("lista-historico");
+  listaHistorico.innerHTML = "";
+  historico.forEach((pedido) => {
+    listaHistorico.innerHTML += cardPedido(pedido);
+  });
+  if (historico.length === 0) listaHistorico.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
 
   const contador = document.getElementById("contador-andamento");
   contador.textContent = andamento.length;
@@ -42,11 +50,14 @@ const STATUS = {
 function cardPedido(pedido) {
   const status = STATUS[pedido.status];
 
-  const itens = pedido.itens.map((item) => `
+  let itens = "";
+  pedido.itens.forEach((item) => {
+    itens += `
     <li class="d-flex justify-content-between">
       <span>${item.quantidade}x ${escapeHtml(item.produto_nome)}</span>
       <span class="text-body-secondary">${reais(item.subtotal)}</span>
-    </li>`).join("");
+    </li>`;
+  });
 
   // Pronto: destaque para o aluno ir buscar, com o código que ele mostra no balcão
   const retirar = pedido.status === "Pronto"

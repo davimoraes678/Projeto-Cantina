@@ -47,10 +47,13 @@ async function carregarProdutos() {
   if (!ok) return avisar(dados.erro || "Não foi possível carregar o cardápio.", "erro");
   produtos = dados;
 
+  // Para cada produto, acrescenta o card dele na lista
   const lista = document.getElementById("lista-produtos");
-  lista.innerHTML = produtos.length
-    ? produtos.map(cardProduto).join("")
-    : `<p class="text-center text-body-secondary py-5">Nenhum produto encontrado.</p>`;
+  lista.innerHTML = "";
+  produtos.forEach((produto) => {
+    lista.innerHTML += cardProduto(produto);
+  });
+  if (produtos.length === 0) lista.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum produto encontrado.</p>`;
 }
 
 // HTML do card de um produto. Se o produto não tiver foto, a imagem some (onerror).
@@ -163,16 +166,20 @@ document.getElementById("btn-limpar-filtros").addEventListener("click", () => {
 // -----------------------------------------------------------------------------
 
 // Um botão por combo ("Coxinha + Refrigerante"). Sem combos, a seção fica escondida.
+// Cada combo é sempre uma dupla: produtos[0] e produtos[1].
 async function carregarCombos() {
   const { ok, dados: combos } = await api("/pedidos/combinacoes");
   if (!ok || combos.length === 0) return;
 
-  document.getElementById("lista-combos").innerHTML = combos.map((combo) => {
-    const nomes = combo.produtos.map((p) => escapeHtml(p.nome)).join(" + ");
-    const ids = combo.produtos.map((p) => p.id_produto).join(", ");
-    return `<button class="btn btn-outline-primary rounded-pill text-nowrap" type="button"
-              onclick="adicionarCombo([${ids}])">+ ${nomes}</button>`;
-  }).join("");
+  const lista = document.getElementById("lista-combos");
+  lista.innerHTML = "";
+  combos.forEach((combo) => {
+    const primeiro = combo.produtos[0];
+    const segundo = combo.produtos[1];
+    lista.innerHTML += `<button class="btn btn-outline-primary rounded-pill text-nowrap" type="button"
+        onclick="adicionarCombo([${primeiro.id_produto}, ${segundo.id_produto}])">
+        + ${escapeHtml(primeiro.nome)} + ${escapeHtml(segundo.nome)}</button>`;
+  });
   document.getElementById("secao-combos").classList.remove("d-none");
 }
 
@@ -228,16 +235,22 @@ async function removerDoCarrinho(id_item_pedido) {
 // barra "Ver carrinho" do celular.
 function desenharCarrinho(carrinho) {
   const itens = carrinho.itens;
-  const quantidade = itens.reduce((soma, item) => soma + item.quantidade, 0);
   const vazio = itens.length === 0;
 
-  document.getElementById("lista-carrinho").innerHTML = itens.map((item) => `
+  // Para cada item: acrescenta a linha na lista e soma a quantidade
+  let quantidade = 0;
+  const lista = document.getElementById("lista-carrinho");
+  lista.innerHTML = "";
+  itens.forEach((item) => {
+    quantidade += item.quantidade;
+    lista.innerHTML += `
     <li class="list-group-item px-0 d-flex align-items-center gap-2">
       <span class="badge rounded-pill text-bg-light border">${item.quantidade}x</span>
       <span class="flex-grow-1">${escapeHtml(item.produto_nome)}</span>
       <span class="fw-semibold">${reais(item.subtotal)}</span>
       <button class="btn-close" type="button" onclick="removerDoCarrinho(${item.id_item_pedido})" aria-label="Remover"></button>
-    </li>`).join("");
+    </li>`;
+  });
 
   document.getElementById("carrinho-total").textContent = reais(carrinho.valor_total);
   document.getElementById("carrinho-vazio").classList.toggle("d-none", !vazio);

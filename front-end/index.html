@@ -21,6 +21,7 @@
                 <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
                 <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
                 <li class="nav-item so-admin d-none"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/conta.html">Perfil</a></li>
             </ul>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html">
@@ -31,16 +32,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg><span class="d-none d-md-inline ms-1">Carrinho</span>
                     <span id="contador-carrinho" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
                 </button>
-                <div class="dropdown d-none d-md-block">
-                    <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span data-aluno="primeiro-nome">Aluno</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="/front-end/conta.html">Meu perfil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><button class="dropdown-item text-danger btn-logout" type="button">Sair</button></li>
-                    </ul>
-                </div>
+                <!-- Sair (no celular fica na página Perfil) -->
+                <button class="btn btn-outline-light rounded-pill d-none d-md-inline-flex align-items-center gap-1 btn-logout" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone " fill="currentColor" aria-hidden="true"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h299v60H180v600h299v60H180Zm486-185-43-43 102-102H360v-60h363L621-612l43-43 176 176-174 174Z"/></svg> Sair
+                </button>
             </div>
         </div>
     </nav>

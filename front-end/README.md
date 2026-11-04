@@ -10,7 +10,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (em preparo e **pronto para retirar**, com o código) e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
 | `conta.html` | `/front-end/conta.html` | Sim | Perfil: editar dados, sair e remover a própria conta |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
-| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Abas. **Admin:** Pedidos (um card por pedido, com o código de retirada; o botão **Pronto** avisa o aluno e o **Entregar** fecha o pedido quando ele retira; também Cancelar) e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
+| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Feita para usar no computador do balcão: menu fixo na lateral (no celular vira abas em cima) e tudo um pouco maior. **Admin:** Pedidos em duas colunas, "Em preparo" (botão **Pronto**) e "Prontos para retirar" (botão **Entregar**, quando o aluno retira), que se atualizam sozinhas a cada 15 s, com aviso de pedido novo e o número de pedidos no título da aba do navegador; e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto e descrição) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
 | `assets/logo.png` | | | Logo da Cantina Real |
 | [`js/`](js/README.md) | | | O JavaScript: um arquivo por página e o `comum.js` |
@@ -40,6 +40,11 @@ Para colocar um ícone novo numa página:
 ```
 
 - A classe `icone` (no `style.css`) deixa o ícone do tamanho do texto ao lado. Para aumentar, use as classes do Bootstrap no ícone (`fs-4`) ou em volta dele (`display-5`).
+
+## Barra de cima e teclado
+
+- **Computador:** a barra de cima tem os links Cardápio, Meus pedidos, Carteira, Administração (só admin e mestre) e Perfil, o saldo e o botão **Sair**.
+- **Teclado:** dá para usar o site só com Tab e Enter. O elemento com foco ganha um contorno amarelo (`:focus-visible` no `style.css`), que só aparece no teclado, não no clique do mouse.
 
 ## Celular
 

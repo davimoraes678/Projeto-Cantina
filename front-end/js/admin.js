@@ -8,6 +8,7 @@
 let produtos = [];          // produtos carregados (o "Editar" pega os dados daqui)
 let alunos = [];            // alunos carregados
 let editandoProdutoId = null; // null = a janela de produto está cadastrando; um id = editando
+let totalEmPreparo = null;  // quantos pedidos estavam em preparo (para avisar quando chega um novo)
 
 iniciar();
 
@@ -18,31 +19,47 @@ async function iniciar() {
     carregarProdutos();
     carregarAlunos();
   }
+  // O admin deixa esta tela aberta no computador: os pedidos se atualizam sozinhos
+  setInterval(carregarPedidos, 15000);
 }
 
 // -----------------------------------------------------------------------------
 // 1. PEDIDOS E HISTÓRICO
 // -----------------------------------------------------------------------------
 
-// GET /pedidos: os em preparo e os prontos vão para a aba Pedidos (o mais antigo
-// primeiro) e os entregues e cancelados para a aba Histórico (o mais novo primeiro).
+// GET /pedidos e separa em três listas:
+//   - Em preparo e Prontos para retirar (aba Pedidos, o mais antigo primeiro)
+//   - Histórico: entregues e cancelados (o mais novo primeiro)
 async function carregarPedidos() {
   const { ok, dados: pedidos } = await api("/pedidos");
   if (!ok) return;
 
-  const andamento = pedidos.filter((p) => p.status === "Pendente" || p.status === "Pronto");
+  const preparo = pedidos.filter((p) => p.status === "Pendente");
+  const prontos = pedidos.filter((p) => p.status === "Pronto");
   const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado").reverse();
 
-  document.getElementById("lista-pedidos-admin").innerHTML = andamento.length
-    ? andamento.map(cardPedidoAdmin).join("")
-    : `<p class="text-center text-body-secondary py-5">Nenhum pedido esperando.</p>`;
+  document.getElementById("lista-preparo").innerHTML = preparo.length
+    ? preparo.map(cardPedidoAdmin).join("")
+    : `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
+  document.getElementById("lista-prontos").innerHTML = prontos.length
+    ? prontos.map(cardPedidoAdmin).join("")
+    : `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
   document.getElementById("lista-historico-admin").innerHTML = historico.length
     ? historico.map(linhaHistorico).join("")
     : `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
 
+  // Números: nas colunas, no menu e no título da aba do navegador ("(3) Administração")
+  const esperando = preparo.length + prontos.length;
+  document.getElementById("contador-preparo").textContent = preparo.length;
+  document.getElementById("contador-prontos").textContent = prontos.length;
   const contador = document.getElementById("contador-pedidos-admin");
-  contador.textContent = andamento.length;
-  contador.classList.toggle("d-none", andamento.length === 0);
+  contador.textContent = esperando;
+  contador.classList.toggle("d-none", esperando === 0);
+  document.title = (esperando ? `(${esperando}) ` : "") + "Administração - Cantina Real";
+
+  // Chegou pedido novo desde a última atualização? Avisa.
+  if (totalEmPreparo !== null && preparo.length > totalEmPreparo) avisar("Novo pedido chegou!");
+  totalEmPreparo = preparo.length;
 }
 
 // Card de um pedido, com o código de retirada em destaque. O botão principal
@@ -56,8 +73,7 @@ function cardPedidoAdmin(pedido) {
     ? `<button class="btn btn-success rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'concluir')">Entregar</button>`
     : `<button class="btn btn-warning rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'pronto')">Pronto</button>`;
   return `
-    <div class="col">
-      <div class="card h-100 border-0 border-start border-4 ${pronto ? "border-success" : "border-warning"} shadow-sm rounded-4">
+      <div class="card border-0 border-start border-4 ${pronto ? "border-success" : "border-warning"} shadow-sm rounded-4">
         <div class="card-body d-flex flex-column">
           <div class="d-flex justify-content-between">
             <small class="text-body-secondary">Código de retirada</small>
@@ -73,8 +89,7 @@ function cardPedidoAdmin(pedido) {
             ${botao}
           </div>
         </div>
-      </div>
-    </div>`;
+      </div>`;
 }
 
 // Linha do histórico: aluno, código, itens, status, total e data.

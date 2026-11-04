@@ -10,7 +10,7 @@ O JavaScript do site: **um arquivo por página**, mais o `comum.js`, que todas u
 | `pedidos.js` | `pedidos.html` | Meus pedidos: em andamento e histórico; "Pedir de novo"; avaliação |
 | `carteira.js` | `carteira.html` | Recarga de saldo |
 | `conta.js` | `conta.html` | Editar dados e remover a conta |
-| `admin.js` | `admin.html` | Pedidos (pronto, entregar e cancelar) e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
+| `admin.js` | `admin.html` | Pedidos em duas colunas (pronto, entregar e cancelar), atualizados a cada 15 s, e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
 
 ## Como uma página carrega o JavaScript
 

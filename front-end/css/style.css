@@ -83,3 +83,23 @@
 .card-produto {
     cursor: pointer;
 }
+
+/* Teclado: quem navega com Tab vê bem onde está (contorno amarelo).
+   :focus-visible só aparece no teclado, não no clique do mouse. */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.list-group-item:focus-visible,
+a:focus-visible {
+    outline: 3px solid var(--cantina-amarelo);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+/* Administração no computador: tudo um pouco maior, para ler de longe no balcão.
+   Como o Bootstrap mede quase tudo em rem, aumentar a fonte do <html> aumenta
+   textos, botões e espaçamentos juntos. */
+@media (min-width: 992px) {
+    html.pagina-admin {
+        font-size: 17px;
+    }
+}

@@ -1,30 +1,29 @@
 # backend/controllers/
 
-Os controllers recebem as **requisições HTTP**. **Cada controller é uma classe**, ligada a um recurso (Model) do sistema, com um método por rota. O método lê a requisição, chama o [service](../services/README.md) do caso de uso e devolve JSON. **Nenhuma regra de negócio fica aqui.**
+Os controllers recebem as **requisições HTTP**. Há um arquivo por recurso (Model) do sistema, com **uma função por rota**. A função lê a requisição, chama o [service](../services/README.md) do caso de uso e devolve JSON. **Nenhuma regra de negócio fica aqui.**
 
-| Arquivo | Classe | Recurso (Model) | Prefixo |
+| Arquivo | Blueprint | Recurso (Model) | Prefixo |
 |---|---|---|---|
-| `aluno_controller.py` | `AlunoController` | `Aluno` | `/api/alunos` |
-| `produto_controller.py` | `ProdutoController` | `Produto` | `/api/produtos` |
-| `item_pedido_controller.py` | `ItemPedidoController` | `ItemPedido` (carrinho) | `/api/carrinho` |
-| `pedido_controller.py` | `PedidoController` | `Pedido` | `/api/pedidos` |
-| `avaliacao_controller.py` | `AvaliacaoController` | `Avaliacao` | `/api/pedidos/<id>/avaliacao` |
+| `aluno_controller.py` | `bp_aluno` | `Aluno` | `/api/alunos` |
+| `produto_controller.py` | `bp_produto` | `Produto` | `/api/produtos` |
+| `item_pedido_controller.py` | `bp_item_pedido` | `ItemPedido` (carrinho) | `/api/carrinho` |
+| `pedido_controller.py` | `bp_pedido` | `Pedido` | `/api/pedidos` |
+| `avaliacao_controller.py` | `bp_avaliacao` | `Avaliacao` | `/api/pedidos/<id>/avaliacao` |
 
 ## Como é um controller
 
 ```python
-class ProdutoController:
-    @staticmethod
-    @master_required                       # permissão (backend/autenticacao.py)
-    def criar():
-        dados = request.get_json(silent=True) or {}          # 1. lê a requisição
-        resposta, status = CriarProdutoService.executar(dados)  # 2. chama o service
-        return jsonify(resposta), status                     # 3. devolve JSON
+bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')   # todas as URLs começam com /api/produtos
 
-# No fim do arquivo, as URLs do recurso são ligadas aos métodos:
-bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
-bp_produto.add_url_rule('', view_func=ProdutoController.criar, methods=['POST'])
+@bp_produto.route('', methods=['POST'])    # POST /api/produtos
+@master_required                           # permissão (backend/autenticacao.py)
+def criar():
+    dados = request.get_json(silent=True) or {}             # 1. lê a requisição
+    resposta, status = CriarProdutoService.executar(dados)  # 2. chama o service
+    return jsonify(resposta), status                        # 3. devolve JSON
 ```
+
+O `@bp_produto.route(...)` em cima da função diz **qual URL e qual método HTTP** chamam aquela função. O `url_prefix` do Blueprint é juntado na frente: `''` vira `/api/produtos` e `'/<int:id_produto>'` vira `/api/produtos/5`.
 
 O `Blueprint` de cada arquivo é registrado em [`backend/routes.py`](../routes.py). Permissões: `@login_required` (qualquer logado), `@admin_required` (admin ou mestre), `@master_required` (só mestre).
 
@@ -115,8 +114,9 @@ Status de um pedido: `Carrinho` → `Pendente` (ao finalizar) → `Pronto` (admi
 
 ## Ao criar uma rota
 
-- Crie um **método na classe do controller** e ligue a URL com `bp.add_url_rule(...)` no fim do arquivo. O método só lê a requisição e chama um service.
-- Os nomes entre `< >` na URL precisam ser parâmetros do método (`/<int:id_aluno>` → `def promover(id_aluno)`), senão dá `TypeError`.
-- Dentro de um mesmo controller, os métodos precisam ter **nomes diferentes** (o Flask usa o nome para identificar a rota).
+- Crie uma **função no controller** com `@bp.route('/caminho', methods=['GET'])` em cima. A função só lê a requisição e chama um service.
+- A permissão vem logo abaixo do `@bp.route` (`@login_required`, `@admin_required` ou `@master_required`). A ordem importa: o `@bp.route` fica sempre em cima.
+- Os nomes entre `< >` na URL precisam ser parâmetros da função (`/<int:id_aluno>` → `def promover(id_aluno)`), senão dá `TypeError`.
+- Dentro de um mesmo controller, as funções precisam ter **nomes diferentes** (o Flask usa o nome para identificar a rota).
 - Leia o corpo com `request.get_json(silent=True) or {}`, que não quebra se o corpo vier vazio.
 - Controller novo: registre o blueprint em `routes.py` e acrescente as rotas nesta página. O `GET /api` lista as rotas sozinho.

@@ -1,6 +1,6 @@
 # backend/services/aluno/
 
-Casos de uso de **aluno**: uma classe por arquivo, cada uma com `executar()`. As rotas que os chamam ficam no `AlunoController` ([`controllers/aluno_controller.py`](../../controllers/README.md#aluno_controllerpy--apialunos)).
+Casos de uso de **aluno**: uma classe por arquivo, cada uma com `executar()`. As rotas que os chamam ficam em [`controllers/aluno_controller.py`](../../controllers/README.md#aluno_controllerpy--apialunos).
 
 | Arquivo | Classe | O que faz |
 |---|---|---|

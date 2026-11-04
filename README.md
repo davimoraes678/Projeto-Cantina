@@ -82,7 +82,7 @@ Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** 
 
 ```mermaid
 flowchart LR
-    T["Tela<br/>(front-end/*.html + js da página)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(classe)"]
+    T["Tela<br/>(front-end/*.html + js da página)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(uma função por rota)"]
     C --> S["Service<br/>(uma classe por caso de uso)"]
     S --> M["Model<br/>(db.Model)"]
     S --> R["Repository<br/>(consultas especiais)"]
@@ -92,7 +92,7 @@ flowchart LR
 
 | Camada | Pasta | Responsabilidade |
 |---|---|---|
-| Controller | [`backend/controllers/`](backend/controllers/README.md) | Uma classe por recurso (`AlunoController`, `ProdutoController`, `ItemPedidoController`, `PedidoController`, `AvaliacaoController`). Recebe a requisição, lê os dados, chama o service e devolve JSON. Sem regra de negócio |
+| Controller | [`backend/controllers/`](backend/controllers/README.md) | Um arquivo por recurso (aluno, produto, carrinho, pedido, avaliação), com uma função por rota marcada com `@bp.route`. Recebe a requisição, lê os dados, chama o service e devolve JSON. Sem regra de negócio |
 | Service | [`backend/services/`](backend/services/README.md) | Uma classe por caso de uso, com o método `executar()` (ex.: `CriarProdutoService`, `FinalizarPedidoService`). Faz as validações e coordena o caso de uso |
 | Model | [`backend/models/`](backend/models/README.md) | Entidades do domínio, herdam de `db.Model`, com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()` e `buscar_por_id()` |
 | Repository | [`backend/repositories/`](backend/repositories/README.md) | Só as consultas não-CRUD, por **stored procedures** do MySQL (`CALL` fica só aqui): busca de produtos, repetir último pedido e combinações mais pedidas |

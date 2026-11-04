@@ -14,7 +14,7 @@ class FiltrarProdutosService:
         Controller e Service não sabem nada sobre `CALL sp_...` - só o
         ProdutoRepository conhece as procedures. O fluxo principal é:
 
-            ProdutoController -> FiltrarProdutosService -> ProdutoRepository -> CALL sp_...(...) -> MySQL
+            produto_controller.filtrar -> FiltrarProdutosService -> ProdutoRepository -> CALL sp_...(...) -> MySQL
 
         Cada procedure resolve um caso de uso específico, então aqui só decidimos
         qual delas chamar de acordo com o filtro escolhido no front-end.

@@ -10,59 +10,55 @@ from backend.services.pedido.listar_meus_pedidos_service import ListarMeusPedido
 from backend.services.pedido.listar_pedidos_service import ListarPedidosService
 from backend.services.pedido.marcar_pronto_service import MarcarProntoService
 
-
-class PedidoController:
-    """Rotas do recurso Pedido: lê a requisição, chama o service e devolve JSON."""
-
-    @staticmethod
-    @admin_required
-    def listar():
-        resposta, status = ListarPedidosService.executar()
-        return jsonify(resposta), status
-
-    @staticmethod
-    @login_required
-    def listar_meus():
-        resposta, status = ListarMeusPedidosService.executar()
-        return jsonify(resposta), status
-
-    @staticmethod
-    @login_required
-    def buscar(id_pedido):
-        resposta, status = BuscarPedidoService.executar(id_pedido)
-        return jsonify(resposta), status
-
-    @staticmethod
-    @admin_required
-    def marcar_pronto(id_pedido):
-        resposta, status = MarcarProntoService.executar(id_pedido)
-        return jsonify(resposta), status
-
-    @staticmethod
-    @admin_required
-    def concluir(id_pedido):
-        resposta, status = ConcluirPedidoService.executar(id_pedido)
-        return jsonify(resposta), status
-
-    @staticmethod
-    @admin_required
-    def cancelar(id_pedido):
-        resposta, status = CancelarPedidoService.executar(id_pedido)
-        return jsonify(resposta), status
-
-    @staticmethod
-    @login_required
-    def combinacoes_mais_pedidas():
-        resposta, status = CombinacoesMaisPedidasService.executar()
-        return jsonify(resposta), status
-
-
+# Rotas do recurso Pedido: lê a requisição, chama o service e devolve JSON.
 # URLs do recurso: /api/pedidos/...
 bp_pedido = Blueprint('pedidos', __name__, url_prefix='/api/pedidos')
-bp_pedido.add_url_rule('', view_func=PedidoController.listar, methods=['GET'])
-bp_pedido.add_url_rule('/meus', view_func=PedidoController.listar_meus, methods=['GET'])
-bp_pedido.add_url_rule('/combinacoes', view_func=PedidoController.combinacoes_mais_pedidas, methods=['GET'])
-bp_pedido.add_url_rule('/<int:id_pedido>', view_func=PedidoController.buscar, methods=['GET'])
-bp_pedido.add_url_rule('/<int:id_pedido>/pronto', view_func=PedidoController.marcar_pronto, methods=['POST'])
-bp_pedido.add_url_rule('/<int:id_pedido>/concluir', view_func=PedidoController.concluir, methods=['POST'])
-bp_pedido.add_url_rule('/<int:id_pedido>/cancelar', view_func=PedidoController.cancelar, methods=['POST'])
+
+
+@bp_pedido.route('', methods=['GET'])
+@admin_required
+def listar():
+    resposta, status = ListarPedidosService.executar()
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/meus', methods=['GET'])
+@login_required
+def listar_meus():
+    resposta, status = ListarMeusPedidosService.executar()
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/combinacoes', methods=['GET'])
+@login_required
+def combinacoes_mais_pedidas():
+    resposta, status = CombinacoesMaisPedidasService.executar()
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/<int:id_pedido>', methods=['GET'])
+@login_required
+def buscar(id_pedido):
+    resposta, status = BuscarPedidoService.executar(id_pedido)
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/<int:id_pedido>/pronto', methods=['POST'])
+@admin_required
+def marcar_pronto(id_pedido):
+    resposta, status = MarcarProntoService.executar(id_pedido)
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/<int:id_pedido>/concluir', methods=['POST'])
+@admin_required
+def concluir(id_pedido):
+    resposta, status = ConcluirPedidoService.executar(id_pedido)
+    return jsonify(resposta), status
+
+
+@bp_pedido.route('/<int:id_pedido>/cancelar', methods=['POST'])
+@admin_required
+def cancelar(id_pedido):
+    resposta, status = CancelarPedidoService.executar(id_pedido)
+    return jsonify(resposta), status

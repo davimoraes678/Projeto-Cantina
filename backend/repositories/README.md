@@ -10,7 +10,7 @@ Acesso ao banco por **stored procedures do MySQL**. Repository **não** repete C
 ## Fluxo da busca de produtos
 
 ```
-GET /api/produtos/buscar → ProdutoController.filtrar → FiltrarProdutosService → ProdutoRepository → CALL sp_... → MySQL
+GET /api/produtos/buscar → produto_controller.filtrar → FiltrarProdutosService → ProdutoRepository → CALL sp_... → MySQL
 ```
 
 | Método do repository | Procedure |

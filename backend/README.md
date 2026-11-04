@@ -7,7 +7,7 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**; quem desenha as
 | `extensions.py` | Cria `db` (banco, SQLAlchemy) e `lm` (login, LoginManager) **uma única vez**, para todo o projeto importar daqui |
 | `routes.py` | `register_routes(app)`: registra todos os controllers no app. **Controller novo precisa ser registrado aqui.** |
 | `autenticacao.py` | Login e permissões: `load_user` (Flask-Login) e os decorators `admin_required` / `master_required` |
-| [`controllers/`](controllers/README.md) | Uma classe por recurso: recebe a requisição HTTP e devolve JSON |
+| [`controllers/`](controllers/README.md) | Um arquivo por recurso, uma função por rota (`@bp.route`): recebe a requisição HTTP e devolve JSON |
 | [`services/`](services/README.md) | Uma classe por caso de uso, com as regras de negócio |
 | [`models/`](models/README.md) | Entidades do domínio / tabelas do banco |
 | [`repositories/`](repositories/README.md) | Consultas não-CRUD por stored procedures do MySQL |
@@ -29,7 +29,7 @@ flowchart LR
 
 | Camada | Responsabilidade | O que **não** faz |
 |---|---|---|
-| **Controller** | Classe por recurso. Liga URL e método, lê a requisição, aplica a permissão, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
+| **Controller** | Um arquivo por recurso, uma função por rota. Liga URL e método (`@bp.route`), lê a requisição, aplica a permissão, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
 | **Service** | Classe por caso de uso, com `executar()`. Regras e validações. Devolve sempre `(dicionário, código_http)` | Não usa `request` nem `jsonify` |
 | **Model** | Uma classe por tabela (`db.Model`), com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()`, `to_dict()` | Decisões de negócio |
 | **Repository** | Consultas não-CRUD: monta o `CALL sp_...` | CRUD simples (isso fica no Model) |
@@ -129,22 +129,20 @@ class AvaliarPedidoService:
         return avaliacao.to_dict(), 201
 ```
 
-**3. Controller** (`controllers/avaliacao_controller.py`), **uma classe por recurso**:
+**3. Controller** (`controllers/avaliacao_controller.py`), **uma função por rota**:
 ```python
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
 
-class AvaliacaoController:
-    @staticmethod
-    @login_required
-    def avaliar(id_pedido):
-        dados = request.get_json(silent=True) or {}
-        resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
-        return jsonify(resposta), status
-
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
-bp_avaliacao.add_url_rule('/<int:id_pedido>/avaliacao', view_func=AvaliacaoController.avaliar, methods=['POST'])
+
+@bp_avaliacao.route('/<int:id_pedido>/avaliacao', methods=['POST'])
+@login_required
+def avaliar(id_pedido):
+    dados = request.get_json(silent=True) or {}
+    resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
+    return jsonify(resposta), status
 ```
 
 **4. Registrar** em `routes.py`:

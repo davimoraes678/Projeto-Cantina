@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from backend.models.pedido_model import Pedido
 
 class ConcluirPedidoService:
@@ -15,5 +17,6 @@ class ConcluirPedidoService:
         if pedido.status in ("Concluído", "Cancelado"):
             return {"erro": f"Este pedido já está {pedido.status.lower()}"}, 400
 
-        pedido.atualizar(status="Concluído")
+        # Guarda a hora da entrega (o resumo "Entregues hoje" do admin usa)
+        pedido.atualizar(status="Concluído", data_hora_retirada=datetime.utcnow())
         return pedido.to_dict(), 200

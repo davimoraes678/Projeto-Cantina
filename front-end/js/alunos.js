@@ -18,9 +18,6 @@
 // URL base da API
 const API_BASE_URL = "/api"; // mesmo endereço da página (funciona local e no Codespaces)
 
-// Caminho do arquivo de ícones (Bootstrap Icons) usado nos <svg><use href="...#nome">
-const ICONES = "/front-end/assets/icones.svg";
-
 // Guarda o ID do produto em edição (null = formulário está em modo "cadastrar").
 let editandoProdutoId = null;
 
@@ -60,7 +57,7 @@ function filtrar(categoria) {
 document.addEventListener("DOMContentLoaded", () => {
   // Carrega os dados da página. Cada função sai sozinha se a página não tiver a parte dela.
 
-  carregarProdutos(); // cards (cardápio) ou tabela de produtos (admin)
+  carregarProdutos(); // cards (cardápio) ou lista de produtos (admin)
   carregarCarrinho(); // painel do carrinho (cardápio)
   alunoInf(); // nome/e-mail/saldo e o que aparece para admin e mestre
   carregarCombinacoes(); // "Combos mais pedidos" (cardápio)
@@ -150,9 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (admin.html, só mestre) ---
+  // --- EVENTO: SUBMIT DO FORMULÁRIO DE PRODUTO (janela #modal-produto do admin.html, só mestre) ---
   // Se editandoProdutoId for null, cria (POST); se tiver um id, edita (PUT).
-  // Depois de salvar os dados, envia a imagem (se foi escolhida uma).
+  // Depois de salvar os dados, envia a imagem (se foi escolhida uma) e fecha a janela.
   const formProduto = document.getElementById("form-produto");
   if (formProduto) {
     formProduto.addEventListener("submit", async (e) => {
@@ -188,18 +185,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const produtoSalvo = await res.json();
-        // Se o upload falhar, mantém o ID para tentar novamente sem duplicar o produto.
-        editarProduto(
-          produtoSalvo.id_produto,
-          produtoSalvo.nome,
-          produtoSalvo.preco_atual,
-          produtoSalvo.quantidade_estoque,
-          produtoSalvo.categoria || "",
-        );
+        // Se o upload falhar, a janela continua aberta e já em modo "editar":
+        // salvar de novo tenta só a imagem, sem cadastrar o produto duas vezes.
+        editandoProdutoId = produtoSalvo.id_produto;
         await enviarImagem(produtoSalvo.id_produto);
-        sairModoEdicaoProduto(); // limpa o formulário e volta ao modo "cadastrar"
-        carregarProdutos(); // atualiza a tabela
-        avisar("Produto salvo.");
+        bootstrap.Modal.getInstance(document.getElementById("modal-produto")).hide();
+        carregarProdutos(); // atualiza a lista
+        avisar(`${produtoSalvo.nome} salvo.`);
       } catch (erro) {
         console.error("Erro ao salvar produto:", erro);
         avisar(erro.message || "Ocorreu um erro ao salvar o produto.", "erro");
@@ -207,12 +199,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Botão "Cancelar edição" do formulário de produto
-  const btnCancelarEdicaoProduto = document.getElementById(
-    "btn-cancelar-edicao-produto",
-  );
-  if (btnCancelarEdicaoProduto) {
-    btnCancelarEdicaoProduto.addEventListener("click", sairModoEdicaoProduto);
+  // Janela de produto: mostra a prévia da foto escolhida antes de salvar
+  const campoImagem = document.getElementById("imagem");
+  if (campoImagem) {
+    campoImagem.addEventListener("change", () => {
+      const arquivo = campoImagem.files[0];
+      if (arquivo) mostrarPreviaProduto(URL.createObjectURL(arquivo));
+    });
+  }
+
+  // --- ADMINISTRAÇÃO (admin.html) ---
+  // Buscas que filtram na hora o que já foi carregado (não chamam a API)
+  document.getElementById("busca-produto-admin")?.addEventListener("input", desenharListaProdutosAdmin);
+  document.getElementById("busca-aluno-admin")?.addEventListener("input", desenharListaAlunos);
+  document.getElementById("busca-historico")?.addEventListener("input", desenharHistoricoAdmin);
+  document.querySelectorAll('input[name="filtro-historico"]').forEach((radio) => {
+    radio.addEventListener("change", desenharHistoricoAdmin);
+  });
+  // Categoria dos produtos do admin: chama a rota de busca (procedure por categoria)
+  const categoriaAdmin = document.getElementById("lista-produtos-admin") && document.getElementById("busca-categoria");
+  if (categoriaAdmin) categoriaAdmin.addEventListener("change", () => buscarProdutos());
+
+  // Abas do admin: "admin.html#historico" já abre na aba Histórico, e trocar de aba
+  // atualiza o endereço (recarregar a página volta para a mesma aba)
+  if (document.getElementById("aba-pedidos")) {
+    const aba = window.location.hash.slice(1);
+    if (aba) abrirAba(aba);
+    document.querySelectorAll('[data-bs-toggle="pill"]').forEach((botao) => {
+      botao.addEventListener("shown.bs.tab", () => {
+        history.replaceState(null, "", "#" + botao.dataset.bsTarget.replace("#aba-", ""));
+      });
+    });
+    // Pedidos novos aparecem sozinhos a cada 20 segundos (só com a aba do navegador aberta)
+    setInterval(() => {
+      if (!document.hidden) carregarPedidos();
+    }, 20000);
   }
 
   // --- EVENTO: BUSCA/FILTRO DE PRODUTOS (usa GET /api/produtos/buscar) ---
@@ -358,44 +379,61 @@ document.addEventListener("DOMContentLoaded", () => {
 // ALUNOS
 // =============================================================================
 
-// Monta a tabela de alunos do admin.html (#tabela-alunos). Só é chamada para o
+// Lista de alunos já carregada (a busca do admin filtra em cima dela).
+let alunosCarregados = [];
+
+// Busca os alunos (GET /alunos) para a aba Alunos do admin.html. Só é chamada para o
 // mestre (ver funcaoPorAluno); a rota GET /alunos também só responde ao mestre.
 async function carregarAlunos() {
-  const tabela = document.getElementById("tabela-alunos");
-  if (!tabela) return;
+  if (!document.getElementById("lista-alunos")) return;
   try {
     const res = await fetch(`${API_BASE_URL}/alunos`);
-    const alunos = await res.json();
-
-    tabela.innerHTML = "";
-
-    alunos.forEach((aluno) => {
-      // O mestre não pode ser promovido nem excluído: a coluna de ações fica vazia
-      const acoes = aluno.funcao === "mestre" ? "" : `
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="promoverAluno(${aluno.id_aluno})">Promover</button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>`;
-
-      tabela.innerHTML += `
-                <tr>
-                    <th scope="row">${aluno.id_aluno}</th>
-                    <td>${escapeHtml(aluno.nome)}</td>
-                    <td>${escapeHtml(aluno.email)}</td>
-                    <td>${reais(aluno.saldo)}</td>
-                    <td><span class="badge rounded-pill text-bg-light border text-capitalize">${aluno.funcao}</span></td>
-                    <td class="text-nowrap">${acoes}
-                    </td>
-                </tr>
-            `;
-    });
-
+    if (!res.ok) return;
+    alunosCarregados = await res.json();
+    desenharListaAlunos();
   } catch (erro) {
     console.error("Erro ao carregar alunos:", erro);
   }
 }
 
-// Botão "Promover" da tabela de alunos: PUT /alunos/<id> torna o aluno admin
-// (só o mestre pode). Depois recarrega a tabela para mostrar a nova função.
-async function promoverAluno(id_aluno) {
+// Desenha os alunos (só os que combinam com a busca): iniciais, nome, função,
+// e-mail, saldo e os botões Promover (só para aluno comum) e Excluir (menos o mestre).
+function desenharListaAlunos() {
+  const lista = document.getElementById("lista-alunos");
+  const texto = (document.getElementById("busca-aluno-admin")?.value || "").trim().toLowerCase();
+  const alunos = alunosCarregados.filter((a) =>
+    `${a.nome} ${a.email}`.toLowerCase().includes(texto));
+
+  if (alunos.length === 0) {
+    lista.innerHTML = `<div class="list-group-item text-center text-body-secondary py-4">Nenhum aluno encontrado.</div>`;
+    return;
+  }
+
+  const cores = { mestre: "text-bg-danger", admin: "text-bg-warning", aluno: "text-bg-light border" };
+  lista.innerHTML = alunos.map((aluno) => {
+    const nomes = aluno.nome.trim().split(/\s+/);
+    const iniciais = (nomes[0][0] + (nomes.length > 1 ? nomes[nomes.length - 1][0] : "")).toUpperCase();
+    const promover = aluno.funcao === "aluno"
+      ? `<button class="btn btn-sm btn-outline-secondary rounded-pill text-nowrap" onclick="promoverAluno(${aluno.id_aluno}, '${escapeAttr(aluno.nome)}')" title="Tornar admin">${icone("add")} Admin</button>` : "";
+    const excluir = aluno.funcao !== "mestre"
+      ? `<button class="btn btn-sm btn-outline-danger rounded-pill" onclick="excluirAluno(${aluno.id_aluno}, '${escapeAttr(aluno.nome)}')" aria-label="Excluir ${escapeHtml(aluno.nome)}">${icone("delete")}</button>` : "";
+    return `
+            <div class="list-group-item d-flex align-items-center gap-3 py-2">
+                <div class="rounded-circle bg-warning-subtle text-warning-emphasis fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">${iniciais}</div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-semibold text-truncate">${escapeHtml(aluno.nome)}
+                        <span class="badge rounded-pill ${cores[aluno.funcao] || cores.aluno} text-capitalize ms-1">${aluno.funcao}</span></div>
+                    <small class="text-body-secondary d-block text-truncate">${escapeHtml(aluno.email)} · ${reais(aluno.saldo)}</small>
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">${promover}${excluir}</div>
+            </div>`;
+  }).join("");
+}
+
+// Botão "Tornar admin" da lista de alunos: PUT /alunos/<id> torna o aluno admin
+// (só o mestre pode). Depois recarrega a lista para mostrar a nova função.
+async function promoverAluno(id_aluno, nome) {
+  if (!confirm(`Tornar ${nome} admin? Ele poderá concluir e cancelar pedidos.`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, {
       method: "PUT",
@@ -408,15 +446,16 @@ async function promoverAluno(id_aluno) {
       return;
     }
     carregarAlunos();
+    avisar(`${nome} agora é admin.`);
   } catch (erro) {
     console.error("Erro ao promover aluno:", erro);
   }
 }
 
-// Botão "Excluir" da tabela de alunos (só o mestre): DELETE /alunos/<id>, depois
+// Botão de lixeira da lista de alunos (só o mestre): DELETE /alunos/<id>, depois
 // de confirmar. Os pedidos do aluno continuam no histórico com o nome guardado.
-async function excluirAluno(id_aluno) {
-  if (!confirm("Deseja realmente excluir este aluno?")) return;
+async function excluirAluno(id_aluno, nome) {
+  if (!confirm(`Excluir a conta de ${nome}? Os pedidos dele continuam no histórico.`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/alunos/${id_aluno}`, { method: "DELETE" });
     if (!res.ok) {
@@ -432,8 +471,8 @@ async function excluirAluno(id_aluno) {
 
 // Mostra na tela o que cada função pode ver e carrega os dados dela:
 //   aluno  -> nada extra
-//   admin  -> elementos .so-admin (ex.: link "Administração") + tabela de pedidos
-//   mestre -> tudo do admin + elementos .so-mestre (alunos e produtos no admin.html)
+//   admin  -> elementos .so-admin (ex.: link "Administração") + pedidos e histórico
+//   mestre -> tudo do admin + elementos .so-mestre (abas Produtos e Alunos do admin.html)
 // Isso só esconde da tela: quem bloqueia de verdade é o back-end (@admin_required etc.).
 function funcaoPorAluno(funcao) {
   const admin = funcao === "admin" || funcao === "mestre";
@@ -573,10 +612,10 @@ async function carregarProdutos() {
 // Busca/filtra/ordena produtos usando a rota GET /api/produtos/buscar.
 // Lê os filtros da tela (ou usa os de filtrosForcados) e monta:
 //   - cards em #tabela-produtos (cardápio), com quantidade e botão de adicionar
-//   - linhas em #tabela-produtos-admin (admin.html), com Editar/Excluir
+//   - a lista #lista-produtos-admin (admin.html), com Editar/Excluir
 async function buscarProdutos(filtrosForcados) {
   const tabela = document.getElementById("tabela-produtos");
-  const tabela_admin = document.getElementById("tabela-produtos-admin");
+  const tabela_admin = document.getElementById("lista-produtos-admin");
   if (!tabela && !tabela_admin) return; // página sem produtos
 
   const categoriaEl = document.getElementById("busca-categoria");
@@ -614,7 +653,7 @@ async function buscarProdutos(filtrosForcados) {
 
     produtosCarregados = dados;
     if (tabela) desenharCardsProdutos();
-    if (tabela_admin) desenharTabelaProdutosAdmin();
+    if (tabela_admin) desenharListaProdutosAdmin();
   } catch (erro) {
     console.error("Erro ao buscar produtos:", erro);
     avisar("Ocorreu um erro ao buscar os produtos.", "erro");
@@ -635,7 +674,7 @@ function desenharCardsProdutos() {
   if (produtos.length === 0) {
     tabela.innerHTML = `
             <div class="col-12 text-center text-body-secondary py-5">
-                <p class="display-6 mb-2"><svg class="icone" aria-hidden="true"><use href="${ICONES}#search_off"></use></svg></p>
+                <p class="display-6 mb-2"><span class="material-symbols-rounded icone" aria-hidden="true">search_off</span></p>
                 <p class="mb-0">Nenhum produto encontrado.</p>
             </div>
         `;
@@ -663,7 +702,7 @@ function cardProduto(prod) {
             <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="position-relative">
                     <div class="ratio ratio-4x3 rounded-top-4">
-                        <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true"><svg class="icone"><use href="${ICONES}#${icones[prod.categoria] || "restaurant"}"></use></svg></div>
+                        <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true"><span class="material-symbols-rounded icone">${icones[prod.categoria] || "restaurant"}</span></div>
                         <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="${escapeHtml(prod.nome)}"
                              class="object-fit-contain p-2 ${esgotado ? "opacity-50" : ""}" loading="lazy" onerror="this.remove()">
                     </div>
@@ -675,12 +714,12 @@ function cardProduto(prod) {
                     <p class="fw-bold text-primary mb-2">${reais(prod.preco_atual)}</p>
                     <div class="mt-auto d-flex align-items-center justify-content-between gap-1">
                         <div class="input-group input-group-sm seletor-qtd w-auto flex-nowrap">
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}><svg class="icone" aria-hidden="true"><use href="${ICONES}#remove"></use></svg></button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}><span class="material-symbols-rounded icone" aria-hidden="true">remove</span></button>
                             <input class="form-control text-center px-0" type="number" id="qtd-produto-${id}" value="1" min="1" max="${estoque}" inputmode="numeric" aria-label="Quantidade de ${escapeHtml(prod.nome)}" ${esgotado ? "disabled" : ""}>
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}><svg class="icone" aria-hidden="true"><use href="${ICONES}#add"></use></svg></button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}><span class="material-symbols-rounded icone" aria-hidden="true">add</span></button>
                         </div>
                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-2" onclick="adicionarItemAoCarrinho(${id})" aria-label="Adicionar ${escapeHtml(prod.nome)} ao carrinho" ${esgotado ? "disabled" : ""}>
-                            <svg class="icone fs-6" aria-hidden="true"><use href="${ICONES}#shopping_cart"></use></svg>
+                            <span class="material-symbols-rounded icone fs-6" aria-hidden="true">shopping_cart</span>
                         </button>
                     </div>
                 </div>
@@ -697,64 +736,87 @@ function mudarQuantidade(id_produto, delta) {
   campo.value = Math.min(Math.max(novo, 1), maximo);
 }
 
-// admin.html: uma linha por produto. O escapeAttr evita que uma aspa no nome quebre o onclick.
-function desenharTabelaProdutosAdmin() {
-  const tabela_admin = document.getElementById("tabela-produtos-admin");
-  if (produtosCarregados.length === 0) {
-    tabela_admin.innerHTML = `<tr><td colspan="6" class="text-center text-body-secondary">Nenhum produto encontrado.</td></tr>`;
+// admin.html: um item por produto (só os que combinam com a busca), com foto,
+// categoria, preço, estoque e os botões Editar e Excluir. Também atualiza o
+// número de "Estoque baixo" do resumo.
+function desenharListaProdutosAdmin() {
+  const lista = document.getElementById("lista-produtos-admin");
+  const texto = (document.getElementById("busca-produto-admin")?.value || "").trim().toLowerCase();
+  const produtos = produtosCarregados.filter((p) => p.nome.toLowerCase().includes(texto));
+
+  const resumoEstoque = document.getElementById("resumo-estoque");
+  if (resumoEstoque) resumoEstoque.textContent = produtosCarregados.filter((p) => p.quantidade_estoque <= 5).length;
+
+  if (produtos.length === 0) {
+    lista.innerHTML = `<div class="list-group-item text-center text-body-secondary py-4">Nenhum produto encontrado.</div>`;
     return;
   }
-  tabela_admin.innerHTML = produtosCarregados.map((prod) => `
-                <tr>
-                    <td>${prod.id_produto}</td>
-                    <td>
-                        <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem"
-                             alt="" width="48" height="36" class="object-fit-contain me-1" loading="lazy"
-                             onerror="this.hidden = true">
-                        ${escapeHtml(prod.nome)}
-                    </td>
-                    <td>${reais(prod.preco_atual)}</td>
-                    <td><span class="badge rounded-pill ${prod.quantidade_estoque > 5 ? "text-bg-light border" : "text-bg-warning"}">${prod.quantidade_estoque}</span></td>
-                    <td>${escapeHtml(prod.categoria || "")}</td>
-                    <td class="text-nowrap">
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="editarProduto(${prod.id_produto}, '${escapeAttr(prod.nome)}', ${prod.preco_atual}, ${prod.quantidade_estoque}, '${escapeAttr(prod.categoria || "")}')">Editar</button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="removerProduto(${prod.id_produto})">Excluir</button>
-                    </td>
-                </tr>
-            `).join("");
+
+  const icones = { Salgado: "bakery_dining", Bebida: "local_cafe", Doce: "cake" };
+  lista.innerHTML = produtos.map((prod) => {
+    const estoque = prod.quantidade_estoque;
+    const corEstoque = estoque <= 0 ? "text-bg-secondary" : estoque <= 5 ? "text-bg-warning" : "text-bg-light border";
+    return `
+            <div class="list-group-item d-flex align-items-center gap-3 py-2">
+                <div class="position-relative flex-shrink-0 rounded bg-warning-subtle d-flex align-items-center justify-content-center text-warning-emphasis" style="width: 48px; height: 48px;">
+                    ${icone(icones[prod.categoria] || "restaurant")}
+                    <img src="${API_BASE_URL}/produtos/${prod.id_produto}/imagem" alt="" loading="lazy"
+                         class="position-absolute top-0 start-0 w-100 h-100 object-fit-contain bg-white rounded" onerror="this.remove()">
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-semibold text-truncate">${escapeHtml(prod.nome)}</div>
+                    <small class="text-body-secondary">${escapeHtml(prod.categoria || "Sem categoria")} · ${reais(prod.preco_atual)}</small>
+                    <span class="badge rounded-pill ${corEstoque} ms-1">${estoque <= 0 ? "Esgotado" : `${estoque} un.`}</span>
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="editarProduto(${prod.id_produto}, '${escapeAttr(prod.nome)}', ${prod.preco_atual}, ${estoque}, '${escapeAttr(prod.categoria || "")}')" aria-label="Editar ${escapeHtml(prod.nome)}">${icone("edit")}</button>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="removerProduto(${prod.id_produto}, '${escapeAttr(prod.nome)}')" aria-label="Excluir ${escapeHtml(prod.nome)}">${icone("delete")}</button>
+                </div>
+            </div>`;
+  }).join("");
 }
 
-// Botão "Editar" de um produto: preenche o formulário com os dados dele e
-// entra no "modo edição" (o próximo envio do formulário faz PUT em vez de POST).
+// Botão "Novo produto": abre a janela de produto vazia, em modo "cadastrar".
+function novoProduto() {
+  editandoProdutoId = null;
+  document.getElementById("form-produto").reset();
+  document.getElementById("modal-produto-titulo").textContent = "Novo produto";
+  document.getElementById("btn-salvar-produto").textContent = "Cadastrar";
+  mostrarPreviaProduto("");
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
+}
+
+// Botão "Editar" de um produto: abre a janela já preenchida com os dados dele, em
+// "modo edição" (o próximo envio do formulário faz PUT em vez de POST).
 function editarProduto(id, nome, preco, estoque, categoria) {
   editandoProdutoId = id;
+  document.getElementById("form-produto").reset();
   document.getElementById("produto-nome").value = nome;
   document.getElementById("produto-preco").value = preco;
   document.getElementById("produto-estoque").value = estoque;
   document.getElementById("produto-categoria").value = categoria;
-  document.getElementById("btn-salvar-produto").textContent = "Salvar Edição";
-  document.getElementById("btn-cancelar-edicao-produto").style.display =
-    "inline-block";
-  document
-    .getElementById("produto-nome")
-    .scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("modal-produto-titulo").textContent = "Editar produto";
+  document.getElementById("btn-salvar-produto").textContent = "Salvar";
+  mostrarPreviaProduto(`${API_BASE_URL}/produtos/${id}/imagem?v=${Date.now()}`); // ?v= evita a foto antiga do cache
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
 }
 
-// Volta o formulário de produto para o modo "cadastrar" e limpa os campos.
-function sairModoEdicaoProduto() {
-  editandoProdutoId = null;
-  document.getElementById("form-produto").reset();
-  document.getElementById("btn-salvar-produto").textContent =
-    "Cadastrar Produto";
-  document.getElementById("btn-cancelar-edicao-produto").style.display = "none";
+// Mostra a foto do produto na janela (endereço vazio, ou produto sem foto, esconde).
+function mostrarPreviaProduto(endereco) {
+  const previa = document.getElementById("produto-imagem-previa");
+  previa.classList.add("d-none");
+  if (!endereco) return;
+  previa.onload = () => previa.classList.remove("d-none");
+  previa.onerror = () => previa.classList.add("d-none");
+  previa.src = endereco;
 }
 
-// Botão "Excluir" de um produto: DELETE /produtos/<id>, depois de confirmar.
+// Botão de lixeira de um produto: DELETE /produtos/<id>, depois de confirmar.
 // Os pedidos antigos continuam mostrando o nome do produto.
-async function removerProduto(id) {
+async function removerProduto(id, nome) {
   if (
     confirm(
-      "Deseja realmente remover este produto? Os pedidos que já o incluem serão mantidos no histórico.",
+      `Excluir ${nome} do cardápio? Os pedidos que já o incluem continuam no histórico.`,
     )
   ) {
     const res = await fetch(`${API_BASE_URL}/produtos/${id}`, {
@@ -765,9 +827,9 @@ async function removerProduto(id) {
       avisar(erro.erro || "Não foi possível remover o produto.", "erro");
       return;
     }
-    if (editandoProdutoId === id) sairModoEdicaoProduto();
     carregarProdutos();
     carregarPedidos();
+    avisar(`${nome} excluído.`);
   }
 }
 
@@ -859,7 +921,7 @@ function renderizarCarrinho(carrinho) {
                 </div>
                 <span class="fw-semibold text-nowrap">${reais(item.subtotal)}</span>
                 <button class="btn btn-sm btn-link text-danger p-1" onclick="removerItemDoCarrinho(${item.id_item_pedido})" aria-label="Remover ${escapeHtml(item.produto_nome)}">
-                    <svg class="icone" aria-hidden="true"><use href="${ICONES}#delete"></use></svg>
+                    <span class="material-symbols-rounded icone" aria-hidden="true">delete</span>
                 </button>
             </li>
         `).join("");
@@ -913,7 +975,7 @@ async function finalizarPedido() {
 
     // Fecha o carrinho e mostra a janela "Pedido enviado!"
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("carrinho")).hide();
-    document.getElementById("pedido-feito-numero").textContent = `#${pedido.id_pedido}`;
+    document.getElementById("pedido-feito-numero").textContent = codigoPedido(pedido);
     document.getElementById("pedido-feito-total").textContent = reais(pedido.valor_total);
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-pedido-feito")).show();
 
@@ -1020,7 +1082,7 @@ async function carregarMeusPedidos() {
       aviso.classList.toggle("d-flex", andamento.length > 0);
       if (andamento.length) {
         document.getElementById("aviso-pedido-titulo").textContent = andamento.length === 1
-          ? `Pedido #${andamento[0].id_pedido} em preparo`
+          ? `Pedido ${codigoPedido(andamento[0])} em preparo`
           : `${andamento.length} pedidos em preparo`;
       }
     }
@@ -1060,11 +1122,11 @@ function cardPedidoAndamento(pedido) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h2 class="h6 fw-bold mb-0">Pedido ${pedido.codigo}</h2>
+                        <h2 class="h6 fw-bold mb-0">Pedido ${escapeHtml(codigoPedido(pedido))}</h2>
                         <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
                     </div>
                     <span class="badge rounded-pill text-bg-warning d-flex align-items-center gap-1">
-                        <svg class="icone" aria-hidden="true"><use href="${ICONES}#hourglass_top"></use></svg> Em preparo
+                        <span class="material-symbols-rounded icone" aria-hidden="true">hourglass_top</span> Em preparo
                     </span>
                 </div>
                 <div class="progress mb-1" role="progressbar" aria-label="Andamento do pedido" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="height: 8px;">
@@ -1089,9 +1151,9 @@ function cardPedidoHistorico(pedido) {
   let avaliar = "";
   if (concluido && !pedido.avaliado) {
     avaliar = `<button class="btn btn-warning btn-sm rounded-pill" type="button" onclick="abrirAvaliacao(${pedido.id_pedido})">
-                       <svg class="icone" aria-hidden="true"><use href="${ICONES}#star"></use></svg> Avaliar</button>`;
+                       <span class="material-symbols-rounded icone icone-cheio" aria-hidden="true">star</span> Avaliar</button>`;
   } else if (pedido.avaliado) {
-    avaliar = `<small class="text-body-secondary align-self-center"><svg class="icone text-warning" aria-hidden="true"><use href="${ICONES}#star"></use></svg> Avaliado</small>`;
+    avaliar = `<small class="text-body-secondary align-self-center"><span class="material-symbols-rounded icone icone-cheio text-warning" aria-hidden="true">star</span> Avaliado</small>`;
   }
 
   return `
@@ -1099,7 +1161,7 @@ function cardPedidoHistorico(pedido) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
-                        <h2 class="h6 fw-bold mb-0">Pedido #${pedido.id_pedido}</h2>
+                        <h2 class="h6 fw-bold mb-0">Pedido ${escapeHtml(codigoPedido(pedido))}</h2>
                         <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
                     </div>
                     <span class="badge rounded-pill ${concluido ? "text-bg-success" : "text-bg-secondary"}">${pedido.status}</span>
@@ -1111,7 +1173,7 @@ function cardPedidoHistorico(pedido) {
                     <div class="d-flex gap-2">
                         ${avaliar}
                         <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">
-                            <svg class="icone" aria-hidden="true"><use href="${ICONES}#replay"></use></svg> Pedir de novo
+                            <span class="material-symbols-rounded icone" aria-hidden="true">replay</span> Pedir de novo
                         </button>
                     </div>
                 </div>
@@ -1120,14 +1182,14 @@ function cardPedidoHistorico(pedido) {
     `;
 }
 
-// Mensagem de lista vazia (com um ícone) e um botão para o cardápio.
-function estadoVazio(icone, titulo, texto) {
+// Mensagem de lista vazia (com um ícone) e, se comBotao, um botão para o cardápio.
+function estadoVazio(nomeIcone, titulo, texto, comBotao = true) {
   return `
         <div class="text-center text-body-secondary py-5">
-            <p class="display-5 mb-2 text-body-tertiary"><svg class="icone" aria-hidden="true"><use href="${ICONES}#${icone}"></use></svg></p>
+            <p class="display-5 mb-2 text-body-tertiary">${icone(nomeIcone)}</p>
             <p class="fw-semibold mb-1 text-body">${titulo}</p>
             <p class="small">${texto}</p>
-            <a class="btn btn-primary rounded-pill" href="/">Ver cardápio</a>
+            ${comBotao ? `<a class="btn btn-primary rounded-pill" href="/">Ver cardápio</a>` : ""}
         </div>
     `;
 }
@@ -1149,80 +1211,144 @@ async function pedirDeNovo(id_pedido) {
 }
 
 // =============================================================================
-// PEDIDOS (admin.html e historico.html; só admin e mestre)
+// PEDIDOS (admin.html; só admin e mestre)
 // =============================================================================
 
-// Busca todos os pedidos (GET /pedidos) e monta #tabela-pedidos:
-//   admin.html     -> só os em andamento, com Concluir/Cancelar (ordem de chegada)
-//   historico.html -> só os concluídos e cancelados, com a data (mais recente primeiro)
+// Todos os pedidos já carregados (o histórico filtra em cima deles).
+let pedidosAdmin = [];
+
+// Busca todos os pedidos (GET /pedidos) e monta, no admin.html:
+//   - aba Pedidos: um card por pedido "Pendente", do mais antigo para o mais novo
+//   - aba Histórico: os entregues e cancelados (ver desenharHistoricoAdmin)
+//   - o resumo do dia (em preparo, entregues hoje, vendido hoje)
 async function carregarPedidos() {
-  const tabela = document.getElementById("tabela-pedidos");
-  if (!tabela) return; // página sem tabela de pedidos
+  const lista = document.getElementById("lista-pedidos-admin");
+  if (!lista) return; // página sem pedidos do admin
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos`);
-    const pedidos = await res.json();
+    if (!res.ok) return;
+    pedidosAdmin = await res.json();
+    const andamento = pedidosAdmin.filter((ped) => ped.status === "Pendente");
 
-    // historico.html mostra os finalizados (mais recente primeiro); admin.html, os em andamento
-    const historico = tabela.dataset.historico === "sim"; // lê o data-historico="sim" do HTML
-    const lista = pedidos.filter(
-      (ped) => ["Concluído", "Cancelado"].includes(ped.status) === historico,
-    );
-    if (historico) lista.reverse();
+    // Resumo do dia. "Hoje" é comparado no horário local (toDateString).
+    const hoje = new Date().toDateString();
+    const entreguesHoje = pedidosAdmin.filter((ped) => ped.status === "Concluído"
+      && dataLocal(ped.data_hora_retirada || ped.data_hora_criacao).toDateString() === hoje);
+    document.getElementById("resumo-andamento").textContent = andamento.length;
+    document.getElementById("resumo-concluidos").textContent = entreguesHoje.length;
+    document.getElementById("resumo-vendido").textContent =
+      reais(entreguesHoje.reduce((soma, ped) => soma + ped.valor_total, 0));
 
     const contador = document.getElementById("contador-pedidos-admin");
-    if (contador) contador.textContent = lista.length || "";
+    contador.textContent = andamento.length;
+    contador.classList.toggle("d-none", andamento.length === 0);
 
-    if (lista.length === 0) {
-      tabela.innerHTML = `<tr><td colspan="6" class="text-center text-body-secondary py-4">Nenhum pedido ${historico ? "finalizado" : "em andamento"}.</td></tr>`;
-      return;
-    }
+    lista.innerHTML = andamento.length
+      ? andamento.map(cardPedidoAdmin).join("")
+      : `<div class="col-12">${estadoVazio("check_circle", "Nenhum pedido esperando", "Os pedidos novos aparecem aqui sozinhos.", false)}</div>`;
 
-    const cores = { Pendente: "text-bg-warning", "Concluído": "text-bg-success", Cancelado: "text-bg-secondary" };
-    tabela.innerHTML = lista.map((ped) => {
-      // "2x Coxinha, 1x Refri"
-      const listaProdutos = ped.itens
-        .map((item) => `${item.quantidade}x ${escapeHtml(item.produto_nome)}`)
-        .join(", ");
-
-      // Última coluna: a data no histórico, os botões no admin
-      const ultimaColuna = historico
-        ? formatarData(ped.data_hora_criacao)
-        : `<button class="btn btn-sm btn-success rounded-pill" onclick="concluirPedido(${ped.id_pedido})">Concluir</button>
-           <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="cancelarPedido(${ped.id_pedido})">Cancelar</button>`;
-
-      return `
-                <tr>
-                    <td class="fw-semibold">#${ped.id_pedido}</td>
-                    <td>${escapeHtml(ped.aluno_nome)}</td>
-                    <td>${listaProdutos}</td>
-                    <td><span class="badge rounded-pill ${cores[ped.status] || "text-bg-light"}">${ped.status}</span></td>
-                    <td>${reais(ped.valor_total)}</td>
-                    <td class="text-nowrap">${ultimaColuna}</td>
-                </tr>
-            `;
-    }).join("");
+    desenharHistoricoAdmin();
   } catch (erro) {
     console.error("Erro ao carregar pedidos:", erro);
   }
 }
 
-// Botão "Concluir": POST /pedidos/<id>/concluir marca o pedido como "Concluído".
-// O pedido sai da tabela do admin e vai para o histórico; a avaliação é pedida
+// Card de um pedido em preparo: código de retirada grande (o aluno mostra no
+// balcão), nome do aluno, há quanto tempo foi feito, itens e os botões.
+function cardPedidoAdmin(ped) {
+  const codigo = codigoPedido(ped);
+  return `
+        <div class="col">
+            <div class="card h-100 border-0 border-start border-4 border-warning shadow-sm rounded-4">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <small class="text-body-secondary">Código de retirada</small>
+                            <div class="fs-2 fw-bold font-monospace lh-1">${escapeHtml(codigo)}</div>
+                        </div>
+                        <span class="badge rounded-pill text-bg-light border">${tempoDesde(ped.data_hora_criacao)}</span>
+                    </div>
+                    <p class="fw-semibold mb-1">${icone("person", "text-body-secondary")} ${escapeHtml(ped.aluno_nome)}</p>
+                    <ul class="list-unstyled small mb-3">
+                        ${ped.itens.map((item) => `<li><span class="fw-semibold">${item.quantidade}x</span> ${escapeHtml(item.produto_nome)}</li>`).join("")}
+                    </ul>
+                    <div class="mt-auto d-flex align-items-center gap-2">
+                        <span class="fw-bold me-auto">${reais(ped.valor_total)}</span>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="cancelarPedido(${ped.id_pedido}, '${escapeAttr(codigo)}')">Cancelar</button>
+                        <button class="btn btn-success rounded-pill px-3" onclick="concluirPedido(${ped.id_pedido}, '${escapeAttr(codigo)}', '${escapeAttr(ped.aluno_nome)}')">
+                            ${icone("check")} Entregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Aba Histórico: pedidos entregues e cancelados, do mais recente para o mais antigo,
+// filtrados pelos botões Todos/Entregues/Cancelados e pela busca (aluno ou código).
+function desenharHistoricoAdmin() {
+  const lista = document.getElementById("lista-historico-admin");
+  if (!lista) return;
+  const status = document.querySelector('input[name="filtro-historico"]:checked').value;
+  const texto = (document.getElementById("busca-historico").value || "").trim().toLowerCase();
+
+  const historico = pedidosAdmin
+    .filter((ped) => ["Concluído", "Cancelado"].includes(ped.status))
+    .filter((ped) => !status || ped.status === status)
+    .filter((ped) => `${ped.aluno_nome} ${ped.codigo || ""} #${ped.id_pedido}`.toLowerCase().includes(texto))
+    .reverse();
+
+  if (historico.length === 0) {
+    lista.innerHTML = `<div class="list-group-item text-center text-body-secondary py-4">Nenhum pedido encontrado.</div>`;
+    return;
+  }
+
+  lista.innerHTML = historico.map((ped) => {
+    const entregue = ped.status === "Concluído";
+    const itens = ped.itens.map((item) => `${item.quantidade}x ${escapeHtml(item.produto_nome)}`).join(", ");
+    return `
+            <div class="list-group-item py-3">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="overflow-hidden">
+                        <div class="fw-semibold text-truncate">${escapeHtml(ped.aluno_nome)}
+                            <small class="text-body-secondary fw-normal">${escapeHtml(codigoPedido(ped))}</small></div>
+                        <small class="text-body-secondary">${itens}</small>
+                    </div>
+                    <div class="text-end flex-shrink-0">
+                        <span class="badge rounded-pill ${entregue ? "text-bg-success" : "text-bg-secondary"}">${entregue ? "Entregue" : "Cancelado"}</span>
+                        <div class="fw-semibold">${reais(ped.valor_total)}</div>
+                        <small class="text-body-secondary">${formatarData(ped.data_hora_retirada || ped.data_hora_criacao)}</small>
+                    </div>
+                </div>
+            </div>`;
+  }).join("");
+}
+
+// Troca a aba do admin pelo nome: "pedidos", "historico", "produtos" ou "alunos"
+// (usado pelos cards do resumo e pelo endereço admin.html#historico).
+function abrirAba(nome) {
+  const botao = document.getElementById(`aba-${nome}-btn`);
+  if (botao) bootstrap.Tab.getOrCreateInstance(botao).show();
+}
+
+// Botão "Entregar": POST /pedidos/<id>/concluir marca o pedido como "Concluído".
+// O pedido sai da aba Pedidos e vai para o Histórico; a avaliação é pedida
 // ao aluno quando ele abrir a cantina (ver verificarAvaliacao).
-async function concluirPedido(id) {
-  if (!confirm("Deseja realmente marcar este pedido como concluído?")) return;
-  await mudarPedido(id, "concluir");
+async function concluirPedido(id, codigo, aluno) {
+  if (!confirm(`Entregar o pedido ${codigo} para ${aluno}?`)) return;
+  await mudarPedido(id, "concluir", codigo);
 }
 
 // Botão "Cancelar": POST /pedidos/<id>/cancelar. O back-end devolve o valor para
 // a carteira do aluno e os produtos para o estoque.
-async function cancelarPedido(id) {
-  if (!confirm("Cancelar este pedido? O valor volta para a carteira do aluno.")) return;
-  await mudarPedido(id, "cancelar");
+async function cancelarPedido(id, codigo) {
+  if (!confirm(`Cancelar o pedido ${codigo}? O valor volta para a carteira do aluno.`)) return;
+  await mudarPedido(id, "cancelar", codigo);
 }
 
-// Chama a rota de concluir ou cancelar e recarrega as tabelas.
-async function mudarPedido(id, acao) {
+// Chama a rota de concluir ou cancelar e recarrega a tela.
+async function mudarPedido(id, acao, codigo) {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/${id}/${acao}`, { method: "POST" });
     if (!res.ok) {
@@ -1230,10 +1356,11 @@ async function mudarPedido(id, acao) {
       avisar(erro.erro || "Não foi possível atualizar o pedido.", "erro");
       return;
     }
-    // O alunoInf recarrega os pedidos e, para o mestre, a tabela de alunos
+    // O alunoInf recarrega os pedidos e, para o mestre, a lista de alunos
     // (o cancelamento devolve saldo, então o saldo do aluno muda)
     alunoInf();
-    avisar(acao === "concluir" ? `Pedido #${id} concluído.` : `Pedido #${id} cancelado.`);
+    if (acao === "cancelar") carregarProdutos(); // o estoque voltou
+    avisar(acao === "concluir" ? `Pedido ${codigo} entregue.` : `Pedido ${codigo} cancelado.`);
   } catch (erro) {
     console.error("Erro ao atualizar pedido:", erro);
     avisar("Ocorreu um erro ao atualizar o pedido.", "erro");
@@ -1324,15 +1451,41 @@ function reais(valor) {
   return (parseFloat(valor) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-// Data do back-end -> "03/11, 14:32". O back-end grava em UTC sem dizer o fuso
-// (ex.: "2026-11-03T17:32:00"); o "Z" no fim avisa o navegador para converter para
-// o horário local.
+// Código de retirada do pedido (ex.: "4aZ9"). Pedidos feitos antes do código
+// existir não têm um: aí mostra o número ("#12").
+function codigoPedido(pedido) {
+  return pedido.codigo || `#${pedido.id_pedido}`;
+}
+
+// Data do back-end -> objeto Date no horário local. O back-end grava em UTC sem
+// dizer o fuso (ex.: "2026-11-03T17:32:00"); o "Z" no fim avisa o navegador que é
+// UTC, e ele converte para o horário de quem está vendo.
+function dataLocal(iso) {
+  const comFuso = /Z|[+-]\d\d:\d\d$/.test(iso) ? iso : `${iso}Z`;
+  return new Date(comFuso);
+}
+
+// Data do back-end -> "03/11, 14:32"
 function formatarData(iso) {
   if (!iso) return "";
-  const comFuso = /Z|[+-]\d\d:\d\d$/.test(iso) ? iso : `${iso}Z`;
-  return new Date(comFuso).toLocaleString("pt-BR", {
+  return dataLocal(iso).toLocaleString("pt-BR", {
     day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
   });
+}
+
+// Data do back-end -> "agora", "há 5 min", "há 2 h" (cards de pedido do admin)
+function tempoDesde(iso) {
+  const minutos = Math.floor((Date.now() - dataLocal(iso)) / 60000);
+  if (minutos < 1) return "agora";
+  if (minutos < 60) return `há ${minutos} min`;
+  return `há ${Math.floor(minutos / 60)} h`;
+}
+
+// Ícone do Material Symbols (Google Fonts) como texto HTML, para usar dentro das
+// listas e cards montados aqui: icone("delete") -> <span ...>delete</span>.
+// O nome do ícone precisa estar na lista icon_names do <link> do Google Fonts nas páginas.
+function icone(nome, classes = "") {
+  return `<span class="material-symbols-rounded icone ${classes}" aria-hidden="true">${nome}</span>`;
 }
 
 // Troca os caracteres especiais do HTML, para um nome com "<" não virar código na página.

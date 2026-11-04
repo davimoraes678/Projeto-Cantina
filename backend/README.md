@@ -65,7 +65,7 @@ O `app.py` fica na raiz do projeto. A função `create_app()`:
 3. Configura o banco (`DATABASE_URL`, padrão SQLite), a pasta de imagens (`arquivos/`), o tamanho máximo de upload (6 MB) e a `SECRET_KEY`.
 4. Liga o banco (`db.init_app`) e o login (`lm.init_app`). Rotas protegidas sem login respondem `401`.
 5. Registra os controllers (`register_routes(app)`).
-6. Protege as páginas: sem login, vai para o cadastro; `admin.html` e `historico.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
+6. Protege as páginas: sem login, vai para o cadastro; `admin.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
 7. Cria as tabelas que ainda não existem (`db.create_all()`).
 
 > **Atenção:** O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.

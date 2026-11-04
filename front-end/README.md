@@ -10,10 +10,8 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (pedidos `Pendente`, atualiza a cada 30 s) e "Histórico" (concluídos e cancelados, com "Pedir de novo" e "Avaliar") |
 | `conta.html` | `/front-end/conta.html` | Sim | Perfil: ver, editar e remover a própria conta; atalhos para carteira, pedidos e administração; botão Sair |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
-| `admin.html` | `/front-end/admin.html` | Admin ou mestre | **Admin:** só os pedidos em andamento (botões Concluir e Cancelar) e o botão do histórico. **Mestre:** também a lista de alunos (promover, excluir) e o cadastro de produtos. Aluno comum é mandado de volta para `/` |
-| `historico.html` | `/front-end/historico.html` | Admin ou mestre | Pedidos concluídos e cancelados, do mais recente para o mais antigo |
+| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Resumo do dia (em preparo, entregues hoje, vendido hoje, estoque baixo) e abas. **Admin:** Pedidos (um card por pedido em preparo, com o código de retirada e os botões Entregar e Cancelar; atualiza a cada 20 s) e Histórico (entregues e cancelados, com filtro e busca). **Mestre:** também Produtos (lista com busca; cadastrar e editar numa janela) e Alunos (tornar admin, excluir). `admin.html#historico` abre direto na aba. Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
-| `assets/icones.svg` | | | Os ícones usados no site ([Material Symbols](https://fonts.google.com/icons) do Google Fonts, estilo Rounded, num arquivo só): `<svg class="icone"><use href="/front-end/assets/icones.svg#shopping_cart"></use></svg>`. Para adicionar um ícone, copie o `<path>` do SVG baixado no Google Fonts para um novo `<symbol id="nome" viewBox="0 -960 960 960">` |
 | `assets/logo.png` | | | Logo da Cantina Real |
 | [`js/alunos.js`](js/README.md) | | | **Todo** o JavaScript das páginas |
 
@@ -28,9 +26,21 @@ O Bootstrap 5.3.8 vem do CDN jsDelivr, com `integrity` (o navegador confere se o
 - Para mudar uma cor da cantina, troque as variáveis no topo do `style.css`.
 - Ao trocar a versão do Bootstrap, troque também o `integrity` (está na página de download do Bootstrap).
 
+## Ícones (Google Fonts)
+
+Os ícones são do [Material Symbols](https://fonts.google.com/icons), estilo **Rounded**, carregados do Google Fonts por um `<link>` no `<head>` de cada página. Cada ícone é escrito pelo nome:
+
+```html
+<span class="material-symbols-rounded icone" aria-hidden="true">shopping_cart</span>
+```
+
+- No JS, o `icone("delete")` do `alunos.js` monta esse mesmo `<span>`.
+- O `<link>` usa `icon_names=...` com **só os ícones que o site usa**: assim o Google manda um arquivo de uns 10 KB em vez da fonte inteira (vários MB). **Ícone novo:** procure o nome em [fonts.google.com/icons](https://fonts.google.com/icons) e acrescente na lista `icon_names` (em ordem alfabética) de **todas** as páginas. Se esquecer, aparece o nome escrito no lugar do ícone.
+- A classe `icone` (no `style.css`) deixa o ícone do tamanho do texto ao lado; `icone-cheio` mostra a versão preenchida (ex.: a estrela).
+
 ## Celular
 
-As páginas do aluno (cardápio, pedidos, carteira e perfil) têm, no celular, uma **barra de navegação embaixo** (`fixed-bottom d-md-none` com `nav nav-justified`), como num app. No computador ela some e os mesmos links ficam na barra de cima. No fim do `<main>` há um `<div class="d-md-none py-5">` para o conteúdo não ficar escondido atrás dela. Cada página marca o próprio item com `active`.
+As páginas logadas (cardápio, pedidos, carteira, perfil e administração) têm, no celular, uma **barra de navegação embaixo** (`fixed-bottom d-md-none` com `nav nav-justified`), como num app. No computador ela some e os mesmos links ficam na barra de cima. No fim do `<main>` há um `<div class="d-md-none py-5">` para o conteúdo não ficar escondido atrás dela. Cada página marca o próprio item com `active`. O item **Admin** só aparece para admin e mestre (classe `so-admin`).
 
 ## Como as páginas falam com o back-end
 

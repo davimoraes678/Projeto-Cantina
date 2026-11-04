@@ -40,13 +40,11 @@ def create_app():
         '/front-end/admin.html',
         '/front-end/conta.html',
         '/front-end/carteira.html',
-        '/front-end/historico.html',
         '/front-end/pedidos.html',
     }
     # Páginas só para admin e mestre: um aluno comum volta para a cantina
     PAGINAS_ADMIN = {
         '/front-end/admin.html',
-        '/front-end/historico.html',
     }
     @app.before_request
     def proteger_paginas():

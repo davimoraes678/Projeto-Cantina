@@ -6,149 +6,224 @@
     <meta name="theme-color" content="#aa0e1b">
     <title>Administração - Cantina Real</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Ícones: Material Symbols Rounded do Google Fonts (https://fonts.google.com/icons).
+         icon_names = só os ícones que o site usa (em ordem alfabética), para baixar pouco.
+         Ícone novo? Acrescente o nome nessa lista, em todas as páginas. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=account_balance_wallet,add,bakery_dining,cake,check,check_circle,chevron_right,delete,edit,hourglass_top,inventory_2,local_cafe,local_fire_department,logout,payments,person,receipt_long,refresh,remove,replay,restaurant,search,search_off,settings,shopping_basket,shopping_cart,star,tune&display=block">
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-cantina sticky-top shadow-sm">
+    <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
-            <a class="btn btn-outline-light rounded-pill btn-sm d-flex align-items-center gap-1" href="/">
-                <svg class="icone" aria-hidden="true"><use href="/front-end/assets/icones.svg#arrow_back"></use></svg> Voltar
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+                <img src="/front-end/assets/logo.png" alt="" width="36" height="36">
+                <span>Cantina <span class="text-cantina-amarelo">Real</span></span>
             </a>
-            <span class="navbar-brand mb-0 fw-bold d-flex align-items-center gap-2">
-                <img src="/front-end/assets/logo.png" alt="" width="32" height="32"> Administração
-            </span>
+            <ul class="navbar-nav d-none d-md-flex me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Cardápio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
+                <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
+                <li class="nav-item so-admin" style="display:none;"><a class="nav-link active" aria-current="page" href="/front-end/admin.html">Administração</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <div class="dropdown d-none d-md-block">
+                    <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-aluno="primeiro-nome">Aluno</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="/front-end/conta.html">Meu perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger btn-logout" type="button">Sair</button></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main class="container py-4">
-        <!-- Pedidos -->
-        <section class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h2 class="h5 fw-bold card-title mb-0">Pedidos em andamento <span class="badge rounded-pill text-bg-warning ms-1" id="contador-pedidos-admin"></span></h2>
-                    <a class="btn btn-outline-primary btn-sm rounded-pill" href="/front-end/historico.html">Histórico</a>
-                </div>
+    <main class="container py-3 py-md-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h4 fw-bold mb-0">Administração</h1>
+            <span class="badge rounded-pill text-bg-light border text-capitalize" data-aluno="funcao"></span>
+        </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Aluno</th>
-                                <th scope="col">Itens</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Total</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-pedidos"></tbody>
-                    </table>
+        <!-- Resumo do dia: os números vêm do alunos.js (carregarPedidos e buscarProdutos) -->
+        <div class="row row-cols-2 row-cols-md-4 g-2 g-md-3 mb-3">
+            <div class="col">
+                <button class="card border-0 shadow-sm rounded-4 w-100 h-100 text-start p-3" type="button" onclick="abrirAba('pedidos')">
+                    <span class="small text-body-secondary"><span class="material-symbols-rounded icone text-warning" aria-hidden="true">hourglass_top</span> Em preparo</span>
+                    <span class="fs-3 fw-bold" id="resumo-andamento">0</span>
+                </button>
+            </div>
+            <div class="col">
+                <button class="card border-0 shadow-sm rounded-4 w-100 h-100 text-start p-3" type="button" onclick="abrirAba('historico')">
+                    <span class="small text-body-secondary"><span class="material-symbols-rounded icone text-success" aria-hidden="true">check_circle</span> Entregues hoje</span>
+                    <span class="fs-3 fw-bold" id="resumo-concluidos">0</span>
+                </button>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                    <span class="small text-body-secondary"><span class="material-symbols-rounded icone text-primary" aria-hidden="true">payments</span> Vendido hoje</span>
+                    <span class="fs-3 fw-bold" id="resumo-vendido">R$ 0,00</span>
                 </div>
             </div>
-        </section>
-
-        <!-- Alunos e Produtos: só o mestre vê (o alunos.js mostra) -->
-        <section class="card border-0 shadow-sm rounded-4 mb-4 so-mestre" style="display:none;">
-            <div class="card-body">
-                <h2 class="h5 fw-bold card-title mb-3">Alunos</h2>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Nome</th>
-                                <th scope="col">E-mail</th>
-                                <th scope="col">Saldo</th>
-                                <th scope="col">Função</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-alunos"></tbody>
-                    </table>
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                    <span class="small text-body-secondary"><span class="material-symbols-rounded icone text-danger" aria-hidden="true">inventory_2</span> Estoque baixo</span>
+                    <span class="fs-3 fw-bold" id="resumo-estoque">0</span>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Produtos -->
-        <section class="card border-0 shadow-sm rounded-4 mb-4 so-mestre" style="display:none;">
-            <div class="card-body">
-                <h2 class="h5 fw-bold card-title mb-3">Produtos</h2>
-                <form id="form-produto" class="row g-2 mb-4">
-                    <div class="col-md-6">
-                        <input class="form-control" type="text" id="produto-nome" placeholder="Nome do Produto" required>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <input class="form-control" type="number" step="0.01" id="produto-preco" placeholder="Preço (R$)" required>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <input class="form-control" type="number" id="produto-estoque" placeholder="Qtd. Estoque" required>
-                    </div>
-                    <div class="col-md-6">
-                        <select class="form-select" id="produto-categoria" required>
-                            <option value="">Selecione a Categoria...</option>
-                            <option value="Bebida">Bebida</option>
-                            <option value="Salgado">Salgado</option>
-                            <option value="Doce">Doce</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <input class="form-control" type="file" id="imagem" accept="image/*">
-                    </div>
-                    <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit" id="btn-salvar-produto">Cadastrar Produto</button>
-                        <!-- O alunos.js mostra este botão ao editar um produto -->
-                        <button class="btn btn-outline-secondary" type="button" id="btn-cancelar-edicao-produto" style="display:none;">Cancelar edição</button>
-                    </div>
-                </form>
+        <!-- Abas: Pedidos e Histórico (admin e mestre); Produtos e Alunos (só mestre) -->
+        <ul class="nav nav-pills flex-nowrap overflow-x-auto bg-white rounded-pill shadow-sm p-1 mb-3" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link rounded-pill w-100 text-nowrap px-2 active" id="aba-pedidos-btn" data-bs-toggle="pill" data-bs-target="#aba-pedidos" type="button" role="tab" aria-controls="aba-pedidos" aria-selected="true">
+                    Pedidos <span class="badge rounded-pill bg-warning text-dark ms-1 d-none" id="contador-pedidos-admin"></span>
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link rounded-pill w-100 text-nowrap px-2" id="aba-historico-btn" data-bs-toggle="pill" data-bs-target="#aba-historico" type="button" role="tab" aria-controls="aba-historico" aria-selected="false">Histórico</button>
+            </li>
+            <li class="nav-item flex-fill so-mestre" style="display:none;" role="presentation">
+                <button class="nav-link rounded-pill w-100 text-nowrap px-2" id="aba-produtos-btn" data-bs-toggle="pill" data-bs-target="#aba-produtos" type="button" role="tab" aria-controls="aba-produtos" aria-selected="false">Produtos</button>
+            </li>
+            <li class="nav-item flex-fill so-mestre" style="display:none;" role="presentation">
+                <button class="nav-link rounded-pill w-100 text-nowrap px-2" id="aba-alunos-btn" data-bs-toggle="pill" data-bs-target="#aba-alunos" type="button" role="tab" aria-controls="aba-alunos" aria-selected="false">Alunos</button>
+            </li>
+        </ul>
 
-                <!-- Busca/filtro de produtos (usa a rota GET /api/produtos/buscar) -->
-                <form id="form-busca-produto" class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <select class="form-select" id="busca-categoria">
-                            <option value="">Todas as categorias</option>
-                            <option value="Bebida">Bebida</option>
-                            <option value="Salgado">Salgado</option>
-                            <option value="Doce">Doce</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <input class="form-control" type="number" step="0.01" id="busca-preco-min" placeholder="Preço mín.">
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <input class="form-control" type="number" step="0.01" id="busca-preco-max" placeholder="Preço máx.">
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="busca-ordenar">
-                            <option value="">Sem ordenação</option>
-                            <option value="nome">Ordenar por nome</option>
-                            <option value="preco">Ordenar por preço</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button class="btn btn-primary flex-fill" type="submit">Buscar</button>
-                        <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-limpar-busca">Limpar</button>
-                    </div>
-                </form>
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Produto</th>
-                                <th scope="col">Preço</th>
-                                <th scope="col">Estoque</th>
-                                <th scope="col">Categoria</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-produtos-admin"></tbody>
-                    </table>
+        <div class="tab-content">
+            <!-- PEDIDOS: um card por pedido "Pendente", com o código de retirada em destaque -->
+            <div class="tab-pane fade show active" id="aba-pedidos" role="tabpanel" aria-labelledby="aba-pedidos-btn" tabindex="0">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <small class="text-body-secondary">Do mais antigo para o mais novo. Atualiza sozinho a cada 20 segundos.</small>
+                    <button class="btn btn-light border btn-sm rounded-pill text-nowrap" type="button" onclick="carregarPedidos()">
+                        <span class="material-symbols-rounded icone" aria-hidden="true">refresh</span> Atualizar
+                    </button>
                 </div>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="lista-pedidos-admin"></div>
             </div>
-        </section>
 
+            <!-- HISTÓRICO: pedidos entregues e cancelados, com filtro e busca -->
+            <div class="tab-pane fade" id="aba-historico" role="tabpanel" aria-labelledby="aba-historico-btn" tabindex="0">
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Filtrar histórico">
+                        <input type="radio" class="btn-check" name="filtro-historico" id="filtro-todos" value="" checked>
+                        <label class="btn btn-outline-secondary" for="filtro-todos">Todos</label>
+                        <input type="radio" class="btn-check" name="filtro-historico" id="filtro-concluidos" value="Concluído">
+                        <label class="btn btn-outline-secondary" for="filtro-concluidos">Entregues</label>
+                        <input type="radio" class="btn-check" name="filtro-historico" id="filtro-cancelados" value="Cancelado">
+                        <label class="btn btn-outline-secondary" for="filtro-cancelados">Cancelados</label>
+                    </div>
+                    <input class="form-control form-control-sm flex-grow-1" style="max-width: 320px;" type="search" id="busca-historico" placeholder="Buscar aluno ou código" aria-label="Buscar aluno ou código">
+                </div>
+                <div class="list-group shadow-sm rounded-4" id="lista-historico-admin"></div>
+            </div>
+
+            <!-- PRODUTOS (só mestre): lista com busca; "Novo produto" e "Editar" abrem a janela #modal-produto -->
+            <div class="tab-pane fade" id="aba-produtos" role="tabpanel" aria-labelledby="aba-produtos-btn" tabindex="0">
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <input class="form-control flex-grow-1" style="max-width: 320px;" type="search" id="busca-produto-admin" placeholder="Buscar produto" aria-label="Buscar produto">
+                    <!-- A categoria usa a rota GET /api/produtos/buscar (procedure sp_produtos_por_categoria) -->
+                    <select class="form-select w-auto" id="busca-categoria" aria-label="Categoria">
+                        <option value="">Todas as categorias</option>
+                        <option value="Salgado">Salgado</option>
+                        <option value="Bebida">Bebida</option>
+                        <option value="Doce">Doce</option>
+                    </select>
+                    <button class="btn btn-primary rounded-pill ms-auto" type="button" onclick="novoProduto()">
+                        <span class="material-symbols-rounded icone" aria-hidden="true">add</span> Novo produto
+                    </button>
+                </div>
+                <div class="list-group shadow-sm rounded-4" id="lista-produtos-admin"></div>
+            </div>
+
+            <!-- ALUNOS (só mestre): promover a admin e excluir -->
+            <div class="tab-pane fade" id="aba-alunos" role="tabpanel" aria-labelledby="aba-alunos-btn" tabindex="0">
+                <input class="form-control mb-2" style="max-width: 320px;" type="search" id="busca-aluno-admin" placeholder="Buscar aluno" aria-label="Buscar aluno">
+                <div class="list-group shadow-sm rounded-4" id="lista-alunos"></div>
+            </div>
+        </div>
+
+        <div class="d-md-none py-5"></div>
     </main>
+
+    <!-- Celular: barra de navegação de baixo -->
+    <div class="fixed-bottom d-md-none">
+        <nav class="nav nav-justified flex-nowrap bg-white border-top shadow" aria-label="Navegação principal">
+            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/">
+                <span class="material-symbols-rounded icone fs-4" aria-hidden="true">restaurant</span>Cardápio
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/pedidos.html">
+                <span class="material-symbols-rounded icone fs-4" aria-hidden="true">receipt_long</span>Pedidos
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/carteira.html">
+                <span class="material-symbols-rounded icone fs-4" aria-hidden="true">account_balance_wallet</span>Carteira
+            </a>
+            <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
+            <a class="nav-link small py-2 px-0 so-admin active" style="display:none;" aria-current="page" href="/front-end/admin.html">
+                <span class="d-flex flex-column align-items-center"><span class="material-symbols-rounded icone fs-4" aria-hidden="true">settings</span>Admin</span>
+            </a>
+            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/conta.html">
+                <span class="material-symbols-rounded icone fs-4" aria-hidden="true">person</span>Perfil
+            </a>
+        </nav>
+    </div>
+
+    <!-- Produto: janela usada para cadastrar (novoProduto) e editar (editarProduto) -->
+    <div class="modal fade" id="modal-produto" tabindex="-1" aria-labelledby="modal-produto-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content border-0 rounded-4" id="form-produto">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="modal-produto-titulo">Novo produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body d-grid gap-2">
+                    <div class="form-floating">
+                        <input class="form-control" type="text" id="produto-nome" placeholder="Nome" required>
+                        <label for="produto-nome">Nome do produto</label>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="form-floating">
+                                <input class="form-control" type="number" step="0.01" min="0" id="produto-preco" placeholder="Preço" required>
+                                <label for="produto-preco">Preço (R$)</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating">
+                                <input class="form-control" type="number" min="0" id="produto-estoque" placeholder="Estoque" required>
+                                <label for="produto-estoque">Estoque</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating">
+                        <select class="form-select" id="produto-categoria" required>
+                            <option value="">Escolha...</option>
+                            <option value="Salgado">Salgado</option>
+                            <option value="Bebida">Bebida</option>
+                            <option value="Doce">Doce</option>
+                        </select>
+                        <label for="produto-categoria">Categoria</label>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Foto atual (ao editar) ou a escolhida agora -->
+                        <img id="produto-imagem-previa" src="" alt="" width="64" height="64" class="rounded border object-fit-contain bg-body-tertiary d-none">
+                        <div class="flex-grow-1">
+                            <label class="form-label small mb-1" for="imagem">Foto (PNG, JPG ou WEBP até 5 MB)</label>
+                            <input class="form-control form-control-sm" type="file" id="imagem" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-link text-body-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4" id="btn-salvar-produto">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
     <script src="/front-end/js/alunos.js" defer></script>

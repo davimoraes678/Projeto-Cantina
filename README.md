@@ -72,7 +72,7 @@ Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** 
 | 24 | Painel de pedidos em andamento | admin, mestre | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
 | 25 | Concluir pedido | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
 | 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
-| 27 | Histórico de pedidos (concluídos e cancelados) | admin, mestre | `historico.html` | `GET /api/pedidos` | `ListarPedidosService` |
+| 27 | Histórico de pedidos (entregues e cancelados) | admin, mestre | `admin.html` (aba Histórico) | `GET /api/pedidos` | `ListarPedidosService` |
 | 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | aluno | `index.html` (janela automática) e `pedidos.html` (botão "Avaliar") | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
 | 29 | Meus pedidos: em andamento e histórico | aluno | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
 | 30 | Pedir de novo um pedido antigo | aluno | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |

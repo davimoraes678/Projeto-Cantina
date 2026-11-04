@@ -662,7 +662,7 @@ function cardProduto(prod) {
         <div class="col">
             <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="position-relative">
-                    <div class="ratio ratio-4x3 bg-warning-subtle rounded-top-4">
+                    <div class="ratio ratio-4x3 rounded-top-4">
                         <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true"><svg class="icone"><use href="${ICONES}#${icones[prod.categoria] || "restaurant"}"></use></svg></div>
                         <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="${escapeHtml(prod.nome)}"
                              class="object-fit-contain p-2 ${esgotado ? "opacity-50" : ""}" loading="lazy" onerror="this.remove()">

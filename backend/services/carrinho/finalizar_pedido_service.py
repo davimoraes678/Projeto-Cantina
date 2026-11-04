@@ -11,7 +11,6 @@ class FinalizarPedidoService:
     @staticmethod
     def executar():
         carrinho = Pedido.buscar_carrinho(current_user.id_aluno)
-        pedido = Pedido.buscar_por_id(current_userid_pedido)
         if not carrinho or not carrinho.itens:
             return {"erro": "O carrinho está vazio"}, 400
 
@@ -32,7 +31,7 @@ class FinalizarPedidoService:
         codigo_lista = numeros + letras
         random.shuffle(codigo_lista)
         codigo_final = "".join(codigo_lista)
-        pedido.atualizar(codigo=codigo_final)
+        carrinho.codigo = codigo_final
         
         # Tudo certo: baixa o estoque, desconta o saldo e o carrinho vira pedido
         for item in carrinho.itens:

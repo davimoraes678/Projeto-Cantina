@@ -14,7 +14,7 @@ class Pedido(db.Model):
     valor_total = db.Column(db.Float, nullable=False, default=0.0)
     horario_agendado_retirada = db.Column(db.DateTime, nullable=True)
     data_hora_retirada = db.Column(db.DateTime, nullable=True)
-    codigo = db.Column(db.Integer)
+    codigo = db.Column(db.String(4))
 
     # nullable=True: permite apagar o aluno sem apagar/travar o pedido (o histórico é preservado).
     id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno'), nullable=True)

@@ -19,7 +19,7 @@ Toda requisição passa pelas mesmas camadas, nesta ordem:
 
 ```mermaid
 flowchart LR
-    F["Front-end<br/>(fetch no alunos.js)"] -->|"HTTP + JSON"| C["Controller"]
+    F["Front-end<br/>(api() no js da página)"] -->|"HTTP + JSON"| C["Controller"]
     C --> S["Service"]
     S --> M["Model"]
     S -.->|"consultas não-CRUD"| R["Repository"]
@@ -156,4 +156,4 @@ E acrescente a rota em [`controllers/README.md`](controllers/README.md) e a func
 
 **Consulta especial (ranking, relatório, filtro complexo)?** Crie a stored procedure no `database/create-database.sql`, um método no repository que faz o `CALL` (ver [`repositories/`](repositories/README.md)) e chame o repository no service.
 
-**5. Front-end:** uma função `async` no `alunos.js`, seguindo o padrão de [`front-end/js/README.md`](../front-end/js/README.md).
+**5. Front-end:** uma função `async` no `.js` da página, usando a função `api()`, seguindo o padrão de [`front-end/js/README.md`](../front-end/js/README.md).

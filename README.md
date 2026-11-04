@@ -73,7 +73,7 @@ Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** 
 | 25 | Concluir pedido | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
 | 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
 | 27 | Histórico de pedidos (entregues e cancelados) | admin, mestre | `admin.html` (aba Histórico) | `GET /api/pedidos` | `ListarPedidosService` |
-| 28 | Avaliar pedido concluído (nota de 1 a 5 e comentário) | aluno | `index.html` (janela automática) e `pedidos.html` (botão "Avaliar") | `GET /api/pedidos/<id>` e `POST /api/pedidos/<id>/avaliacao` | `BuscarPedidoService` e `AvaliarPedidoService` |
+| 28 | Avaliar pedido entregue (nota de 1 a 5 e comentário) | aluno | `pedidos.html` (botão "Avaliar") | `POST /api/pedidos/<id>/avaliacao` | `AvaliarPedidoService` |
 | 29 | Meus pedidos: em andamento e histórico | aluno | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
 | 30 | Pedir de novo um pedido antigo | aluno | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
 
@@ -81,7 +81,7 @@ Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** 
 
 ```mermaid
 flowchart LR
-    T["Tela<br/>(front-end/*.html + alunos.js)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(classe)"]
+    T["Tela<br/>(front-end/*.html + js da página)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(classe)"]
     C --> S["Service<br/>(uma classe por caso de uso)"]
     S --> M["Model<br/>(db.Model)"]
     S --> R["Repository<br/>(consultas especiais)"]
@@ -115,7 +115,7 @@ Cada pasta tem um `README.md` explicando o que ela faz:
 | [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD por stored procedures (busca de produtos, repetir pedido, combinações) |
 | [`backend/database/`](backend/database/README.md) | Script SQL do MySQL |
 | [`front-end/`](front-end/README.md) | As páginas e como elas se ligam à API |
-| [`front-end/js/`](front-end/js/README.md) | O `alunos.js`: funções e padrões |
+| [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página e o `comum.js`: padrões |
 | [`arquivos/`](arquivos/README.md) | Imagens dos produtos |
 | [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes e roteiro do vídeo de demonstração |
 

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
-    <!-- Barra de cima: no computador mostra os links; no celular eles ficam na barra de baixo -->
+    <!-- Barra de cima. No celular os links ficam na barra de baixo -->
     <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
@@ -20,19 +20,16 @@
                 <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Cardápio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
                 <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
-                <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
-                <li class="nav-item so-admin" style="display:none;"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
+                <li class="nav-item so-admin d-none"><a class="nav-link" href="/front-end/admin.html">Administração</a></li>
             </ul>
             <div class="d-flex align-items-center gap-2 ms-auto">
-                <!-- Saldo: leva para a carteira -->
-                <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html" title="Carteira">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg>R$ <span data-aluno="saldo">0,00</span>
+                <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg><span data-aluno="saldo">R$ 0,00</span>
                 </a>
                 <!-- Abre o carrinho (painel lateral #carrinho) -->
-                <button class="btn btn-light rounded-pill position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-controls="carrinho" aria-label="Abrir carrinho">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg>
-                    <span class="d-none d-md-inline ms-1">Carrinho</span>
-                    <span id="badge-contador" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
+                <button class="btn btn-light rounded-pill position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-label="Abrir carrinho">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg><span class="d-none d-md-inline ms-1">Carrinho</span>
+                    <span id="contador-carrinho" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
                 </button>
                 <div class="dropdown d-none d-md-block">
                     <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -49,52 +46,43 @@
     </nav>
 
     <main class="container py-3 py-md-4">
-        <!-- Boas-vindas -->
         <section class="bg-cantina bg-gradient text-white rounded-4 shadow-sm p-4 mb-3">
-            <p class="mb-1 opacity-75" id="saudacao-periodo">Olá</p>
             <h1 class="h3 fw-bold mb-1">Olá, <span data-aluno="primeiro-nome">aluno</span>! O que vai ser hoje?</h1>
             <p class="mb-0 opacity-75">Peça pelo site e retire na cantina, sem fila.</p>
         </section>
 
-        <!-- Pedido em andamento: o alunos.js mostra quando o aluno tem pedido "Pendente" -->
-        <a id="aviso-pedido-andamento" class="alert alert-warning border-0 shadow-sm d-none align-items-center gap-3 text-decoration-none mb-3" href="/front-end/pedidos.html">
+        <!-- Pedido em andamento: o cardapio.js mostra quando há um pedido em preparo -->
+        <a id="aviso-pedido" class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 text-decoration-none mb-3 d-none" href="/front-end/pedidos.html">
             <span class="spinner-grow spinner-grow-sm text-warning" aria-hidden="true"></span>
             <span class="flex-grow-1">
-                <strong id="aviso-pedido-titulo">Seu pedido está em preparo</strong>
+                <strong id="aviso-pedido-texto"></strong>
                 <span class="d-block small">Toque para acompanhar</span>
             </span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M530-481 332-679l43-43 241 241-241 241-43-43 198-198Z"/></svg>
         </a>
 
-        <!-- Busca pelo nome + botão que abre os filtros de preço e ordenação -->
-        <div class="d-flex gap-2 mb-2">
-            <div class="input-group shadow-sm">
-                <span class="input-group-text bg-white border-end-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone text-body-secondary" fill="currentColor" aria-hidden="true"><path d="M796-121 533-384q-30 26-70 40.5T378-329q-108 0-183-75t-75-181q0-106 75-181t182-75q106 0 180.5 75T632-585q0 43-14 83t-42 75l264 262-44 44ZM377-389q81 0 138-57.5T572-585q0-81-57-138.5T377-781q-82 0-139.5 57.5T180-585q0 81 57.5 138.5T377-389Z"/></svg>
-                </span>
-                <input class="form-control border-start-0" type="search" id="busca-nome" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio">
+        <!-- Categorias (botões) + botão que abre os filtros de preço e ordenação -->
+        <div class="d-flex gap-2 align-items-center mb-2">
+            <div class="d-flex gap-2 overflow-x-auto flex-nowrap py-1">
+                <button class="btn btn-primary rounded-pill text-nowrap" type="button" data-categoria="" onclick="filtrar('')">Tudo</button>
+                <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Salgado" onclick="filtrar('Salgado')">Salgados</button>
+                <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Bebida" onclick="filtrar('Bebida')">Bebidas</button>
+                <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Doce" onclick="filtrar('Doce')">Doces</button>
             </div>
-            <button class="btn btn-light border shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros" aria-label="Filtros">
+            <button class="btn btn-light border ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#filtros" aria-expanded="false" aria-controls="filtros" aria-label="Filtros">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M427-120v-225h60v83h353v60H487v82h-60Zm-307-82v-60h247v60H120Zm187-166v-82H120v-60h187v-84h60v226h-60Zm120-82v-60h413v60H427Zm166-165v-225h60v82h187v60H653v83h-60Zm-473-83v-60h413v60H120Z"/></svg>
             </button>
         </div>
 
-        <!-- Filtros de preço e ordenação (usam a rota GET /api/produtos/buscar) -->
+        <!-- Filtros de preço e ordenação (abre e fecha com o collapse do Bootstrap) -->
         <div class="collapse" id="filtros">
-            <form id="form-busca-produto" class="card card-body border-0 shadow-sm mb-2">
-                <input type="hidden" id="busca-categoria" value="">
+            <form id="form-filtros" class="card card-body border-0 shadow-sm mb-3">
                 <div class="row g-2">
                     <div class="col-6 col-md-3">
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input class="form-control" type="number" step="0.01" min="0" id="busca-preco-min" placeholder="Mín.">
-                        </div>
+                        <input class="form-control" type="number" step="0.01" min="0" id="busca-preco-min" placeholder="Preço mín. (R$)">
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input class="form-control" type="number" step="0.01" min="0" id="busca-preco-max" placeholder="Máx.">
-                        </div>
+                        <input class="form-control" type="number" step="0.01" min="0" id="busca-preco-max" placeholder="Preço máx. (R$)">
                     </div>
                     <div class="col-12 col-md-3">
                         <select class="form-select" id="busca-ordenar" aria-label="Ordenar">
@@ -105,125 +93,77 @@
                     </div>
                     <div class="col-12 col-md-3 d-flex gap-2">
                         <button class="btn btn-primary flex-fill" type="submit">Aplicar</button>
-                        <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-limpar-busca">Limpar</button>
+                        <button class="btn btn-outline-secondary flex-fill" type="button" id="btn-limpar-filtros">Limpar</button>
                     </div>
                 </div>
             </form>
         </div>
 
-        <!-- Categorias: rolam para o lado no celular. O alunos.js marca a escolhida (active) -->
-        <div class="d-flex gap-2 overflow-x-auto flex-nowrap py-2 mb-2" id="categorias">
-            <button class="btn btn-primary rounded-pill text-nowrap active" type="button" data-categoria="" onclick="filtrar('')">Tudo</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Salgado" onclick="filtrar('Salgado')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M805-261q27 14 45.5-9t4.5-48l-71-134-54 147 75 44Zm-212-42h70l97-242q6-14 4.5-27.5T748-593l-83-36q-14-7-28 0t-15 21l-29 305Zm-296 0h69l-28-305q-1-15-13.5-22t-29.5 1l-79 34q-13 5-14.5 22.5T205-541l92 238Zm-142 42 75-44-54-147-71 139q-14 28 6 45.5t44 6.5Zm271-42h107l33-364q2-14-7.5-23.5T535-700H425q-16 0-24 9.5t-7 23.5l32 364ZM133-200q-39 0-66-28t-27-67q0-12 4.5-23.5T54-341l92-179q-15-39-3-77.5t48-54.5l83-34q16-6 32.5-7t30.5 8q8-32 32-53.5t56-21.5h110q32 0 56 20t32 51q15-6 31-5t31 8l84 34q37 14 49.5 52t-4.5 74l92 184q4 11 9 21.5t5 21.5q0 42-30 70.5T818-200q-11 0-20.5-4.5T778-213l-61-30H242l-58 30q-12 5-24.5 9t-26.5 4Zm347-280Z"/></svg>Salgados</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Bebida" onclick="filtrar('Bebida')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M160-120v-60h640v60H160Zm151-140q-63 0-107-43.5T160-410v-430h660q24.75 0 42.38 17.62Q880-804.75 880-780v160q0 24.75-17.62 42.37Q844.75-560 820-560h-96v150q0 63-44 106.5T573-260H311Zm0-60h261.98q36.02 0 63.52-27.5T664-410v-370H220v370q0 35 28 62.5t63 27.5Zm413-300h96v-160h-96v160ZM311-320h-91 444-353Z"/></svg>Bebidas</button>
-            <button class="btn btn-light border rounded-pill text-nowrap" type="button" data-categoria="Doce" onclick="filtrar('Doce')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M160-80q-17 0-28.5-11.5T120-120v-219q0-24.75 17.63-42.38Q155.25-399 180-399h27v-182q0-24.75 17.63-42.38Q242.25-641 267-641h183v-64q-20-14-30.5-30.53-10.5-16.54-10.5-39.88 0-14.59 5.5-28.09T430-827l50-53 50 53q10 10 16 23.5t6 28.09q0 23.34-11 39.88Q530-719 510-705v64h183q24.75 0 42.38 17.62Q753-605.75 753-581v182h27q24.75 0 42.38 17.62Q840-363.75 840-339v219q0 17-11.5 28.5T800-80H160Zm107-319h426v-182H267v182Zm-87 259h600v-199H180v199Zm87-259h426-426Zm-87 259h600-600Zm600-259H180h600Z"/></svg>Doces</button>
-        </div>
-
-        <!-- Combinações mais pedidas, montadas pelo alunos.js (só aparece quando já há pedidos) -->
-        <section id="secao-combinacoes" class="mb-3" style="display:none;">
-            <h2 class="h6 fw-bold text-uppercase text-body-secondary mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone text-danger" fill="currentColor" aria-hidden="true"><path d="M220-400q0 63 28.5 118.5T328-189q-4-12-6-24.5t-2-24.5q0-32 12-60t35-51l113-111 113 111q23 23 35 51t12 60q0 12-2 24.5t-6 24.5q51-37 79.5-92.5T740-400q0-54-23-105.5T651-600q-21 15-44 23.5t-46 8.5q-61 0-101-41.5T420-714v-20q-46 33-83 73t-63 83.5q-26 43.5-40 89T220-400Zm260 24-71 70q-14 14-21.5 31t-7.5 37q0 41 29 69.5t71 28.5q42 0 71-28.5t29-69.5q0-20-7.5-37T551-306l-71-70Zm0-464v132q0 34 23.5 57t57.5 23q18 0 33.5-7.5T622-658l18-22q74 42 117 117t43 163q0 134-93 227T480-80q-134 0-227-93t-93-227q0-128 86-246.5T480-840Z"/></svg> Combos mais pedidos
-            </h2>
-            <div id="lista-combinacoes" class="d-flex gap-2 overflow-x-auto flex-nowrap pb-2"></div>
+        <!-- Combos mais pedidos: o cardapio.js mostra quando já existem pedidos -->
+        <section id="secao-combos" class="mb-3 d-none">
+            <h2 class="h6 fw-bold text-body-secondary mb-2">Combos mais pedidos</h2>
+            <div id="lista-combos" class="d-flex gap-2 overflow-x-auto flex-nowrap pb-1"></div>
         </section>
 
-        <div class="d-flex justify-content-between align-items-baseline mb-2">
-            <h2 class="h5 fw-bold mb-0">Cardápio</h2>
-            <small class="text-body-secondary" id="contador-produtos"></small>
-        </div>
+        <h2 class="h5 fw-bold mb-2">Cardápio</h2>
+        <!-- Cards dos produtos, montados pelo cardapio.js -->
+        <div id="lista-produtos" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-md-3"></div>
 
-        <!-- Cards dos produtos, montados pelo alunos.js. Enquanto carrega, mostra "esqueletos" (placeholder) -->
-        <div id="tabela-produtos" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-md-3">
-            <div class="col"><div class="card border-0 shadow-sm placeholder-glow" aria-hidden="true"><div class="ratio ratio-4x3 placeholder bg-secondary-subtle rounded-top"></div><div class="card-body"><span class="placeholder col-8"></span><span class="placeholder col-5"></span></div></div></div>
-            <div class="col"><div class="card border-0 shadow-sm placeholder-glow" aria-hidden="true"><div class="ratio ratio-4x3 placeholder bg-secondary-subtle rounded-top"></div><div class="card-body"><span class="placeholder col-8"></span><span class="placeholder col-5"></span></div></div></div>
-            <div class="col"><div class="card border-0 shadow-sm placeholder-glow" aria-hidden="true"><div class="ratio ratio-4x3 placeholder bg-secondary-subtle rounded-top"></div><div class="card-body"><span class="placeholder col-8"></span><span class="placeholder col-5"></span></div></div></div>
-            <div class="col"><div class="card border-0 shadow-sm placeholder-glow" aria-hidden="true"><div class="ratio ratio-4x3 placeholder bg-secondary-subtle rounded-top"></div><div class="card-body"><span class="placeholder col-8"></span><span class="placeholder col-5"></span></div></div></div>
-        </div>
-
-        <!-- Espaço no fim da página para o conteúdo não ficar atrás da barra de baixo (celular) -->
-        <div class="d-md-none py-5 my-4"></div>
+        <!-- Espaço para o conteúdo não ficar atrás da barra de baixo (celular) -->
+        <div class="d-md-none py-5"></div>
     </main>
 
-    <!-- Celular: botão "Ver carrinho" (aparece quando há itens) + barra de navegação de baixo -->
+    <!-- Celular: barra de navegação de baixo (o item Admin só aparece para admin e mestre) -->
     <div class="fixed-bottom d-md-none">
+        <!-- Botão "Ver carrinho": aparece quando há itens no carrinho -->
         <div class="px-3 pb-2 d-none" id="barra-carrinho">
-            <button class="btn btn-primary btn-lg w-100 rounded-pill shadow d-flex align-items-center gap-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho">
-                <span class="badge rounded-pill bg-white text-danger" id="barra-carrinho-qtd">0</span>
-                <span class="fs-6">Ver carrinho</span>
-                <span class="ms-auto fs-6 fw-bold" id="barra-carrinho-total">R$ 0,00</span>
-            </button>
+            <button class="btn btn-primary btn-lg w-100 rounded-pill shadow fs-6" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" id="barra-carrinho-texto">Ver carrinho</button>
         </div>
-        <nav class="nav nav-justified flex-nowrap bg-white border-top shadow" aria-label="Navegação principal">
-            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0 active" aria-current="page" href="/">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M285-80v-368q-52-11-88.5-52.5T160-600v-280h60v280h65v-280h60v280h65v-280h60v280q0 58-36.5 99.5T345-448v368h-60Zm415 0v-320H585v-305q0-79 48-127t127-48v800h-60Z"/></svg>Cardápio
-            </a>
-            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/pedidos.html">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-125h127v-570l59.8 60 59.8-60 59.8 60 59.8-60 59.8 60 60-60 60 60 60-60 60 60 60-60v695q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm516-60q20 0 32.5-12.5T783-185v-595H304v470h389v125q0 20 12.5 32.5T738-140ZM357-622v-60h240v60H357Zm0 134v-60h240v60H357Zm333-134q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9ZM221-140h412v-110H177v65q0 20 12.65 32.5T221-140Zm-44 0v-110 110Z"/></svg>Pedidos
-            </a>
-            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/carteira.html">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg>Carteira
-            </a>
-            <!-- Só aparece para admin e mestre (o alunos.js mostra) -->
-            <a class="nav-link small py-2 px-0 so-admin" style="display:none;" href="/front-end/admin.html">
-                <span class="d-flex flex-column align-items-center"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z"/></svg>Admin</span>
-            </a>
-            <a class="nav-link d-flex flex-column align-items-center small py-2 px-0" href="/front-end/conta.html">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M372-523q-42-42-42-108t42-108q42-42 108-42t108 42q42 42 42 108t-42 108q-42 42-108 42t-108-42ZM160-160v-94q0-38 19-65t49-41q67-30 128.5-45T480-420q62 0 123 15.5T731-360q31 14 50 41t19 65v94H160Zm60-60h520v-34q0-16-9.5-30.5T707-306q-64-31-117-42.5T480-360q-57 0-111 11.5T252-306q-14 7-23 21.5t-9 30.5v34Zm324.5-346.5Q570-592 570-631t-25.5-64.5Q519-721 480-721t-64.5 25.5Q390-670 390-631t25.5 64.5Q441-541 480-541t64.5-25.5ZM480-631Zm0 411Z"/></svg>Perfil
-            </a>
+        <nav class="nav nav-justified flex-nowrap bg-white border-top shadow">
+            <a class="nav-link small px-0 py-2 active" aria-current="page" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4 d-block mx-auto" fill="currentColor" aria-hidden="true"><path d="M285-80v-368q-52-11-88.5-52.5T160-600v-280h60v280h65v-280h60v280h65v-280h60v280q0 58-36.5 99.5T345-448v368h-60Zm415 0v-320H585v-305q0-79 48-127t127-48v800h-60Z"/></svg>Cardápio</a>
+            <a class="nav-link small px-0 py-2" href="/front-end/pedidos.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4 d-block mx-auto" fill="currentColor" aria-hidden="true"><path d="M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-125h127v-570l59.8 60 59.8-60 59.8 60 59.8-60 59.8 60 60-60 60 60 60-60 60 60 60-60v695q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm516-60q20 0 32.5-12.5T783-185v-595H304v470h389v125q0 20 12.5 32.5T738-140ZM357-622v-60h240v60H357Zm0 134v-60h240v60H357Zm333-134q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9ZM221-140h412v-110H177v65q0 20 12.65 32.5T221-140Zm-44 0v-110 110Z"/></svg>Pedidos</a>
+            <a class="nav-link small px-0 py-2" href="/front-end/carteira.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4 d-block mx-auto" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg>Carteira</a>
+            <a class="nav-link small px-0 py-2 so-admin d-none" href="/front-end/admin.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4 d-block mx-auto" fill="currentColor" aria-hidden="true"><path d="m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z"/></svg>Admin</a>
+            <a class="nav-link small px-0 py-2" href="/front-end/conta.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4 d-block mx-auto" fill="currentColor" aria-hidden="true"><path d="M372-523q-42-42-42-108t42-108q42-42 108-42t108 42q42 42 42 108t-42 108q-42 42-108 42t-108-42ZM160-160v-94q0-38 19-65t49-41q67-30 128.5-45T480-420q62 0 123 15.5T731-360q31 14 50 41t19 65v94H160Zm60-60h520v-34q0-16-9.5-30.5T707-306q-64-31-117-42.5T480-360q-57 0-111 11.5T252-306q-14 7-23 21.5t-9 30.5v34Zm324.5-346.5Q570-592 570-631t-25.5-64.5Q519-721 480-721t-64.5 25.5Q390-670 390-631t25.5 64.5Q441-541 480-541t64.5-25.5ZM480-631Zm0 411Z"/></svg>Perfil</a>
         </nav>
     </div>
 
-    <!-- Carrinho: painel lateral aberto pelo botão do topo ou pelo "Ver carrinho" -->
+    <!-- Carrinho: painel lateral (offcanvas do Bootstrap) -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="carrinho" aria-labelledby="carrinho-titulo">
         <div class="offcanvas-header bg-cantina text-white">
-            <h5 class="offcanvas-title d-flex align-items-center gap-2" id="carrinho-titulo">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M206-120q-20 0-36.5-12T148-164L38-562q-4-14 5-26t24-12h202l185-270q5-6 11-9.5t14-3.5q8 0 14 3.5t11 9.5l184 270h206q15 0 24 12t5 26L812-164q-5 20-21.5 32T754-120H206Zm0-60h548l101-360H106l100 360Zm316.5-137.5Q540-335 540-360t-17.5-42.5Q505-420 480-420t-42.5 17.5Q420-385 420-360t17.5 42.5Q455-300 480-300t42.5-17.5ZM342-600h273L479-800 342-600Zm139 240Z"/></svg> Seu pedido
-            </h5>
+            <h5 class="offcanvas-title" id="carrinho-titulo">Seu pedido</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
         </div>
         <div class="offcanvas-body d-flex flex-column">
-            <!-- Carrinho vazio: o alunos.js troca d-none conforme o carrinho -->
-            <div id="carrinho-vazio" class="text-center text-body-secondary my-auto">
-                <p class="display-4 mb-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone text-body-tertiary" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg></p>
-                <p class="fw-semibold mb-1">Seu carrinho está vazio</p>
-                <p class="small">Escolha algo no cardápio ou repita seu último pedido.</p>
-            </div>
+            <p id="carrinho-vazio" class="text-center text-body-secondary my-4">Seu carrinho está vazio.</p>
+            <ul class="list-group list-group-flush mb-3" id="lista-carrinho"></ul>
+            <button class="btn btn-outline-primary btn-sm rounded-pill align-self-center" type="button" onclick="repetirUltimoPedido()">Repetir último pedido</button>
 
-            <!-- Itens do carrinho, montados pelo alunos.js -->
-            <ul class="list-group list-group-flush mb-3" id="tabela-carrinho"></ul>
-
-            <button class="btn btn-outline-primary btn-sm rounded-pill align-self-center mb-3" type="button" onclick="repetirUltimoPedido()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M339.5-108Q274-136 225-185t-77-114.5Q120-365 120-440h60q0 125 87.5 212.5T480-140q125 0 212.5-87.5T780-440q0-125-85-212.5T485-740h-23l73 73-41 42-147-147 147-147 41 41-78 78h23q75 0 140.5 28T735-695q49 49 77 114.5T840-440q0 75-28 140.5T735-185q-49 49-114.5 77T480-80q-75 0-140.5-28Z"/></svg>Repetir último pedido
-            </button>
-
-            <div class="mt-auto border-top pt-3" id="carrinho-rodape">
+            <div class="mt-auto border-top pt-3 d-none" id="carrinho-rodape">
                 <div class="d-flex justify-content-between align-items-baseline">
                     <span class="text-body-secondary">Total</span>
                     <span id="carrinho-total" class="fs-3 fw-bold">R$ 0,00</span>
                 </div>
-                <div class="d-flex justify-content-between small text-body-secondary mb-2">
-                    <span>Saldo na carteira</span>
-                    <span>R$ <span data-aluno="saldo">0,00</span></span>
-                </div>
-                <!-- Aviso de saldo insuficiente: o alunos.js mostra quando o total passa do saldo -->
+                <p class="d-flex justify-content-between small text-body-secondary mb-2">
+                    <span>Saldo na carteira</span><span data-aluno="saldo">R$ 0,00</span>
+                </p>
                 <div class="alert alert-danger py-2 small d-none" id="aviso-saldo">
                     Saldo insuficiente. <a href="/front-end/carteira.html" class="alert-link">Adicionar saldo</a>
                 </div>
-                <button class="btn btn-primary btn-lg w-100 rounded-pill" type="button" id="btn-finalizar-pedido">Finalizar pedido</button>
+                <button class="btn btn-primary btn-lg w-100 rounded-pill" type="button" onclick="finalizarPedido()">Finalizar pedido</button>
             </div>
         </div>
     </div>
 
-    <!-- Pedido feito: o alunos.js abre depois de finalizar -->
+    <!-- Janela "Pedido enviado!" com o código de retirada -->
     <div class="modal fade" id="modal-pedido-feito" tabindex="-1" aria-labelledby="modal-pedido-feito-titulo" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 text-center">
                 <div class="modal-body p-4">
-                    <p class="display-3 mb-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone text-success" fill="currentColor" aria-hidden="true"><path d="m421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/></svg></p>
+                    <p class="display-3 text-success mb-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/></svg></p>
                     <h5 class="fw-bold" id="modal-pedido-feito-titulo">Pedido enviado!</h5>
-                    <p class="text-body-secondary mb-2">A cantina já recebeu seu pedido. Mostre este código no balcão para retirar:</p>
-                    <p class="display-6 fw-bold font-monospace border border-2 border-warning rounded-4 py-2 mb-2" id="pedido-feito-numero"></p>
-                    <p class="fw-semibold">Total pago: <span id="pedido-feito-total"></span></p>
+                    <p class="text-body-secondary mb-2">Mostre este código no balcão para retirar:</p>
+                    <p class="display-6 fw-bold font-monospace border border-2 border-warning rounded-4 py-2" id="pedido-feito-codigo"></p>
                     <div class="d-grid gap-2">
                         <a class="btn btn-primary rounded-pill" href="/front-end/pedidos.html">Acompanhar pedido</a>
                         <button type="button" class="btn btn-link text-body-secondary" data-bs-dismiss="modal">Continuar no cardápio</button>
@@ -233,37 +173,18 @@
         </div>
     </div>
 
-    <!-- Avaliação: o alunos.js abre quando o último pedido do aluno foi concluído -->
-    <div class="modal fade" id="modal-avaliacao" tabindex="-1" aria-labelledby="modal-avaliacao-titulo" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content border-0 rounded-4" id="form-avaliacao">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="modal-avaliacao-titulo">Seu pedido foi concluído! O que achou?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <!-- Nota de 1 a 5: radios do Bootstrap (btn-check) com cara de botão -->
-                    <div class="btn-group mb-3" role="group" aria-label="Nota de 1 a 5">
-                        <input type="radio" class="btn-check" name="nota" id="nota-1" value="1" required><label class="btn btn-outline-warning" for="nota-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> 1</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-2" value="2"><label class="btn btn-outline-warning" for="nota-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> 2</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-3" value="3"><label class="btn btn-outline-warning" for="nota-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> 3</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-4" value="4"><label class="btn btn-outline-warning" for="nota-4"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> 4</label>
-                        <input type="radio" class="btn-check" name="nota" id="nota-5" value="5"><label class="btn btn-outline-warning" for="nota-5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> 5</label>
-                    </div>
-                    <div class="form-floating text-start">
-                        <textarea class="form-control" id="avaliacao-comentario" placeholder="Comentário" style="height: 90px"></textarea>
-                        <label for="avaliacao-comentario">Comentário (opcional)</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-link text-body-secondary" data-bs-dismiss="modal">Agora não</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Enviar avaliação</button>
-                </div>
-            </form>
+    <!-- Aviso rápido (toast do Bootstrap): o avisar() do comum.js preenche e mostra -->
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+        <div id="aviso" class="toast border-0" role="status" aria-live="polite" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="aviso-texto"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
-    <script src="/front-end/js/alunos.js" defer></script>
+    <script src="/front-end/js/comum.js" defer></script>
+    <script src="/front-end/js/cardapio.js" defer></script>
 </body>
 </html>

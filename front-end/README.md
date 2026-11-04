@@ -4,16 +4,16 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 
 | Arquivo | Endereço | Login | Para quê |
 |---|---|---|---|
-| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: busca pelo nome, categorias, filtros de preço, combos mais pedidos e os cards dos produtos. O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo; a janela de avaliação abre quando o último pedido é concluído |
+| `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: categorias, filtros de preço e ordenação, combos mais pedidos e os cards dos produtos. O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo |
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
-| `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (pedidos `Pendente`, atualiza a cada 30 s) e "Histórico" (concluídos e cancelados, com "Pedir de novo" e "Avaliar") |
-| `conta.html` | `/front-end/conta.html` | Sim | Perfil: ver, editar e remover a própria conta; atalhos para carteira, pedidos e administração; botão Sair |
+| `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
+| `conta.html` | `/front-end/conta.html` | Sim | Perfil: editar dados, sair e remover a própria conta |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
-| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Resumo do dia (em preparo, entregues hoje, vendido hoje, estoque baixo) e abas. **Admin:** Pedidos (um card por pedido em preparo, com o código de retirada e os botões Entregar e Cancelar; atualiza a cada 20 s) e Histórico (entregues e cancelados, com filtro e busca). **Mestre:** também Produtos (lista com busca; cadastrar e editar numa janela) e Alunos (tornar admin, excluir). `admin.html#historico` abre direto na aba. Aluno comum é mandado de volta para `/` |
+| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Abas. **Admin:** Pedidos (um card por pedido em preparo, com o código de retirada e os botões Entregar e Cancelar) e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
 | `assets/logo.png` | | | Logo da Cantina Real |
-| [`js/alunos.js`](js/README.md) | | | **Todo** o JavaScript das páginas |
+| [`js/`](js/README.md) | | | O JavaScript: um arquivo por página e o `comum.js` |
 
 ## Bootstrap
 
@@ -40,7 +40,6 @@ Para colocar um ícone novo numa página:
 ```
 
 - A classe `icone` (no `style.css`) deixa o ícone do tamanho do texto ao lado. Para aumentar, use as classes do Bootstrap no ícone (`fs-4`) ou em volta dele (`display-5`).
-- **Ícones montados pelo JS** (cards e listas): ficam na lista `ICONES` do `alunos.js` (só o `d="..."` do `<path>`), e a função `icone("delete")` monta o SVG. Ícone novo no JS: acrescente o `d="..."` nessa lista.
 
 ## Celular
 
@@ -48,7 +47,7 @@ As páginas logadas (cardápio, pedidos, carteira, perfil e administração) tê
 
 ## Como as páginas falam com o back-end
 
-Nenhuma página tem dados fixos. Ao abrir, o `alunos.js` chama a API (`/api/...`) com `fetch` e monta as tabelas com a resposta. As rotas estão em [`backend/controllers/README.md`](../backend/controllers/README.md).
+Nenhuma página tem dados fixos. Ao abrir, o JavaScript da página (ver [`js/`](js/README.md)) chama a API (`/api/...`) com `fetch` e monta as tabelas com a resposta. As rotas estão em [`backend/controllers/README.md`](../backend/controllers/README.md).
 
 ```mermaid
 flowchart LR
@@ -60,10 +59,10 @@ flowchart LR
 
 ## Regras para mexer nas páginas
 
-- **Caminhos absolutos:** use `/front-end/css/style.css`, `/front-end/js/alunos.js`, `/front-end/admin.html`. O `index.html` é aberto em `/`, então um caminho relativo como `css/style.css` viraria `/css/style.css` e daria 404.
-- **O que depende da função do usuário** usa as classes `so-admin` (admin e mestre) e `so-mestre` (só mestre), começando com `style="display:none;"`. O `funcaoPorAluno()` do `alunos.js` mostra esses elementos. Isso só esconde da tela: quem realmente bloqueia é o back-end (`@admin_required` / `@master_required` nas rotas e `PAGINAS_ADMIN` no `app.py`).
-- **Elementos que o JS mostra e esconde** usam um de dois jeitos: `style="display:none;"` (o JS troca `el.style.display`, ex.: `#secao-combinacoes`) ou a classe `d-none` do Bootstrap (o JS tira e põe a classe com `classList.toggle`, ex.: `#barra-carrinho`). Não misture: `d-none` usa `!important`, então mudar `el.style.display` não mostra um elemento com essa classe.
+- **Caminhos absolutos:** use `/front-end/css/style.css`, `/front-end/js/comum.js`, `/front-end/admin.html`. O `index.html` é aberto em `/`, então um caminho relativo como `css/style.css` viraria `/css/style.css` e daria 404.
+- **O que depende da função do usuário** usa as classes `so-admin` (admin e mestre) e `so-mestre` (só mestre), começando escondido com `d-none`. O `carregarAluno()` do `comum.js` tira o `d-none` conforme a função. Isso só esconde da tela: quem realmente bloqueia é o back-end (`@admin_required` / `@master_required` nas rotas e `PAGINAS_ADMIN` no `app.py`).
+- **Elementos que o JS mostra e esconde** começam com a classe `d-none` do Bootstrap; o JS tira e põe a classe com `classList.toggle("d-none", condição)`.
 - **Abra pelo Flask** (`http://127.0.0.1:5000`), não pelo Live Server nem com duplo clique no arquivo. Senão a API fica em outro endereço e o login não funciona.
-- **Os `id` dos elementos são usados pelo JS.** Ao renomear um `id` no HTML (ex.: `tabela-carrinho`), procure-o no `alunos.js` e troque lá também.
+- **Os `id` dos elementos são usados pelo JS.** Ao renomear um `id` no HTML (ex.: `lista-carrinho`), procure-o no `.js` da página e troque lá também.
 - **Botões dentro de `<form>`** que não devem enviar o formulário precisam de `type="button"`, senão recarregam a página.
 - Depois de mexer, abra o console do navegador (F12) e confira se não há erros em vermelho.

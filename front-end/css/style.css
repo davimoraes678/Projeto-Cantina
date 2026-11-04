@@ -55,7 +55,7 @@
     --bs-btn-focus-shadow-rgb: 170, 14, 27;
 }
 
-/* Abas (nav-pills), barras de progresso e links da barra de baixo em vermelho */
+/* Abas (nav-pills) e links da barra de baixo em vermelho */
 .nav-pills {
     --bs-nav-pills-link-active-bg: var(--cantina-vermelho);
 }
@@ -73,17 +73,8 @@
     color: #fff;
 }
 
-.progress {
-    --bs-progress-bar-bg: var(--cantina-vermelho);
-}
-
 .form-control:focus,
 .form-select:focus {
     border-color: #d98a91;
     box-shadow: 0 0 0 .25rem rgba(170, 14, 27, .2);
-}
-
-/* Campo do seletor de quantidade (- 1 +) dos cards do cardápio */
-.seletor-qtd input {
-    max-width: 2.75rem;
 }

@@ -18,7 +18,7 @@
         <div class="card border-0 shadow-lg rounded-4 w-100" style="max-width: 400px;">
             <div class="card-body p-4">
                 <h1 class="h5 fw-bold mb-1">Entrar</h1>
-                <p class="text-body-secondary small mb-3">Bem-vindo de volta! Faça login para pedir.</p>
+                <p class="text-body-secondary small mb-3">Faça login para pedir.</p>
                 <form id="form-aluno-login" class="d-grid gap-2">
                     <div class="form-floating">
                         <input class="form-control" type="email" id="aluno-email" placeholder="E-mail" autocomplete="email" required>
@@ -28,19 +28,14 @@
                         <input class="form-control" type="password" id="aluno-senha" placeholder="Senha" autocomplete="current-password" required>
                         <label for="aluno-senha">Senha</label>
                     </div>
-                    <button class="btn btn-primary btn-lg rounded-pill mt-2" type="submit" id="btn-salvar-aluno">Entrar</button>
+                    <button class="btn btn-primary btn-lg rounded-pill mt-2" type="submit">Entrar</button>
                 </form>
-                <p class="text-center small mt-3 mb-0">
-                    Ainda não tem conta? <a href="/front-end/cadastro.html" class="fw-semibold">Cadastre-se</a>
-                </p>
+                <p class="text-center small mt-3 mb-0">Ainda não tem conta? <a href="/front-end/cadastro.html" class="fw-semibold">Cadastre-se</a></p>
             </div>
-        </div>
-        <!-- Os três passos da cantina -->
-        <div class="d-flex gap-3 text-white small opacity-75 mt-3">
-            <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M285-80v-368q-52-11-88.5-52.5T160-600v-280h60v280h65v-280h60v280h65v-280h60v280q0 58-36.5 99.5T345-448v368h-60Zm415 0v-320H585v-305q0-79 48-127t127-48v800h-60Z"/></svg>Escolha</span><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg>Pague com a carteira</span><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M206-120q-20 0-36.5-12T148-164L38-562q-4-14 5-26t24-12h202l185-270q5-6 11-9.5t14-3.5q8 0 14 3.5t11 9.5l184 270h206q15 0 24 12t5 26L812-164q-5 20-21.5 32T754-120H206Zm0-60h548l101-360H106l100 360Zm316.5-137.5Q540-335 540-360t-17.5-42.5Q505-420 480-420t-42.5 17.5Q420-385 420-360t17.5 42.5Q455-300 480-300t42.5-17.5ZM342-600h273L479-800 342-600Zm139 240Z"/></svg>Retire</span>
         </div>
     </main>
 
-    <script src="/front-end/js/alunos.js" defer></script>
+    <script src="/front-end/js/comum.js" defer></script>
+    <script src="/front-end/js/login.js" defer></script>
 </body>
 </html>

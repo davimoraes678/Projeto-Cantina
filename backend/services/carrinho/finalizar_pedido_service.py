@@ -27,7 +27,7 @@ class FinalizarPedidoService:
 
         # Cria o codigo de retirada
         numeros = random.choices(string.digits, k=2)  # Ex: ['4', '9']
-        letras = random.choices(string.ascii_letters, k=2)  # Ex: ['a', 'Z']
+        letras = random.choices(string.ascii_uppercase, k=2)  # Ex: ['a', 'Z']
         codigo_lista = numeros + letras
         random.shuffle(codigo_lista)
         codigo_final = "".join(codigo_lista)

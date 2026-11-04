@@ -8,6 +8,7 @@ from backend.services.pedido.combinacoes_mais_pedidas_service import Combinacoes
 from backend.services.pedido.concluir_pedido_service import ConcluirPedidoService
 from backend.services.pedido.listar_meus_pedidos_service import ListarMeusPedidosService
 from backend.services.pedido.listar_pedidos_service import ListarPedidosService
+from backend.services.pedido.marcar_pronto_service import MarcarProntoService
 
 
 class PedidoController:
@@ -29,6 +30,12 @@ class PedidoController:
     @login_required
     def buscar(id_pedido):
         resposta, status = BuscarPedidoService.executar(id_pedido)
+        return jsonify(resposta), status
+
+    @staticmethod
+    @admin_required
+    def marcar_pronto(id_pedido):
+        resposta, status = MarcarProntoService.executar(id_pedido)
         return jsonify(resposta), status
 
     @staticmethod
@@ -56,5 +63,6 @@ bp_pedido.add_url_rule('', view_func=PedidoController.listar, methods=['GET'])
 bp_pedido.add_url_rule('/meus', view_func=PedidoController.listar_meus, methods=['GET'])
 bp_pedido.add_url_rule('/combinacoes', view_func=PedidoController.combinacoes_mais_pedidas, methods=['GET'])
 bp_pedido.add_url_rule('/<int:id_pedido>', view_func=PedidoController.buscar, methods=['GET'])
+bp_pedido.add_url_rule('/<int:id_pedido>/pronto', view_func=PedidoController.marcar_pronto, methods=['POST'])
 bp_pedido.add_url_rule('/<int:id_pedido>/concluir', view_func=PedidoController.concluir, methods=['POST'])
 bp_pedido.add_url_rule('/<int:id_pedido>/cancelar', view_func=PedidoController.cancelar, methods=['POST'])

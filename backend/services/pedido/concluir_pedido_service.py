@@ -3,10 +3,10 @@ from datetime import datetime
 from backend.models.pedido_model import Pedido
 
 class ConcluirPedidoService:
-    """Caso de uso: marcar o pedido como entregue/concluído (admin/mestre).
+    """Caso de uso: fechar o pedido quando o aluno o retira no balcão (admin/mestre).
 
-    O pedido sai da tela de pedidos em andamento e vai para o histórico; o
-    aluno recebe o pedido de avaliação quando abrir a cantina.
+    O pedido vai para o histórico como "Concluído" (aparece como "Entregue") e
+    o aluno pode avaliá-lo em Meus pedidos.
     """
 
     @staticmethod

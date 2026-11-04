@@ -10,7 +10,7 @@ O JavaScript do site: **um arquivo por página**, mais o `comum.js`, que todas u
 | `pedidos.js` | `pedidos.html` | Meus pedidos: em andamento e histórico; "Pedir de novo"; avaliação |
 | `carteira.js` | `carteira.html` | Recarga de saldo |
 | `conta.js` | `conta.html` | Editar dados e remover a conta |
-| `admin.js` | `admin.html` | Pedidos (entregar e cancelar) e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
+| `admin.js` | `admin.html` | Pedidos (pronto, entregar e cancelar) e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
 
 ## Como uma página carrega o JavaScript
 
@@ -59,6 +59,6 @@ lista.innerHTML = produtos.map(cardProduto).join("");
 | meus pedidos | `GET /pedidos/meus`, `POST /carrinho/repetir/<id>`, `POST /pedidos/<id>/avaliacao` |
 | carteira | `POST /alunos/atual/recarga` |
 | perfil | `PUT /alunos/atual`, `DELETE /alunos/atual` |
-| admin | `GET /pedidos`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar`, `GET` `POST` `PUT` `DELETE /produtos`, `POST /produtos/<id>/imagem`, `GET /alunos`, `PUT` `DELETE /alunos/<id>` |
+| admin | `GET /pedidos`, `POST /pedidos/<id>/pronto`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar`, `GET` `POST` `PUT` `DELETE /produtos`, `POST /produtos/<id>/imagem`, `GET /alunos`, `PUT` `DELETE /alunos/<id>` |
 
 > **Atenção:** um erro de sintaxe num arquivo `.js` faz aquela página parar de funcionar. Depois de mexer, abra o console do navegador (F12) e confira se não há erros em vermelho.

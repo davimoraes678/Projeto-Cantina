@@ -7,10 +7,10 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `index.html` | `/` | Sim (sem login, vai para o cadastro) | Cardápio: categorias, filtros de preço e ordenação, combos mais pedidos e os cards dos produtos. O botão do carrinho abre o carrinho num painel lateral (com saldo e "Repetir último pedido"); no celular aparece também a barra "Ver carrinho". Mostra o aviso de pedido em preparo |
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
-| `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
+| `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (em preparo e **pronto para retirar**, com o código) e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
 | `conta.html` | `/front-end/conta.html` | Sim | Perfil: editar dados, sair e remover a própria conta |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
-| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Abas. **Admin:** Pedidos (um card por pedido em preparo, com o código de retirada e os botões Entregar e Cancelar) e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
+| `admin.html` | `/front-end/admin.html` | Admin ou mestre | Abas. **Admin:** Pedidos (um card por pedido, com o código de retirada; o botão **Pronto** avisa o aluno e o **Entregar** fecha o pedido quando ele retira; também Cancelar) e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
 | `assets/logo.png` | | | Logo da Cantina Real |
 | [`js/`](js/README.md) | | | O JavaScript: um arquivo por página e o `comum.js` |

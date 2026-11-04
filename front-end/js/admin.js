@@ -24,13 +24,13 @@ async function iniciar() {
 // 1. PEDIDOS E HISTÓRICO
 // -----------------------------------------------------------------------------
 
-// GET /pedidos: os que estão em preparo vão para a aba Pedidos (o mais antigo
+// GET /pedidos: os em preparo e os prontos vão para a aba Pedidos (o mais antigo
 // primeiro) e os entregues e cancelados para a aba Histórico (o mais novo primeiro).
 async function carregarPedidos() {
   const { ok, dados: pedidos } = await api("/pedidos");
   if (!ok) return;
 
-  const andamento = pedidos.filter((p) => p.status === "Pendente");
+  const andamento = pedidos.filter((p) => p.status === "Pendente" || p.status === "Pronto");
   const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado").reverse();
 
   document.getElementById("lista-pedidos-admin").innerHTML = andamento.length
@@ -45,14 +45,24 @@ async function carregarPedidos() {
   contador.classList.toggle("d-none", andamento.length === 0);
 }
 
-// Card de um pedido em preparo, com o código de retirada em destaque.
+// Card de um pedido, com o código de retirada em destaque. O botão principal
+// depende do status:
+//   Pendente -> "Pronto" (avisa o aluno que já pode retirar)
+//   Pronto   -> "Entregar" (o aluno retirou no balcão: fecha o pedido)
 function cardPedidoAdmin(pedido) {
+  const pronto = pedido.status === "Pronto";
   const itens = pedido.itens.map((item) => `<li>${item.quantidade}x ${escapeHtml(item.produto_nome)}</li>`).join("");
+  const botao = pronto
+    ? `<button class="btn btn-success rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'concluir')">Entregar</button>`
+    : `<button class="btn btn-warning rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'pronto')">Pronto</button>`;
   return `
     <div class="col">
-      <div class="card h-100 border-0 border-start border-4 border-warning shadow-sm rounded-4">
+      <div class="card h-100 border-0 border-start border-4 ${pronto ? "border-success" : "border-warning"} shadow-sm rounded-4">
         <div class="card-body d-flex flex-column">
-          <small class="text-body-secondary">Código de retirada</small>
+          <div class="d-flex justify-content-between">
+            <small class="text-body-secondary">Código de retirada</small>
+            <span class="badge rounded-pill ${pronto ? "text-bg-success" : "text-bg-warning"}">${pronto ? "Esperando retirada" : "Em preparo"}</span>
+          </div>
           <p class="fs-2 fw-bold font-monospace lh-1 mb-2">${escapeHtml(codigoPedido(pedido))}</p>
           <p class="fw-semibold mb-1">${escapeHtml(pedido.aluno_nome)}
             <small class="text-body-secondary fw-normal">· ${formatarData(pedido.data_hora_criacao)}</small></p>
@@ -60,7 +70,7 @@ function cardPedidoAdmin(pedido) {
           <div class="mt-auto d-flex align-items-center gap-2">
             <span class="fw-bold me-auto">${reais(pedido.valor_total)}</span>
             <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'cancelar')">Cancelar</button>
-            <button class="btn btn-success rounded-pill" type="button" onclick="mudarPedido(${pedido.id_pedido}, 'concluir')">Entregar</button>
+            ${botao}
           </div>
         </div>
       </div>
@@ -86,17 +96,21 @@ function linhaHistorico(pedido) {
     </div>`;
 }
 
-// Botões "Entregar" e "Cancelar": POST /pedidos/<id>/concluir ou /cancelar.
+// Botões dos cards: POST /pedidos/<id>/pronto, /concluir ou /cancelar.
 // Cancelar devolve o valor para a carteira do aluno e os produtos para o estoque.
+const ACOES = {
+  pronto: { pergunta: null, aviso: "Aluno avisado: pedido pronto" },
+  concluir: { pergunta: "Confirmar que o aluno retirou o pedido?", aviso: "Pedido entregue" },
+  cancelar: { pergunta: "Cancelar o pedido? O valor volta para a carteira do aluno.", aviso: "Pedido cancelado" },
+};
+
 async function mudarPedido(id_pedido, acao) {
-  const pergunta = acao === "concluir"
-    ? "Confirmar que o aluno retirou o pedido?"
-    : "Cancelar o pedido? O valor volta para a carteira do aluno.";
-  if (!confirm(pergunta)) return;
+  const { pergunta, aviso } = ACOES[acao];
+  if (pergunta && !confirm(pergunta)) return;
 
   const { ok, dados } = await api(`/pedidos/${id_pedido}/${acao}`, "POST");
   if (!ok) return avisar(dados.erro || "Não foi possível atualizar o pedido.", "erro");
-  avisar(acao === "concluir" ? "Pedido entregue" : "Pedido cancelado");
+  avisar(aviso);
   carregarPedidos();
 }
 

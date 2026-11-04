@@ -70,12 +70,13 @@ Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** 
 | 22 | Repetir último pedido | aluno | `index.html` | `POST /api/carrinho/repetir` | `RepetirUltimoPedidoService` → `PedidoRepository` (`sp_repetir_ultimo_pedido`) |
 | 23 | Combinações mais pedidas (e adicionar a dupla ao carrinho) | aluno | `index.html` | `GET /api/pedidos/combinacoes` | `CombinacoesMaisPedidasService` → `PedidoRepository` (`sp_combinacoes_mais_pedidas`) |
 | 24 | Painel de pedidos em andamento | admin, mestre | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 25 | Concluir pedido | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
+| 25 | Fechar pedido quando o aluno retira ("Entregar") | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
 | 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
 | 27 | Histórico de pedidos (entregues e cancelados) | admin, mestre | `admin.html` (aba Histórico) | `GET /api/pedidos` | `ListarPedidosService` |
 | 28 | Avaliar pedido entregue (nota de 1 a 5 e comentário) | aluno | `pedidos.html` (botão "Avaliar") | `POST /api/pedidos/<id>/avaliacao` | `AvaliarPedidoService` |
 | 29 | Meus pedidos: em andamento e histórico | aluno | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
 | 30 | Pedir de novo um pedido antigo | aluno | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
+| 31 | Avisar que o pedido está pronto para retirar | admin, mestre | `admin.html` (botão "Pronto"); o aluno vê em `pedidos.html` e no cardápio | `POST /api/pedidos/<id>/pronto` | `MarcarProntoService` |
 
 ## Arquitetura
 

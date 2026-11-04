@@ -101,10 +101,11 @@ Formato do carrinho (igual ao de um pedido):
 | `GET` | `/meus` | login | Os pedidos do aluno logado (sem o carrinho), o mais recente primeiro |
 | `GET` | `/combinacoes` | login | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
 | `GET` | `/<id>` | login | Um pedido (só o dono ou admin/mestre; senão `404`) |
-| `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` · `400` se já estiver concluído ou cancelado |
+| `POST` | `/<id>/pronto` | admin ou mestre | Marca como `"Pronto"` (o aluno vê "Pronto para retirar") · `400` se não estiver `Pendente` |
+| `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` (o aluno retirou; aparece como "Entregue") e grava a hora em `data_hora_retirada` · `400` se já estiver concluído ou cancelado |
 | `POST` | `/<id>/cancelar` | admin ou mestre | Marca como `"Cancelado"` e **devolve o valor ao aluno e os produtos ao estoque** · `400` se já estiver concluído ou cancelado |
 
-Status de um pedido: `Carrinho` → `Pendente` (ao finalizar) → `Concluído` ou `Cancelado`.
+Status de um pedido: `Carrinho` → `Pendente` (ao finalizar) → `Pronto` (admin avisa que pode retirar) → `Concluído` (o aluno retirou no balcão). Enquanto não for concluído, o pedido pode ser `Cancelado`.
 
 ### `avaliacao_controller.py` — `/api/pedidos/<id>/avaliacao`
 

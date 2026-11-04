@@ -235,16 +235,18 @@ async function finalizarPedido() {
 }
 
 // -----------------------------------------------------------------------------
-// 4. AVISO DE PEDIDO EM ANDAMENTO (faixa amarela no topo, leva para Meus pedidos)
+// 4. AVISO DE PEDIDO EM ANDAMENTO (faixa amarela no topo: em preparo ou pronto)
 // -----------------------------------------------------------------------------
 
 async function carregarAvisoPedido() {
   const { ok, dados: pedidos } = await api("/pedidos/meus");
   if (!ok) return;
-  const pedido = pedidos.find((p) => p.status === "Pendente");
+  const pedido = pedidos.find((p) => p.status === "Pendente" || p.status === "Pronto");
 
   document.getElementById("aviso-pedido").classList.toggle("d-none", !pedido);
   if (pedido) {
-    document.getElementById("aviso-pedido-texto").textContent = `Pedido ${codigoPedido(pedido)} em preparo`;
+    document.getElementById("aviso-pedido-texto").textContent = pedido.status === "Pronto"
+      ? `Pedido ${codigoPedido(pedido)} pronto! Retire no balcão`
+      : `Pedido ${codigoPedido(pedido)} em preparo`;
   }
 }

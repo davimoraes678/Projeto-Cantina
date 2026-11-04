@@ -1,6 +1,6 @@
 // =============================================================================
 // pedidos.js: "Meus pedidos" do aluno (pedidos.html).
-//   - aba "Em andamento": pedidos que ainda não foram entregues
+//   - aba "Em andamento": em preparo e prontos para retirar
 //   - aba "Histórico": entregues e cancelados, com "Pedir de novo" e "Avaliar"
 // =============================================================================
 
@@ -14,8 +14,8 @@ async function carregarMeusPedidos() {
   const { ok, dados: pedidos } = await api("/pedidos/meus");
   if (!ok) return;
 
-  const andamento = pedidos.filter((p) => p.status === "Pendente");
-  const historico = pedidos.filter((p) => p.status !== "Pendente");
+  const andamento = pedidos.filter((p) => p.status === "Pendente" || p.status === "Pronto");
+  const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado");
 
   document.getElementById("lista-andamento").innerHTML = andamento.length
     ? andamento.map(cardPedido).join("")
@@ -29,11 +29,13 @@ async function carregarMeusPedidos() {
   contador.classList.toggle("d-none", andamento.length === 0);
 }
 
-// Como cada status aparece: texto, cor do selo e cor da faixa do card.
+// Como cada status aparece: texto e cor (do selo e da faixa do card).
+// Caminho de um pedido: Pendente -> Pronto -> Concluído (ou Cancelado).
 const STATUS = {
   Pendente: { texto: "Em preparo", cor: "warning" },
-  "Concluído": { texto: "Entregue", cor: "success" },
-  Cancelado: { texto: "Cancelado", cor: "secondary" },
+  Pronto: { texto: "Pronto para retirar", cor: "success" },
+  "Concluído": { texto: "Entregue", cor: "secondary" },
+  Cancelado: { texto: "Cancelado", cor: "danger" },
 };
 
 // HTML do card de um pedido. Os botões mudam conforme o status.
@@ -46,9 +48,14 @@ function cardPedido(pedido) {
       <span class="text-body-secondary">${reais(item.subtotal)}</span>
     </li>`).join("");
 
+  // Pronto: destaque para o aluno ir buscar, com o código que ele mostra no balcão
+  const retirar = pedido.status === "Pronto"
+    ? `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${escapeHtml(codigoPedido(pedido))}</strong>.</div>`
+    : "";
+
   // Botões do rodapé: só pedidos que já terminaram
   let botoes = "";
-  if (pedido.status !== "Pendente") {
+  if (pedido.status === "Concluído" || pedido.status === "Cancelado") {
     botoes = `<button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">Pedir de novo</button>`;
   }
   if (pedido.status === "Concluído" && !pedido.avaliado) {
@@ -68,6 +75,7 @@ function cardPedido(pedido) {
           </div>
           <span class="badge rounded-pill text-bg-${status.cor}">${status.texto}</span>
         </div>
+        ${retirar}
         <ul class="list-unstyled small mb-2">${itens}</ul>
         <div class="d-flex flex-wrap align-items-center gap-2 border-top pt-2">
           <span class="fw-bold me-auto">${reais(pedido.valor_total)}</span>

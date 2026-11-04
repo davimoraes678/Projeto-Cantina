@@ -674,7 +674,7 @@ function desenharCardsProdutos() {
   if (produtos.length === 0) {
     tabela.innerHTML = `
             <div class="col-12 text-center text-body-secondary py-5">
-                <p class="display-6 mb-2"><span class="material-symbols-rounded icone" aria-hidden="true">search_off</span></p>
+                <p class="display-6 mb-2">${icone("search_off")}</p>
                 <p class="mb-0">Nenhum produto encontrado.</p>
             </div>
         `;
@@ -702,7 +702,7 @@ function cardProduto(prod) {
             <div class="card h-100 border-0 shadow-sm rounded-4">
                 <div class="position-relative">
                     <div class="ratio ratio-4x3 rounded-top-4">
-                        <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true"><span class="material-symbols-rounded icone">${icones[prod.categoria] || "restaurant"}</span></div>
+                        <div class="d-flex align-items-center justify-content-center display-5 text-warning-emphasis opacity-50" aria-hidden="true">${icone(icones[prod.categoria] || "restaurant")}</div>
                         <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="${escapeHtml(prod.nome)}"
                              class="object-fit-contain p-2 ${esgotado ? "opacity-50" : ""}" loading="lazy" onerror="this.remove()">
                     </div>
@@ -714,12 +714,12 @@ function cardProduto(prod) {
                     <p class="fw-bold text-primary mb-2">${reais(prod.preco_atual)}</p>
                     <div class="mt-auto d-flex align-items-center justify-content-between gap-1">
                         <div class="input-group input-group-sm seletor-qtd w-auto flex-nowrap">
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}><span class="material-symbols-rounded icone" aria-hidden="true">remove</span></button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, -1)" aria-label="Diminuir" ${esgotado ? "disabled" : ""}>${icone("remove")}</button>
                             <input class="form-control text-center px-0" type="number" id="qtd-produto-${id}" value="1" min="1" max="${estoque}" inputmode="numeric" aria-label="Quantidade de ${escapeHtml(prod.nome)}" ${esgotado ? "disabled" : ""}>
-                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}><span class="material-symbols-rounded icone" aria-hidden="true">add</span></button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="mudarQuantidade(${id}, 1)" aria-label="Aumentar" ${esgotado ? "disabled" : ""}>${icone("add")}</button>
                         </div>
                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-2" onclick="adicionarItemAoCarrinho(${id})" aria-label="Adicionar ${escapeHtml(prod.nome)} ao carrinho" ${esgotado ? "disabled" : ""}>
-                            <span class="material-symbols-rounded icone fs-6" aria-hidden="true">shopping_cart</span>
+                            ${icone("shopping_cart", "fs-6")}
                         </button>
                     </div>
                 </div>
@@ -921,7 +921,7 @@ function renderizarCarrinho(carrinho) {
                 </div>
                 <span class="fw-semibold text-nowrap">${reais(item.subtotal)}</span>
                 <button class="btn btn-sm btn-link text-danger p-1" onclick="removerItemDoCarrinho(${item.id_item_pedido})" aria-label="Remover ${escapeHtml(item.produto_nome)}">
-                    <span class="material-symbols-rounded icone" aria-hidden="true">delete</span>
+                    ${icone("delete")}
                 </button>
             </li>
         `).join("");
@@ -1126,7 +1126,7 @@ function cardPedidoAndamento(pedido) {
                         <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
                     </div>
                     <span class="badge rounded-pill text-bg-warning d-flex align-items-center gap-1">
-                        <span class="material-symbols-rounded icone" aria-hidden="true">hourglass_top</span> Em preparo
+                        ${icone("hourglass_top")} Em preparo
                     </span>
                 </div>
                 <div class="progress mb-1" role="progressbar" aria-label="Andamento do pedido" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="height: 8px;">
@@ -1151,9 +1151,9 @@ function cardPedidoHistorico(pedido) {
   let avaliar = "";
   if (concluido && !pedido.avaliado) {
     avaliar = `<button class="btn btn-warning btn-sm rounded-pill" type="button" onclick="abrirAvaliacao(${pedido.id_pedido})">
-                       <span class="material-symbols-rounded icone icone-cheio" aria-hidden="true">star</span> Avaliar</button>`;
+                       ${icone("star")} Avaliar</button>`;
   } else if (pedido.avaliado) {
-    avaliar = `<small class="text-body-secondary align-self-center"><span class="material-symbols-rounded icone icone-cheio text-warning" aria-hidden="true">star</span> Avaliado</small>`;
+    avaliar = `<small class="text-body-secondary align-self-center">${icone("star", "text-warning")} Avaliado</small>`;
   }
 
   return `
@@ -1173,7 +1173,7 @@ function cardPedidoHistorico(pedido) {
                     <div class="d-flex gap-2">
                         ${avaliar}
                         <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">
-                            <span class="material-symbols-rounded icone" aria-hidden="true">replay</span> Pedir de novo
+                            ${icone("replay")} Pedir de novo
                         </button>
                     </div>
                 </div>
@@ -1481,11 +1481,34 @@ function tempoDesde(iso) {
   return `há ${Math.floor(minutos / 60)} h`;
 }
 
-// Ícone do Material Symbols (Google Fonts) como texto HTML, para usar dentro das
-// listas e cards montados aqui: icone("delete") -> <span ...>delete</span>.
-// O nome do ícone precisa estar na lista icon_names do <link> do Google Fonts nas páginas.
+// Ícones montados pelo JS (listas e cards). Cada um é o desenho (<path d="...">) do
+// SVG copiado de https://fonts.google.com/icons (Material Symbols Outlined). A
+// estrela é a versão preenchida. Ícone novo: copie o SVG lá, pegue só o d="..."
+// do <path> e acrescente aqui com o nome do ícone.
+const ICONES = {
+  add: "M450-450H200v-60h250v-250h60v250h250v60H510v250h-60v-250Z",
+  bakery_dining: "M805-261q27 14 45.5-9t4.5-48l-71-134-54 147 75 44Zm-212-42h70l97-242q6-14 4.5-27.5T748-593l-83-36q-14-7-28 0t-15 21l-29 305Zm-296 0h69l-28-305q-1-15-13.5-22t-29.5 1l-79 34q-13 5-14.5 22.5T205-541l92 238Zm-142 42 75-44-54-147-71 139q-14 28 6 45.5t44 6.5Zm271-42h107l33-364q2-14-7.5-23.5T535-700H425q-16 0-24 9.5t-7 23.5l32 364ZM133-200q-39 0-66-28t-27-67q0-12 4.5-23.5T54-341l92-179q-15-39-3-77.5t48-54.5l83-34q16-6 32.5-7t30.5 8q8-32 32-53.5t56-21.5h110q32 0 56 20t32 51q15-6 31-5t31 8l84 34q37 14 49.5 52t-4.5 74l92 184q4 11 9 21.5t5 21.5q0 42-30 70.5T818-200q-11 0-20.5-4.5T778-213l-61-30H242l-58 30q-12 5-24.5 9t-26.5 4Zm347-280Z",
+  cake: "M160-80q-17 0-28.5-11.5T120-120v-219q0-24.75 17.63-42.38Q155.25-399 180-399h27v-182q0-24.75 17.63-42.38Q242.25-641 267-641h183v-64q-20-14-30.5-30.53-10.5-16.54-10.5-39.88 0-14.59 5.5-28.09T430-827l50-53 50 53q10 10 16 23.5t6 28.09q0 23.34-11 39.88Q530-719 510-705v64h183q24.75 0 42.38 17.62Q753-605.75 753-581v182h27q24.75 0 42.38 17.62Q840-363.75 840-339v219q0 17-11.5 28.5T800-80H160Zm107-319h426v-182H267v182Zm-87 259h600v-199H180v199Zm87-259h426-426Zm-87 259h600-600Zm600-259H180h600Z",
+  check: "M378-246 154-470l43-43 181 181 384-384 43 43-427 427Z",
+  check_circle: "m421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z",
+  delete: "M261-120q-24.75 0-42.37-17.63Q201-155.25 201-180v-570h-41v-60h188v-30h264v30h188v60h-41v570q0 24-18 42t-42 18H261Zm438-630H261v570h438v-570ZM367-266h60v-399h-60v399Zm166 0h60v-399h-60v399ZM261-750v570-570Z",
+  edit: "M180-180h44l472-471-44-44-472 471v44Zm-60 60v-128l575-574q8-8 19-12.5t23-4.5q11 0 22 4.5t20 12.5l44 44q9 9 13 20t4 22q0 11-4.5 22.5T823-694L248-120H120Zm659-617-41-41 41 41Zm-105 64-22-22 44 44-22-22Z",
+  hourglass_top: "M308-140h344v-127q0-72-50-121.5T480-438q-72 0-122 49.5T308-267v127ZM160-80v-60h88v-127q0-71 40-129t106-84q-66-27-106-85t-40-129v-126h-88v-60h640v60h-88v126q0 71-40 129t-106 85q66 26 106 84t40 129v127h88v60H160Z",
+  local_cafe: "M160-120v-60h640v60H160Zm151-140q-63 0-107-43.5T160-410v-430h660q24.75 0 42.38 17.62Q880-804.75 880-780v160q0 24.75-17.62 42.37Q844.75-560 820-560h-96v150q0 63-44 106.5T573-260H311Zm0-60h261.98q36.02 0 63.52-27.5T664-410v-370H220v370q0 35 28 62.5t63 27.5Zm413-300h96v-160h-96v160ZM311-320h-91 444-353Z",
+  person: "M372-523q-42-42-42-108t42-108q42-42 108-42t108 42q42 42 42 108t-42 108q-42 42-108 42t-108-42ZM160-160v-94q0-38 19-65t49-41q67-30 128.5-45T480-420q62 0 123 15.5T731-360q31 14 50 41t19 65v94H160Zm60-60h520v-34q0-16-9.5-30.5T707-306q-64-31-117-42.5T480-360q-57 0-111 11.5T252-306q-14 7-23 21.5t-9 30.5v34Zm324.5-346.5Q570-592 570-631t-25.5-64.5Q519-721 480-721t-64.5 25.5Q390-670 390-631t25.5 64.5Q441-541 480-541t64.5-25.5ZM480-631Zm0 411Z",
+  receipt_long: "M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-125h127v-570l59.8 60 59.8-60 59.8 60 59.8-60 59.8 60 60-60 60 60 60-60 60 60 60-60v695q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm516-60q20 0 32.5-12.5T783-185v-595H304v470h389v125q0 20 12.5 32.5T738-140ZM357-622v-60h240v60H357Zm0 134v-60h240v60H357Zm333-134q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9ZM221-140h412v-110H177v65q0 20 12.65 32.5T221-140Zm-44 0v-110 110Z",
+  remove: "M200-450v-60h560v60H200Z",
+  replay: "M339.5-108Q274-136 225-185t-77-114.5Q120-365 120-440h60q0 125 87.5 212.5T480-140q125 0 212.5-87.5T780-440q0-125-85-212.5T485-740h-23l73 73-41 42-147-147 147-147 41 41-78 78h23q75 0 140.5 28T735-695q49 49 77 114.5T840-440q0 75-28 140.5T735-185q-49 49-114.5 77T480-80q-75 0-140.5-28Z",
+  restaurant: "M285-80v-368q-52-11-88.5-52.5T160-600v-280h60v280h65v-280h60v280h65v-280h60v280q0 58-36.5 99.5T345-448v368h-60Zm415 0v-320H585v-305q0-79 48-127t127-48v800h-60Z",
+  search_off: "M136-136q-56-56-56-134t56-134q56-56 134-56t134 56q56 56 56 134t-56 134q-56 56-134 56t-134-56Zm700 16L573-383q-14 11-31.5 21.5T508-344q-5-14-11-28.5T483-399q54-21 91.5-69.5T612-584q0-81-57-138.5T417-780q-82 0-139.5 57.5T220-584q0 17 3.5 35.5T232-517q-13 2-29 6.5T174-500q-7-18-10.5-40t-3.5-44q0-107 75-181.5T417-840q106 0 180.5 75T672-584q0 43-15 85t-41 73l264 262-44 44Zm-635-56 69-69 68 68 23-23-69-69 71-71-23-23-70 70-70-70-23 23 70 70-70 70 24 24Z",
+  shopping_cart: "M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z",
+  star: "m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z",
+};
+
+// Monta o SVG de um ícone da lista ICONES: icone("delete") -> <svg ...><path d="..."/></svg>
+// fill="currentColor" faz o ícone ter a mesma cor do texto em volta.
 function icone(nome, classes = "") {
-  return `<span class="material-symbols-rounded icone ${classes}" aria-hidden="true">${nome}</span>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone ${classes}" fill="currentColor" aria-hidden="true"><path d="${ICONES[nome]}"/></svg>`;
 }
 
 // Troca os caracteres especiais do HTML, para um nome com "<" não virar código na página.

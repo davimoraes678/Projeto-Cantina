@@ -28,15 +28,19 @@ O Bootstrap 5.3.8 vem do CDN jsDelivr, com `integrity` (o navegador confere se o
 
 ## Ícones (Google Fonts)
 
-Os ícones são do [Material Symbols](https://fonts.google.com/icons), estilo **Rounded**, carregados do Google Fonts por um `<link>` no `<head>` de cada página. Cada ícone é escrito pelo nome:
+Os ícones são SVGs copiados de [fonts.google.com/icons](https://fonts.google.com/icons) (Material Symbols **Outlined**) e colados **direto no HTML**. Não há fonte nem arquivo de ícones para carregar.
+
+Para colocar um ícone novo numa página:
+
+1. Em [fonts.google.com/icons](https://fonts.google.com/icons), escolha o ícone e copie o **SVG**.
+2. Cole no HTML e troque três coisas: tire o `width`/`height`, troque o `fill="#..."` por `fill="currentColor"` (o ícone fica da cor do texto) e acrescente `class="icone"` e `aria-hidden="true"`:
 
 ```html
-<span class="material-symbols-rounded icone" aria-hidden="true">shopping_cart</span>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="..."/></svg>
 ```
 
-- No JS, o `icone("delete")` do `alunos.js` monta esse mesmo `<span>`.
-- O `<link>` usa `icon_names=...` com **só os ícones que o site usa**: assim o Google manda um arquivo de uns 10 KB em vez da fonte inteira (vários MB). **Ícone novo:** procure o nome em [fonts.google.com/icons](https://fonts.google.com/icons) e acrescente na lista `icon_names` (em ordem alfabética) de **todas** as páginas. Se esquecer, aparece o nome escrito no lugar do ícone.
-- A classe `icone` (no `style.css`) deixa o ícone do tamanho do texto ao lado; `icone-cheio` mostra a versão preenchida (ex.: a estrela).
+- A classe `icone` (no `style.css`) deixa o ícone do tamanho do texto ao lado. Para aumentar, use as classes do Bootstrap no ícone (`fs-4`) ou em volta dele (`display-5`).
+- **Ícones montados pelo JS** (cards e listas): ficam na lista `ICONES` do `alunos.js` (só o `d="..."` do `<path>`), e a função `icone("delete")` monta o SVG. Ícone novo no JS: acrescente o `d="..."` nessa lista.
 
 ## Celular
 

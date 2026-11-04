@@ -40,7 +40,7 @@ Caminho relativo: a API é chamada no mesmo endereço da página. Funciona no `1
 | Avaliação | `verificarAvaliacao`, `abrirAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>/avaliacao` |
 
 **Como a avaliação chega ao aluno:** ao finalizar, o `finalizarPedido` guarda o número do pedido no navegador (`localStorage`, chave `pedidoParaAvaliar`). Ao abrir o cardápio, o `verificarAvaliacao` consulta esse pedido e, se estiver `Concluído` e ainda sem avaliação, abre a janela. Depois de avaliar (ou no logout) a chave é apagada. Em qualquer navegador, o aluno também pode avaliar pelo botão "Avaliar" do histórico em `pedidos.html`.
-| Util | `avisar` (toast do Bootstrap no topo da tela), `icone` (ícone do Google Fonts), `reais` (12.5 → "R$ 12,50"), `dataLocal` e `formatarData` (UTC do back-end → horário local), `tempoDesde` ("há 5 min"), `escapeHtml`, `escapeAttr` | — |
+| Util | `avisar` (toast do Bootstrap no topo da tela), `icone` (monta o SVG de um ícone da lista `ICONES`), `reais` (12.5 → "R$ 12,50"), `dataLocal` e `formatarData` (UTC do back-end → horário local), `tempoDesde` ("há 5 min"), `escapeHtml`, `escapeAttr` | — |
 
 **O formulário `#form-aluno` faz duas coisas.** Com `editandoAlunoId = null`, ele **cadastra** (`POST /alunos/registro`) e leva para `/`. Com um número, ele **edita** no admin (`PUT /alunos/<id>`). O formulário de produto funciona igual, com `editandoProdutoId`.
 

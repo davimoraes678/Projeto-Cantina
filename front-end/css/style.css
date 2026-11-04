@@ -23,17 +23,13 @@
     color: var(--cantina-amarelo);
 }
 
-/* Ícones do Material Symbols (Google Fonts, carregado no <head> de cada página):
-   <span class="material-symbols-rounded icone">shopping_cart</span>
-   O ícone é uma letra da fonte: fica um pouco maior que o texto ao lado e alinhado com ele. */
+/* Ícones: SVG copiado de https://fonts.google.com/icons e colado direto no HTML,
+   com class="icone" e fill="currentColor" (o ícone fica da cor do texto em volta).
+   A classe deixa o ícone um pouco maior que o texto ao lado e alinhado com ele. */
 .icone {
-    font-size: 1.25em;
+    width: 1.25em;
+    height: 1.25em;
     vertical-align: -.25em;
-}
-
-/* Ícone preenchido (ex.: a estrela de "Avaliar" e "Avaliado") */
-.icone-cheio {
-    font-variation-settings: "FILL" 1;
 }
 
 /* Botões "primary" e "outline-primary" em vermelho em vez de azul */

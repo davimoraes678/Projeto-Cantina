@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS pedido (
     data_hora_retirada DATETIME DEFAULT NULL,
     id_aluno INT NULL,
     nome_aluno VARCHAR(100) NULL,
-    codigo INT,
+    codigo VARCHAR(4), -- código de retirada, ex.: "4K9P" (tem letras, por isso VARCHAR)
     FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE SET NULL
 );
 

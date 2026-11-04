@@ -103,3 +103,11 @@ a:focus-visible {
         font-size: 17px;
     }
 }
+
+/* Celulares pequenos (até 389px): esconde o nome "Cantina Real" ao lado da
+   logo, para a barra de cima (logo, saldo e carrinho) caber na tela. */
+@media (max-width: 389px) {
+    .navbar-brand span {
+        display: none;
+    }
+}

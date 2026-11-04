@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
-    <!-- Barra de cima. No celular os links ficam na barra de baixo -->
+    <!-- Barra de cima. No celular e no tablet os links ficam na barra de baixo -->
     <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
-                <img src="/front-end/assets/logo.png" alt="" width="36" height="36">
+                <img src="/front-end/assets/logo-pequena.png" alt="" width="36" height="36">
                 <span>Cantina <span class="text-cantina-amarelo">Real</span></span>
             </a>
-            <ul class="navbar-nav d-none d-md-flex me-auto">
+            <ul class="navbar-nav d-none d-lg-flex me-auto">
                 <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Cardápio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/front-end/pedidos.html">Meus pedidos</a></li>
                 <li class="nav-item"><a class="nav-link" href="/front-end/carteira.html">Carteira</a></li>
@@ -29,11 +29,11 @@
                 </a>
                 <!-- Abre o carrinho (painel lateral #carrinho) -->
                 <button class="btn btn-light rounded-pill position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-label="Abrir carrinho">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg><span class="d-none d-md-inline ms-1">Carrinho</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg><span class="d-none d-xl-inline ms-1">Carrinho</span>
                     <span id="contador-carrinho" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
                 </button>
-                <!-- Sair (no celular fica na página Perfil) -->
-                <button class="btn btn-outline-light rounded-pill d-none d-md-inline-flex align-items-center gap-1 btn-logout" type="button">
+                <!-- Sair (no celular e no tablet fica na página Perfil) -->
+                <button class="btn btn-outline-light rounded-pill d-none d-lg-inline-flex align-items-center gap-1 btn-logout" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone " fill="currentColor" aria-hidden="true"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h299v60H180v600h299v60H180Zm486-185-43-43 102-102H360v-60h363L621-612l43-43 176 176-174 174Z"/></svg> Sair
                 </button>
             </div>
@@ -104,12 +104,12 @@
         <!-- Cards dos produtos, montados pelo cardapio.js -->
         <div id="lista-produtos" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-md-3"></div>
 
-        <!-- Espaço para o conteúdo não ficar atrás da barra de baixo (celular) -->
-        <div class="d-md-none py-5"></div>
+        <!-- Espaço para o conteúdo não ficar atrás da barra de baixo (celular e tablet) -->
+        <div class="d-lg-none py-5"></div>
     </main>
 
-    <!-- Celular: barra de navegação de baixo (o item Admin só aparece para admin e mestre) -->
-    <div class="fixed-bottom d-md-none">
+    <!-- Celular e tablet: barra de navegação de baixo (o item Admin só aparece para admin e mestre) -->
+    <div class="fixed-bottom d-lg-none">
         <!-- Botão "Ver carrinho": aparece quando há itens no carrinho -->
         <div class="px-3 pb-2 d-none" id="barra-carrinho">
             <button class="btn btn-primary btn-lg w-100 rounded-pill shadow fs-6" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" id="barra-carrinho-texto">Ver carrinho</button>

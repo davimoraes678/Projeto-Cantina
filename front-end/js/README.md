@@ -40,11 +40,17 @@ desenharCarrinho(dados);                                                        
 
 ## O padrão de uma lista na tela
 
-As listas (produtos, pedidos, alunos) são montadas assim: a API devolve uma lista, cada item vira um pedaço de HTML e tudo vai para o `innerHTML`:
+As listas (produtos, pedidos, alunos) são montadas assim: a API devolve uma lista, o `forEach` junta o HTML de cada item numa variável, e no fim ela vai para a tela:
 
 ```js
-lista.innerHTML = produtos.map(cardProduto).join("");
+let html = "";
+produtos.forEach((produto) => {
+  html += cardProduto(produto);   // junta o texto (rápido: ainda não mexe na tela)
+});
+lista.innerHTML = html;           // escreve na tela uma vez só
 ```
+
+- Escrever na tela **uma vez só** é mais rápido do que fazer `lista.innerHTML +=` dentro do `forEach`: a cada `+=`, o navegador apaga e redesenha a lista inteira (inclusive as fotos).
 
 - Texto que veio do usuário (nome, e-mail) passa pelo `escapeHtml()` antes de entrar no HTML.
 - Os botões de cada item chamam uma função com o **id**: `onclick="editarProduto(5)"`. A função acha o resto dos dados na lista que já foi carregada.

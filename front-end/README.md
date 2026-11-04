@@ -8,11 +8,12 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (em preparo e **pronto para retirar**, com o código) e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
-| `conta.html` | `/front-end/conta.html` | Sim | Perfil: editar dados, sair e remover a própria conta |
+| `conta.html` | `/front-end/conta.html` | Sim | Perfil: iniciais, nome, e-mail e função; atalhos para Carteira, Meus pedidos e Administração; "Editar dados" (abre e fecha); Sair e remover a própria conta |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
 | `admin.html` | `/front-end/admin.html` | Admin ou mestre | Feita para usar no computador do balcão: menu fixo na lateral (no celular vira abas em cima) e tudo um pouco maior. **Admin:** Pedidos em duas colunas, "Em preparo" (botão **Pronto**) e "Prontos para retirar" (botão **Entregar**, quando o aluno retira), que se atualizam sozinhas a cada 15 s, com aviso de pedido novo e o número de pedidos no título da aba do navegador; e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto e descrição) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |
-| `assets/logo.png` | | | Logo da Cantina Real |
+| `assets/logo-pequena.png` | | | Logo usada nas páginas (176×176, 7 KB) |
+| `assets/logo.png` | | | Logo original (512×512), guardada para quando precisar de uma versão maior |
 | [`js/`](js/README.md) | | | O JavaScript: um arquivo por página e o `comum.js` |
 
 ## Bootstrap
@@ -48,7 +49,7 @@ Para colocar um ícone novo numa página:
 
 ## Celular
 
-As páginas logadas (cardápio, pedidos, carteira, perfil e administração) têm, no celular, uma **barra de navegação embaixo** (`fixed-bottom d-md-none` com `nav nav-justified`), como num app. No computador ela some e os mesmos links ficam na barra de cima. No fim do `<main>` há um `<div class="d-md-none py-5">` para o conteúdo não ficar escondido atrás dela. Cada página marca o próprio item com `active`. O item **Admin** só aparece para admin e mestre (classe `so-admin`).
+As páginas logadas (cardápio, pedidos, carteira, perfil e administração) têm, no celular e no tablet (até 991px), uma **barra de navegação embaixo** (`fixed-bottom d-lg-none` com `nav nav-justified`), como num app. A partir de 992px (`lg`, computador) ela some e os mesmos links ficam na barra de cima (`d-none d-lg-flex`). No fim do `<main>` há um `<div class="d-lg-none py-5">` para o conteúdo não ficar escondido atrás dela. Em celular com até 389px, o nome "Cantina Real" ao lado da logo some (regra no `style.css`), para a barra de cima caber. Cada página marca o próprio item com `active`. O item **Admin** só aparece para admin e mestre (classe `so-admin`).
 
 ## Como as páginas falam com o back-end
 

@@ -33,7 +33,7 @@ function avisar(mensagem, tipo = "sucesso") {
 }
 
 // Busca o aluno logado (GET /alunos/atual) e:
-//   - preenche os elementos com data-aluno="nome", "primeiro-nome", "email", "saldo" ou "funcao"
+//   - preenche os elementos com data-aluno="nome", "primeiro-nome", "iniciais", "email", "saldo" ou "funcao"
 //   - mostra o que é só de admin (.so-admin) e só do mestre (.so-mestre)
 // Devolve o aluno, para a página usar (ex.: o saldo no carrinho).
 // Esconder na tela não protege nada: quem bloqueia de verdade é o back-end.
@@ -41,9 +41,11 @@ async function carregarAluno() {
   const { ok, dados: aluno } = await api("/alunos/atual");
   if (!ok) return null;
 
+  const partes = aluno.nome.split(" ");
   const valores = {
     nome: aluno.nome,
-    "primeiro-nome": aluno.nome.split(" ")[0],
+    "primeiro-nome": partes[0],
+    iniciais: (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : "")).toUpperCase(), // "Davi Moraes" -> "DM"
     email: aluno.email,
     saldo: reais(aluno.saldo),
     funcao: aluno.funcao,

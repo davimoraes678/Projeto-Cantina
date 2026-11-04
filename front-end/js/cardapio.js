@@ -14,12 +14,15 @@ let produtoAberto = null; // id do produto mostrado na janela de detalhes
 iniciar();
 
 async function iniciar() {
-  const aluno = await carregarAluno();
-  saldo = aluno ? aluno.saldo : 0;
+  // Estes não dependem do aluno: começam todos ao mesmo tempo (sem await, um não espera o outro)
   carregarProdutos();
-  carregarCarrinho();
   carregarCombos();
   carregarAvisoPedido();
+
+  // O carrinho usa o saldo (aviso "Saldo insuficiente"), então espera o aluno chegar
+  const aluno = await carregarAluno();
+  saldo = aluno ? aluno.saldo : 0;
+  carregarCarrinho();
 
   // Link "/#carrinho" (botão "Pedir de novo" de Meus pedidos): já abre o carrinho
   if (window.location.hash === "#carrinho") {
@@ -49,10 +52,11 @@ async function carregarProdutos() {
 
   // Para cada produto, acrescenta o card dele na lista
   const lista = document.getElementById("lista-produtos");
-  lista.innerHTML = "";
+  let html = "";
   produtos.forEach((produto) => {
-    lista.innerHTML += cardProduto(produto);
+    html += cardProduto(produto);
   });
+  lista.innerHTML = html; // escreve na tela uma vez só
   if (produtos.length === 0) lista.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum produto encontrado.</p>`;
 }
 
@@ -172,14 +176,15 @@ async function carregarCombos() {
   if (!ok || combos.length === 0) return;
 
   const lista = document.getElementById("lista-combos");
-  lista.innerHTML = "";
+  let html = "";
   combos.forEach((combo) => {
     const primeiro = combo.produtos[0];
     const segundo = combo.produtos[1];
-    lista.innerHTML += `<button class="btn btn-outline-primary rounded-pill text-nowrap" type="button"
+    html += `<button class="btn btn-outline-primary rounded-pill text-nowrap" type="button"
         onclick="adicionarCombo([${primeiro.id_produto}, ${segundo.id_produto}])">
         + ${escapeHtml(primeiro.nome)} + ${escapeHtml(segundo.nome)}</button>`;
   });
+  lista.innerHTML = html; // escreve na tela uma vez só
   document.getElementById("secao-combos").classList.remove("d-none");
 }
 
@@ -240,10 +245,10 @@ function desenharCarrinho(carrinho) {
   // Para cada item: acrescenta a linha na lista e soma a quantidade
   let quantidade = 0;
   const lista = document.getElementById("lista-carrinho");
-  lista.innerHTML = "";
+  let html = "";
   itens.forEach((item) => {
     quantidade += item.quantidade;
-    lista.innerHTML += `
+    html += `
     <li class="list-group-item px-0 d-flex align-items-center gap-2">
       <span class="badge rounded-pill text-bg-light border">${item.quantidade}x</span>
       <span class="flex-grow-1">${escapeHtml(item.produto_nome)}</span>
@@ -251,6 +256,7 @@ function desenharCarrinho(carrinho) {
       <button class="btn-close" type="button" onclick="removerDoCarrinho(${item.id_item_pedido})" aria-label="Remover"></button>
     </li>`;
   });
+  lista.innerHTML = html; // escreve na tela uma vez só
 
   document.getElementById("carrinho-total").textContent = reais(carrinho.valor_total);
   document.getElementById("carrinho-vazio").classList.toggle("d-none", !vazio);

@@ -13,8 +13,8 @@ let totalEmPreparo = null;  // quantos pedidos estavam em preparo (para avisar q
 iniciar();
 
 async function iniciar() {
+  carregarPedidos(); // começa já, sem esperar o aluno (sem await)
   const aluno = await carregarAluno();
-  carregarPedidos();
   if (aluno.funcao === "mestre") {
     carregarProdutos();
     carregarAlunos();
@@ -40,24 +40,27 @@ async function carregarPedidos() {
 
   // Para cada pedido, acrescenta o card dele na coluna certa
   const listaPreparo = document.getElementById("lista-preparo");
-  listaPreparo.innerHTML = "";
+  let htmlPreparo = "";
   preparo.forEach((pedido) => {
-    listaPreparo.innerHTML += cardPedidoAdmin(pedido);
+    htmlPreparo += cardPedidoAdmin(pedido);
   });
+  listaPreparo.innerHTML = htmlPreparo; // escreve na tela uma vez só
   if (preparo.length === 0) listaPreparo.innerHTML = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
 
   const listaProntos = document.getElementById("lista-prontos");
-  listaProntos.innerHTML = "";
+  let htmlProntos = "";
   prontos.forEach((pedido) => {
-    listaProntos.innerHTML += cardPedidoAdmin(pedido);
+    htmlProntos += cardPedidoAdmin(pedido);
   });
+  listaProntos.innerHTML = htmlProntos; // escreve na tela uma vez só
   if (prontos.length === 0) listaProntos.innerHTML = `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
 
   const listaHistorico = document.getElementById("lista-historico-admin");
-  listaHistorico.innerHTML = "";
+  let htmlHistorico = "";
   historico.forEach((pedido) => {
-    listaHistorico.innerHTML += linhaHistorico(pedido);
+    htmlHistorico += linhaHistorico(pedido);
   });
+  listaHistorico.innerHTML = htmlHistorico; // escreve na tela uma vez só
   if (historico.length === 0) listaHistorico.innerHTML = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
 
   // Números: nas colunas, no menu e no título da aba do navegador ("(3) Administração")
@@ -158,9 +161,9 @@ async function carregarProdutos() {
   produtos = dados;
 
   const lista = document.getElementById("lista-produtos-admin");
-  lista.innerHTML = "";
+  let html = "";
   produtos.forEach((produto) => {
-    lista.innerHTML += `
+    html += `
     <div class="list-group-item d-flex align-items-center gap-3 py-2">
       <img src="/api/produtos/${produto.id_produto}/imagem" alt="" width="48" height="48"
            class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy" onerror="this.style.visibility='hidden'">
@@ -172,6 +175,7 @@ async function carregarProdutos() {
       <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirProduto(${produto.id_produto})">Excluir</button>
     </div>`;
   });
+  lista.innerHTML = html; // escreve na tela uma vez só
 }
 
 // "Novo produto": abre a janela vazia.
@@ -277,13 +281,13 @@ async function carregarAlunos() {
   alunos = dados;
 
   const lista = document.getElementById("lista-alunos");
-  lista.innerHTML = "";
+  let html = "";
   alunos.forEach((aluno) => {
     const promover = aluno.funcao === "aluno"
       ? `<button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="promoverAluno(${aluno.id_aluno})">Tornar admin</button>` : "";
     const excluir = aluno.funcao !== "mestre"
       ? `<button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>` : "";
-    lista.innerHTML += `
+    html += `
       <div class="list-group-item d-flex flex-wrap align-items-center gap-2 py-2">
         <div class="flex-grow-1">
           <div class="fw-semibold">${escapeHtml(aluno.nome)}
@@ -293,6 +297,7 @@ async function carregarAlunos() {
         ${promover} ${excluir}
       </div>`;
   });
+  lista.innerHTML = html; // escreve na tela uma vez só
 }
 
 // "Tornar admin": PUT /alunos/<id>. O admin pode entregar e cancelar pedidos.

@@ -19,17 +19,19 @@ async function carregarMeusPedidos() {
 
   // Para cada pedido, acrescenta o card dele na aba certa
   const listaAndamento = document.getElementById("lista-andamento");
-  listaAndamento.innerHTML = "";
+  let htmlAndamento = "";
   andamento.forEach((pedido) => {
-    listaAndamento.innerHTML += cardPedido(pedido);
+    htmlAndamento += cardPedido(pedido);
   });
+  listaAndamento.innerHTML = htmlAndamento; // escreve na tela uma vez só
   if (andamento.length === 0) listaAndamento.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
 
   const listaHistorico = document.getElementById("lista-historico");
-  listaHistorico.innerHTML = "";
+  let htmlHistorico = "";
   historico.forEach((pedido) => {
-    listaHistorico.innerHTML += cardPedido(pedido);
+    htmlHistorico += cardPedido(pedido);
   });
+  listaHistorico.innerHTML = htmlHistorico; // escreve na tela uma vez só
   if (historico.length === 0) listaHistorico.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
 
   const contador = document.getElementById("contador-andamento");

@@ -25,6 +25,7 @@ document.getElementById("form-editar-aluno").addEventListener("submit", async (e
   if (!resposta.ok) return avisar(resposta.dados.erro || "Não foi possível salvar.", "erro");
 
   document.getElementById("aluno-senha").value = "";
+  bootstrap.Collapse.getOrCreateInstance("#form-editar-dados").hide(); // fecha o "Editar dados"
   carregarAluno(); // mostra o nome novo na página
   avisar("Dados atualizados");
 });

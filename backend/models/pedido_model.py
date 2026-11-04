@@ -5,6 +5,15 @@ from datetime import datetime
 # são gravados como ItemPedido; ao finalizar, o status vira "Pendente".
 STATUS_CARRINHO = "Carrinho"
 
+# Como cada status aparece para o usuário (o front-end mostra este texto)
+STATUS_TEXTO = {
+    "Carrinho": "Carrinho",
+    "Pendente": "Em preparo",
+    "Pronto": "Pronto para retirar",
+    "Concluído": "Entregue",
+    "Cancelado": "Cancelado",
+}
+
 class Pedido(db.Model):
     __tablename__ = "pedido"
 
@@ -68,14 +77,18 @@ class Pedido(db.Model):
             'id_pedido': self.id_pedido,
             'data_hora_criacao': self.data_hora_criacao.isoformat() if self.data_hora_criacao else None,
             'status': self.status,
+            'status_texto': STATUS_TEXTO.get(self.status, self.status),
             'valor_total': self.valor_total,
-            'codigo': self.codigo,
+            # Código de retirada; pedidos de antes do código existir mostram o número ("#12")
+            'codigo': self.codigo or f"#{self.id_pedido}",
             'horario_agendado_retirada': self.horario_agendado_retirada.isoformat() if self.horario_agendado_retirada else None,
             'data_hora_retirada': self.data_hora_retirada.isoformat() if self.data_hora_retirada else None,
             'id_aluno': self.id_aluno,
             # Se o aluno ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'aluno_nome': self.aluno.nome if self.aluno else (self.nome_aluno or 'Aluno removido'),
             'itens': [item.to_dict() for item in self.itens],
+            # Total de unidades (o carrinho mostra no botão do topo)
+            'quantidade_itens': sum(item.quantidade for item in self.itens),
             # A tela "Meus pedidos" usa para mostrar o botão "Avaliar" só uma vez
             'avaliado': self.avaliacao is not None
         }

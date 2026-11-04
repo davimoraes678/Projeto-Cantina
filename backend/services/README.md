@@ -60,12 +60,12 @@ O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO`
 
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
-| `listar_pedidos_service.py` | `ListarPedidosService` | Listar os pedidos, sem os carrinhos (admin/mestre) |
+| `listar_pedidos_service.py` | `ListarPedidosService` | Listar os pedidos já separados em `preparo`, `prontos` e `historico` (tela do admin) |
 | `buscar_pedido_service.py` | `BuscarPedidoService` | Ver um pedido (o dono, ou admin/mestre) |
 | `marcar_pronto_service.py` | `MarcarProntoService` | Marcar como `"Pronto"`: o aluno vê que pode retirar (só pedidos `Pendente`) |
 | `concluir_pedido_service.py` | `ConcluirPedidoService` | Marcar como `"Concluído"` quando o aluno retira no balcão (vai para o histórico como "Entregue") |
 | `cancelar_pedido_service.py` | `CancelarPedidoService` | Marcar como `"Cancelado"`, **devolvendo o valor para a carteira do aluno e os produtos para o estoque** |
-| `listar_meus_pedidos_service.py` | `ListarMeusPedidosService` | Os pedidos do aluno logado, sem o carrinho, o mais recente primeiro (página "Meus pedidos") |
+| `listar_meus_pedidos_service.py` | `ListarMeusPedidosService` | Os pedidos do aluno logado já separados em `andamento` e `historico`, o mais recente primeiro (página "Meus pedidos") |
 | `combinacoes_mais_pedidas_service.py` | `CombinacoesMaisPedidasService` | As 3 duplas de produtos mais pedidas juntas (procedure `sp_combinacoes_mais_pedidas`; fora do MySQL, pelo ORM) |
 
 ## `avaliacao/`

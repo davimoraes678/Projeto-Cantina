@@ -27,10 +27,10 @@ async function iniciar() {
 // 1. PEDIDOS E HISTÓRICO
 // =============================================================================
 
-// Busca todos os pedidos (GET /pedidos) e separa em três listas:
-//   - Em preparo (botão "Pronto")
-//   - Prontos para retirar (botão "Entregar")
-//   - Histórico: entregues e cancelados, o mais novo primeiro
+// Busca os pedidos (GET /pedidos). O back-end já manda separado em três listas:
+//   - preparo: em preparo (botão "Pronto")
+//   - prontos: prontos para retirar (botão "Entregar")
+//   - historico: entregues e cancelados, o mais novo primeiro
 async function carregarPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos`);
@@ -38,20 +38,16 @@ async function carregarPedidos() {
     const pedidos = await res.json();
 
     let htmlPreparo = "";
+    pedidos.preparo.forEach((pedido) => {
+      htmlPreparo += cardPedidoAdmin(pedido);
+    });
     let htmlProntos = "";
+    pedidos.prontos.forEach((pedido) => {
+      htmlProntos += cardPedidoAdmin(pedido);
+    });
     let htmlHistorico = "";
-    let emPreparo = 0;
-    let prontos = 0;
-    pedidos.forEach((pedido) => {
-      if (pedido.status === "Pendente") {
-        htmlPreparo += cardPedidoAdmin(pedido);
-        emPreparo++;
-      } else if (pedido.status === "Pronto") {
-        htmlProntos += cardPedidoAdmin(pedido);
-        prontos++;
-      } else {
-        htmlHistorico = linhaHistorico(pedido) + htmlHistorico; // na frente: o mais novo fica em cima
-      }
+    pedidos.historico.forEach((pedido) => {
+      htmlHistorico += linhaHistorico(pedido);
     });
 
     if (htmlPreparo === "") htmlPreparo = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
@@ -62,9 +58,10 @@ async function carregarPedidos() {
     document.getElementById("lista-historico-admin").innerHTML = htmlHistorico;
 
     // Números nas colunas, no menu e no título da aba do navegador ("(3) Administração")
-    const esperando = emPreparo + prontos;
+    const emPreparo = pedidos.preparo.length;
+    const esperando = emPreparo + pedidos.prontos.length;
     document.getElementById("contador-preparo").textContent = emPreparo;
-    document.getElementById("contador-prontos").textContent = prontos;
+    document.getElementById("contador-prontos").textContent = pedidos.prontos.length;
     const contador = document.getElementById("contador-pedidos-admin");
     contador.textContent = esperando;
     if (esperando > 0) {
@@ -89,30 +86,26 @@ async function carregarPedidos() {
 //   Pendente -> "Pronto" (avisa o aluno que já pode retirar)
 //   Pronto   -> "Entregar" (o aluno retirou no balcão: fecha o pedido)
 function cardPedidoAdmin(pedido) {
-  const codigo = pedido.codigo || `#${pedido.id_pedido}`;
-
   let itens = "";
   pedido.itens.forEach((item) => {
     itens += `<li>${item.quantidade}x ${escaparTexto(item.produto_nome)}</li>`;
   });
 
-  let selo = `<span class="badge rounded-pill text-bg-warning">Em preparo</span>`;
+  let cor = "warning";
   let botao = `<button class="btn btn-warning rounded-pill" type="button" onclick="marcarPronto(${pedido.id_pedido})">Pronto</button>`;
-  let borda = "border-warning";
   if (pedido.status === "Pronto") {
-    selo = `<span class="badge rounded-pill text-bg-success">Esperando retirada</span>`;
+    cor = "success";
     botao = `<button class="btn btn-success rounded-pill" type="button" onclick="entregarPedido(${pedido.id_pedido})">Entregar</button>`;
-    borda = "border-success";
   }
 
   return `
-    <div class="card border-0 border-start border-4 ${borda} shadow-sm rounded-4">
+    <div class="card border-0 border-start border-4 border-${cor} shadow-sm rounded-4">
       <div class="card-body d-flex flex-column">
         <div class="d-flex justify-content-between">
           <small class="text-body-secondary">Código de retirada</small>
-          ${selo}
+          <span class="badge rounded-pill text-bg-${cor}">${pedido.status_texto}</span>
         </div>
-        <p class="fs-2 fw-bold font-monospace lh-1 mb-2">${codigo}</p>
+        <p class="fs-2 fw-bold font-monospace lh-1 mb-2">${pedido.codigo}</p>
         <p class="fw-semibold mb-1">${escaparTexto(pedido.aluno_nome)}
           <small class="text-body-secondary fw-normal">· ${new Date(pedido.data_hora_criacao + "Z").toLocaleString("pt-BR")}</small></p>
         <ul class="small mb-3 ps-3">${itens}</ul>
@@ -127,26 +120,22 @@ function cardPedidoAdmin(pedido) {
 
 // Linha do histórico: aluno, código, itens, status, total e data.
 function linhaHistorico(pedido) {
-  const codigo = pedido.codigo || `#${pedido.id_pedido}`;
-
   let itens = "";
   pedido.itens.forEach((item) => {
     itens += `${item.quantidade}x ${escaparTexto(item.produto_nome)}<br>`;
   });
 
-  let selo = `<span class="badge rounded-pill text-bg-success">Entregue</span>`;
-  if (pedido.status === "Cancelado") {
-    selo = `<span class="badge rounded-pill text-bg-secondary">Cancelado</span>`;
-  }
+  let cor = "success";
+  if (pedido.status === "Cancelado") cor = "secondary";
 
   return `
     <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
       <div>
-        <div class="fw-semibold">${escaparTexto(pedido.aluno_nome)} <small class="text-body-secondary fw-normal">${codigo}</small></div>
+        <div class="fw-semibold">${escaparTexto(pedido.aluno_nome)} <small class="text-body-secondary fw-normal">${pedido.codigo}</small></div>
         <small class="text-body-secondary">${itens}</small>
       </div>
       <div class="text-end text-nowrap">
-        ${selo}
+        <span class="badge rounded-pill text-bg-${cor}">${pedido.status_texto}</span>
         <div class="fw-semibold">${formatarPreco(pedido.valor_total)}</div>
         <small class="text-body-secondary">${new Date(pedido.data_hora_criacao + "Z").toLocaleString("pt-BR")}</small>
       </div>

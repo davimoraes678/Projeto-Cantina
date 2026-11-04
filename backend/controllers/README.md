@@ -38,7 +38,7 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **"login" = exige login
 | `POST` | `/registro` | | `{nome, email, senha}` | `201` cadastrado **e logado** · `400` faltou campo · `409` e-mail já existe |
 | `POST` | `/login` | | `{email, senha}` | `200` logado · `400` faltou campo · `401` e-mail ou senha errados |
 | `POST` | `/logout` | login | — | `200` |
-| `GET` | `/atual` | login | — | `200` aluno logado |
+| `GET` | `/atual` | login | — | `200` aluno logado: `{id_aluno, nome, primeiro_nome, iniciais, email, saldo, funcao}` |
 | `PUT` | `/atual` | login | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` |
 | `DELETE` | `/atual` | login | — | `200` conta excluída |
 | `POST` | `/atual/recarga` | login | `{valor}` | `200` saldo novo · `400` fora de R$ 0,01 a R$ 500,00 |
@@ -80,7 +80,8 @@ Formato do carrinho (igual ao de um pedido):
 
 ```json
 {
-  "id_pedido": 3, "status": "Carrinho", "valor_total": 17.5,
+  "id_pedido": 3, "status": "Carrinho", "status_texto": "Carrinho", "valor_total": 17.5,
+  "codigo": "#3", "quantidade_itens": 2,
   "id_aluno": 1, "aluno_nome": "Ana",
   "data_hora_criacao": "2026-10-13T10:00:00",
   "horario_agendado_retirada": null, "data_hora_retirada": null,
@@ -92,12 +93,16 @@ Formato do carrinho (igual ao de um pedido):
 }
 ```
 
+- `codigo`: o código de retirada (ex.: `"4K9P"`). Pedidos sem código mostram o número (`"#3"`).
+- `status_texto`: o status como aparece na tela: `Pendente` → "Em preparo", `Pronto` → "Pronto para retirar", `Concluído` → "Entregue", `Cancelado` → "Cancelado".
+- `quantidade_itens`: soma das quantidades de todos os itens.
+
 ### `pedido_controller.py` — `/api/pedidos`
 
 | Método | Rota | | O que faz |
 |---|---|---|---|
-| `GET` | `` (raiz) | admin ou mestre | Lista os pedidos (**sem** os carrinhos em aberto) |
-| `GET` | `/meus` | login | Os pedidos do aluno logado (sem o carrinho), o mais recente primeiro |
+| `GET` | `` (raiz) | admin ou mestre | Os pedidos, já separados para a tela do admin: `{preparo: [...], prontos: [...], historico: [...]}`. `preparo` e `prontos` do mais antigo para o mais novo; `historico` (entregues e cancelados) do mais novo para o mais antigo |
+| `GET` | `/meus` | login | Os pedidos do aluno logado, já separados: `{andamento: [...], historico: [...]}` (em preparo e prontos / entregues e cancelados), o mais recente primeiro |
 | `GET` | `/combinacoes` | login | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
 | `GET` | `/<id>` | login | Um pedido (só o dono ou admin/mestre; senão `404`) |
 | `POST` | `/<id>/pronto` | admin ou mestre | Marca como `"Pronto"` (o aluno vê "Pronto para retirar") · `400` se não estiver `Pendente` |

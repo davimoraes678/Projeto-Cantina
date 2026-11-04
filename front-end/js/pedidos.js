@@ -9,8 +9,8 @@ let pedidoAvaliando = null; // pedido que a janela de avaliação está avaliand
 alunoInf();
 carregarMeusPedidos();
 
-// Busca os pedidos do aluno (GET /pedidos/meus, o mais recente primeiro) e
-// coloca cada um na aba certa.
+// Busca os pedidos do aluno (GET /pedidos/meus). O back-end já manda separado:
+// { andamento: [...], historico: [...] }, o mais recente primeiro.
 async function carregarMeusPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/meus`);
@@ -18,15 +18,12 @@ async function carregarMeusPedidos() {
     const pedidos = await res.json();
 
     let htmlAndamento = "";
+    pedidos.andamento.forEach((pedido) => {
+      htmlAndamento += cardPedido(pedido);
+    });
     let htmlHistorico = "";
-    let emAndamento = 0;
-    pedidos.forEach((pedido) => {
-      if (pedido.status === "Pendente" || pedido.status === "Pronto") {
-        htmlAndamento += cardPedido(pedido);
-        emAndamento++;
-      } else {
-        htmlHistorico += cardPedido(pedido);
-      }
+    pedidos.historico.forEach((pedido) => {
+      htmlHistorico += cardPedido(pedido);
     });
 
     if (htmlAndamento === "") htmlAndamento = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
@@ -36,8 +33,8 @@ async function carregarMeusPedidos() {
 
     // Número na aba "Em andamento"
     const contador = document.getElementById("contador-andamento");
-    contador.textContent = emAndamento;
-    if (emAndamento > 0) {
+    contador.textContent = pedidos.andamento.length;
+    if (pedidos.andamento.length > 0) {
       contador.classList.remove("d-none");
     } else {
       contador.classList.add("d-none");
@@ -47,26 +44,17 @@ async function carregarMeusPedidos() {
   }
 }
 
-// HTML do card de um pedido. O texto, a cor e os botões mudam conforme o status:
-//   Pendente  -> "Em preparo" (amarelo)
-//   Pronto    -> "Pronto para retirar" (verde), com o código para mostrar no balcão
-//   Concluído -> "Entregue" (cinza), com "Avaliar" e "Pedir de novo"
-//   Cancelado -> "Cancelado" (vermelho), com "Pedir de novo"
+// HTML do card de um pedido. O texto do status vem pronto do back-end
+// (status_texto); aqui só escolhemos a cor e os botões:
+//   Pendente  -> amarelo
+//   Pronto    -> verde, com o código para mostrar no balcão
+//   Concluído -> cinza, com "Avaliar" e "Pedir de novo"
+//   Cancelado -> vermelho, com "Pedir de novo"
 function cardPedido(pedido) {
-  const codigo = pedido.codigo || `#${pedido.id_pedido}`;
-
-  let texto = "Em preparo";
   let cor = "warning";
-  if (pedido.status === "Pronto") {
-    texto = "Pronto para retirar";
-    cor = "success";
-  } else if (pedido.status === "Concluído") {
-    texto = "Entregue";
-    cor = "secondary";
-  } else if (pedido.status === "Cancelado") {
-    texto = "Cancelado";
-    cor = "danger";
-  }
+  if (pedido.status === "Pronto") cor = "success";
+  if (pedido.status === "Concluído") cor = "secondary";
+  if (pedido.status === "Cancelado") cor = "danger";
 
   // Itens: "2x Coxinha ... R$ 13,00"
   let itens = "";
@@ -81,7 +69,7 @@ function cardPedido(pedido) {
   // Pronto: aviso para o aluno ir buscar
   let retirar = "";
   if (pedido.status === "Pronto") {
-    retirar = `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${codigo}</strong>.</div>`;
+    retirar = `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${pedido.codigo}</strong>.</div>`;
   }
 
   // Botões do rodapé (só para pedidos que já terminaram)
@@ -101,10 +89,10 @@ function cardPedido(pedido) {
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
-            <h2 class="h6 fw-bold mb-0">Pedido ${codigo}</h2>
+            <h2 class="h6 fw-bold mb-0">Pedido ${pedido.codigo}</h2>
             <small class="text-body-secondary">${new Date(pedido.data_hora_criacao + "Z").toLocaleString("pt-BR")}</small>
           </div>
-          <span class="badge rounded-pill text-bg-${cor}">${texto}</span>
+          <span class="badge rounded-pill text-bg-${cor}">${pedido.status_texto}</span>
         </div>
         ${retirar}
         <ul class="list-unstyled small mb-2">${itens}</ul>

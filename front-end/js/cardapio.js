@@ -6,23 +6,19 @@
 //   4. Aviso de pedido em andamento
 // =============================================================================
 
-let saldo = 0;            // saldo do aluno (para avisar quando não dá para pagar)
 let categoriaAtual = "";  // categoria escolhida nos botões ("" = todas)
 let produtos = [];        // produtos que estão na tela (a janela de detalhes usa)
 let produtoAberto = null; // id do produto mostrado na janela de detalhes
 
 iniciar();
 
-// Ao abrir a página: carrega tudo
-async function iniciar() {
+// Ao abrir a página: carrega tudo (ao mesmo tempo)
+function iniciar() {
+  alunoInf();
   carregarProdutos();
   carregarCombinacoes();
-  verificarPedidoAndamento();
-
-  // O carrinho precisa do saldo, então espera os dados do aluno chegarem
-  const aluno = await alunoInf();
-  if (aluno) saldo = aluno.saldo;
   carregarCarrinho();
+  verificarPedidoAndamento();
 
   // Veio do botão "Pedir de novo" (endereço /#carrinho): já abre o carrinho
   if (window.location.hash === "#carrinho") {
@@ -289,13 +285,12 @@ async function removerItemDoCarrinho(id_item_pedido) {
   }
 }
 
-// Mostra o carrinho: itens, total, aviso de saldo, número no botão do topo e a
-// barra "Ver carrinho" do celular.
+// Mostra o carrinho: itens, total, número no botão do topo e a barra "Ver carrinho"
+// do celular. O back-end já manda o total (valor_total) e a quantidade (quantidade_itens).
 function renderizarCarrinho(carrinho) {
+  const quantidade = carrinho.quantidade_itens;
   let html = "";
-  let quantidade = 0;
   carrinho.itens.forEach((item) => {
-    quantidade += item.quantidade;
     html += `
       <li class="list-group-item px-0 d-flex align-items-center gap-2">
         <span class="badge rounded-pill text-bg-light border">${item.quantidade}x</span>
@@ -324,13 +319,6 @@ function renderizarCarrinho(carrinho) {
   contador.textContent = quantidade;
   document.getElementById("barra-carrinho-texto").textContent =
     `Ver carrinho (${quantidade}) · ${formatarPreco(carrinho.valor_total)}`;
-
-  // Aviso de saldo insuficiente
-  if (carrinho.valor_total > saldo) {
-    document.getElementById("aviso-saldo").classList.remove("d-none");
-  } else {
-    document.getElementById("aviso-saldo").classList.add("d-none");
-  }
 }
 
 // Botão "Repetir último pedido": POST /carrinho/repetir (procedure no back-end)
@@ -350,7 +338,8 @@ async function repetirUltimoPedido() {
 }
 
 // Botão "Finalizar pedido": POST /carrinho/finalizar. O back-end confere estoque
-// e saldo, desconta os dois e gera o código de retirada.
+// e saldo (se faltar, a mensagem de erro aparece no alert), desconta os dois e
+// gera o código de retirada.
 async function finalizarPedido() {
   try {
     const res = await fetch(`${API_BASE_URL}/carrinho/finalizar`, { method: "POST" });
@@ -362,12 +351,11 @@ async function finalizarPedido() {
 
     // Fecha o carrinho e mostra a janela com o código de retirada
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("carrinho")).hide();
-    document.getElementById("pedido-feito-codigo").textContent = pedido.codigo || `#${pedido.id_pedido}`;
+    document.getElementById("pedido-feito-codigo").textContent = pedido.codigo;
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-pedido-feito")).show();
 
     // Atualiza o resto da tela: saldo, estoque, carrinho vazio e o aviso do pedido
-    const aluno = await alunoInf();
-    if (aluno) saldo = aluno.saldo;
+    alunoInf();
     carregarProdutos();
     carregarCarrinho();
     verificarPedidoAndamento();
@@ -380,26 +368,20 @@ async function finalizarPedido() {
 // 4. AVISO DE PEDIDO EM ANDAMENTO (faixa amarela no topo)
 // =============================================================================
 
-// Busca os pedidos do aluno (GET /pedidos/meus) e mostra o aviso se algum
-// estiver em preparo ou pronto para retirar.
+// Busca os pedidos do aluno (GET /pedidos/meus) e, se algum estiver em andamento,
+// mostra o aviso: "Pedido 4K9P: Em preparo" ou "Pedido 4K9P: Pronto para retirar".
 async function verificarPedidoAndamento() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/meus`);
     if (!res.ok) return;
     const pedidos = await res.json();
-    const pedido = pedidos.find((p) => p.status === "Pendente" || p.status === "Pronto");
-
     const aviso = document.getElementById("aviso-pedido");
-    if (!pedido) {
+    if (pedidos.andamento.length === 0) {
       aviso.classList.add("d-none");
       return;
     }
-    const codigo = pedido.codigo || `#${pedido.id_pedido}`;
-    if (pedido.status === "Pronto") {
-      document.getElementById("aviso-pedido-texto").textContent = `Pedido ${codigo} pronto! Retire no balcão`;
-    } else {
-      document.getElementById("aviso-pedido-texto").textContent = `Pedido ${codigo} em preparo`;
-    }
+    const pedido = pedidos.andamento[0]; // o mais recente
+    document.getElementById("aviso-pedido-texto").textContent = `Pedido ${pedido.codigo}: ${pedido.status_texto}`;
     aviso.classList.remove("d-none");
   } catch (erro) {
     console.error("Erro ao verificar pedidos:", erro);

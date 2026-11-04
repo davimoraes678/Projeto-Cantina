@@ -4,13 +4,21 @@ from backend.models.pedido_model import Pedido, STATUS_CARRINHO
 
 
 class ListarMeusPedidosService:
-    """Caso de uso: o aluno logado vê os próprios pedidos (tela "Meus pedidos")."""
+    """Caso de uso: o aluno logado vê os próprios pedidos (tela "Meus pedidos").
+
+    Devolve duas listas, o mais recente primeiro:
+      - andamento: "Pendente" e "Pronto"
+      - historico: "Concluído" e "Cancelado"
+    """
 
     @staticmethod
     def executar():
-        # O carrinho ainda não é um pedido feito; o mais recente vem primeiro
+        # O carrinho ainda não é um pedido feito, então não aparece
         pedidos = (Pedido.query
                    .filter(Pedido.id_aluno == current_user.id_aluno, Pedido.status != STATUS_CARRINHO)
                    .order_by(Pedido.id_pedido.desc())
                    .all())
-        return [pedido.to_dict() for pedido in pedidos], 200
+        return {
+            "andamento": [p.to_dict() for p in pedidos if p.status in ("Pendente", "Pronto")],
+            "historico": [p.to_dict() for p in pedidos if p.status in ("Concluído", "Cancelado")],
+        }, 200

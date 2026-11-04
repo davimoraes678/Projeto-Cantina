@@ -16,16 +16,10 @@ async function alunoInf() {
     if (!res.ok) return null; // não está logado
     const aluno = await res.json();
 
-    // "Davi Moraes" -> primeiro nome "Davi" e iniciais "DM"
-    const nomes = aluno.nome.split(" ");
-    const primeiroNome = nomes[0];
-    let iniciais = nomes[0][0];
-    if (nomes.length > 1) iniciais += nomes[nomes.length - 1][0];
-    iniciais = iniciais.toUpperCase();
-
+    // O back-end já manda o primeiro nome e as iniciais ("Davi" e "DM")
     document.querySelectorAll(".nome-aluno").forEach((el) => (el.textContent = aluno.nome));
-    document.querySelectorAll(".primeiro-nome-aluno").forEach((el) => (el.textContent = primeiroNome));
-    document.querySelectorAll(".iniciais-aluno").forEach((el) => (el.textContent = iniciais));
+    document.querySelectorAll(".primeiro-nome-aluno").forEach((el) => (el.textContent = aluno.primeiro_nome));
+    document.querySelectorAll(".iniciais-aluno").forEach((el) => (el.textContent = aluno.iniciais));
     document.querySelectorAll(".email-aluno").forEach((el) => (el.textContent = aluno.email));
     document.querySelectorAll(".saldo-aluno").forEach((el) => (el.textContent = formatarPreco(aluno.saldo)));
     document.querySelectorAll(".funcao-aluno").forEach((el) => (el.textContent = aluno.funcao));

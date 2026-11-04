@@ -4,9 +4,10 @@
 
 preencherFormulario();
 
-// Mostra os dados do aluno na página e já deixa o formulário "Editar dados" preenchido.
+// Mostra os dados do aluno na página e deixa o formulário "Editar dados" preenchido.
 async function preencherFormulario() {
-  const aluno = await carregarAluno();
+  const aluno = await alunoInf();
+  if (!aluno) return;
   document.getElementById("aluno-nome").value = aluno.nome;
   document.getElementById("aluno-email").value = aluno.email;
 }
@@ -14,25 +15,45 @@ async function preencherFormulario() {
 // "Salvar": PUT /alunos/atual. Senha em branco = continua a mesma.
 document.getElementById("form-editar-aluno").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const dados = {
+  const corpo = {
     nome: document.getElementById("aluno-nome").value,
     email: document.getElementById("aluno-email").value,
   };
   const senha = document.getElementById("aluno-senha").value;
-  if (senha) dados.senha = senha;
+  if (senha) corpo.senha = senha;
 
-  const resposta = await api("/alunos/atual", "PUT", dados);
-  if (!resposta.ok) return avisar(resposta.dados.erro || "Não foi possível salvar.", "erro");
-
-  document.getElementById("aluno-senha").value = "";
-  bootstrap.Collapse.getOrCreateInstance("#form-editar-dados").hide(); // fecha o "Editar dados"
-  carregarAluno(); // mostra o nome novo na página
-  avisar("Dados atualizados");
+  try {
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(corpo),
+    });
+    if (!res.ok) {
+      const erro = await res.json();
+      alert(erro.erro || "Não foi possível salvar os dados.");
+      return;
+    }
+    document.getElementById("aluno-senha").value = "";
+    bootstrap.Collapse.getOrCreateInstance(document.getElementById("form-editar-dados")).hide(); // fecha o "Editar dados"
+    alunoInf(); // mostra o nome novo
+    avisar("Dados atualizados");
+  } catch (erro) {
+    console.error("Erro ao editar dados:", erro);
+  }
 });
 
 // "Remover minha conta": DELETE /alunos/atual. Os pedidos continuam no histórico.
-async function removerConta() {
+async function removerAluno() {
   if (!confirm("Remover sua conta? Seus pedidos continuam no histórico da cantina.")) return;
-  const { ok } = await api("/alunos/atual", "DELETE");
-  if (ok) window.location.href = "/front-end/login.html";
+  try {
+    const res = await fetch(`${API_BASE_URL}/alunos/atual`, { method: "DELETE" });
+    if (!res.ok) {
+      const erro = await res.json();
+      alert(erro.erro || "Não foi possível remover a conta.");
+      return;
+    }
+    window.location.href = "/front-end/login.html";
+  } catch (erro) {
+    console.error("Erro ao remover conta:", erro);
+  }
 }

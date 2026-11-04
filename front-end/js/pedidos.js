@@ -1,97 +1,115 @@
 // =============================================================================
 // pedidos.js: "Meus pedidos" do aluno (pedidos.html).
-//   - aba "Em andamento": em preparo e prontos para retirar
+//   - aba "Em andamento": pedidos em preparo e prontos para retirar
 //   - aba "Histórico": entregues e cancelados, com "Pedir de novo" e "Avaliar"
 // =============================================================================
 
 let pedidoAvaliando = null; // pedido que a janela de avaliação está avaliando
 
-carregarAluno();
+alunoInf();
 carregarMeusPedidos();
 
-// GET /pedidos/meus (o mais recente primeiro) e separa nas duas abas.
+// Busca os pedidos do aluno (GET /pedidos/meus, o mais recente primeiro) e
+// coloca cada um na aba certa.
 async function carregarMeusPedidos() {
-  const { ok, dados: pedidos } = await api("/pedidos/meus");
-  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/meus`);
+    if (!res.ok) return;
+    const pedidos = await res.json();
 
-  const andamento = pedidos.filter((p) => p.status === "Pendente" || p.status === "Pronto");
-  const historico = pedidos.filter((p) => p.status === "Concluído" || p.status === "Cancelado");
+    let htmlAndamento = "";
+    let htmlHistorico = "";
+    let emAndamento = 0;
+    pedidos.forEach((pedido) => {
+      if (pedido.status === "Pendente" || pedido.status === "Pronto") {
+        htmlAndamento += cardPedido(pedido);
+        emAndamento++;
+      } else {
+        htmlHistorico += cardPedido(pedido);
+      }
+    });
 
-  // Para cada pedido, acrescenta o card dele na aba certa
-  const listaAndamento = document.getElementById("lista-andamento");
-  let htmlAndamento = "";
-  andamento.forEach((pedido) => {
-    htmlAndamento += cardPedido(pedido);
-  });
-  listaAndamento.innerHTML = htmlAndamento; // escreve na tela uma vez só
-  if (andamento.length === 0) listaAndamento.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
+    if (htmlAndamento === "") htmlAndamento = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
+    if (htmlHistorico === "") htmlHistorico = `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
+    document.getElementById("lista-andamento").innerHTML = htmlAndamento;
+    document.getElementById("lista-historico").innerHTML = htmlHistorico;
 
-  const listaHistorico = document.getElementById("lista-historico");
-  let htmlHistorico = "";
-  historico.forEach((pedido) => {
-    htmlHistorico += cardPedido(pedido);
-  });
-  listaHistorico.innerHTML = htmlHistorico; // escreve na tela uma vez só
-  if (historico.length === 0) listaHistorico.innerHTML = `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
-
-  const contador = document.getElementById("contador-andamento");
-  contador.textContent = andamento.length;
-  contador.classList.toggle("d-none", andamento.length === 0);
+    // Número na aba "Em andamento"
+    const contador = document.getElementById("contador-andamento");
+    contador.textContent = emAndamento;
+    if (emAndamento > 0) {
+      contador.classList.remove("d-none");
+    } else {
+      contador.classList.add("d-none");
+    }
+  } catch (erro) {
+    console.error("Erro ao carregar pedidos:", erro);
+  }
 }
 
-// Como cada status aparece: texto e cor (do selo e da faixa do card).
-// Caminho de um pedido: Pendente -> Pronto -> Concluído (ou Cancelado).
-const STATUS = {
-  Pendente: { texto: "Em preparo", cor: "warning" },
-  Pronto: { texto: "Pronto para retirar", cor: "success" },
-  "Concluído": { texto: "Entregue", cor: "secondary" },
-  Cancelado: { texto: "Cancelado", cor: "danger" },
-};
-
-// HTML do card de um pedido. Os botões mudam conforme o status.
+// HTML do card de um pedido. O texto, a cor e os botões mudam conforme o status:
+//   Pendente  -> "Em preparo" (amarelo)
+//   Pronto    -> "Pronto para retirar" (verde), com o código para mostrar no balcão
+//   Concluído -> "Entregue" (cinza), com "Avaliar" e "Pedir de novo"
+//   Cancelado -> "Cancelado" (vermelho), com "Pedir de novo"
 function cardPedido(pedido) {
-  const status = STATUS[pedido.status];
+  const codigo = pedido.codigo || `#${pedido.id_pedido}`;
 
+  let texto = "Em preparo";
+  let cor = "warning";
+  if (pedido.status === "Pronto") {
+    texto = "Pronto para retirar";
+    cor = "success";
+  } else if (pedido.status === "Concluído") {
+    texto = "Entregue";
+    cor = "secondary";
+  } else if (pedido.status === "Cancelado") {
+    texto = "Cancelado";
+    cor = "danger";
+  }
+
+  // Itens: "2x Coxinha ... R$ 13,00"
   let itens = "";
   pedido.itens.forEach((item) => {
     itens += `
-    <li class="d-flex justify-content-between">
-      <span>${item.quantidade}x ${escapeHtml(item.produto_nome)}</span>
-      <span class="text-body-secondary">${reais(item.subtotal)}</span>
-    </li>`;
+      <li class="d-flex justify-content-between">
+        <span>${item.quantidade}x ${escaparTexto(item.produto_nome)}</span>
+        <span class="text-body-secondary">${formatarPreco(item.subtotal)}</span>
+      </li>`;
   });
 
-  // Pronto: destaque para o aluno ir buscar, com o código que ele mostra no balcão
-  const retirar = pedido.status === "Pronto"
-    ? `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${escapeHtml(codigoPedido(pedido))}</strong>.</div>`
-    : "";
+  // Pronto: aviso para o aluno ir buscar
+  let retirar = "";
+  if (pedido.status === "Pronto") {
+    retirar = `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${codigo}</strong>.</div>`;
+  }
 
-  // Botões do rodapé: só pedidos que já terminaram
+  // Botões do rodapé (só para pedidos que já terminaram)
   let botoes = "";
-  if (pedido.status === "Concluído" || pedido.status === "Cancelado") {
-    botoes = `<button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">Pedir de novo</button>`;
+  if (pedido.status === "Cancelado") {
+    botoes += `<small class="text-body-secondary me-auto">Valor devolvido à carteira</small>`;
   }
   if (pedido.status === "Concluído" && !pedido.avaliado) {
-    botoes = `<button class="btn btn-warning btn-sm rounded-pill" type="button" onclick="abrirAvaliacao(${pedido.id_pedido})">Avaliar</button> ` + botoes;
+    botoes += `<button class="btn btn-warning btn-sm rounded-pill" type="button" onclick="abrirAvaliacao(${pedido.id_pedido})">Avaliar</button>`;
   }
-  if (pedido.status === "Cancelado") {
-    botoes = `<small class="text-body-secondary me-auto">Valor devolvido à carteira</small> ` + botoes;
+  if (pedido.status === "Concluído" || pedido.status === "Cancelado") {
+    botoes += `<button class="btn btn-outline-primary btn-sm rounded-pill" type="button" onclick="pedirDeNovo(${pedido.id_pedido})">Pedir de novo</button>`;
   }
 
   return `
-    <div class="card border-0 border-start border-4 border-${status.cor} shadow-sm rounded-4 mb-3">
+    <div class="card border-0 border-start border-4 border-${cor} shadow-sm rounded-4 mb-3">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div>
-            <h2 class="h6 fw-bold mb-0">Pedido ${escapeHtml(codigoPedido(pedido))}</h2>
-            <small class="text-body-secondary">${formatarData(pedido.data_hora_criacao)}</small>
+            <h2 class="h6 fw-bold mb-0">Pedido ${codigo}</h2>
+            <small class="text-body-secondary">${new Date(pedido.data_hora_criacao + "Z").toLocaleString("pt-BR")}</small>
           </div>
-          <span class="badge rounded-pill text-bg-${status.cor}">${status.texto}</span>
+          <span class="badge rounded-pill text-bg-${cor}">${texto}</span>
         </div>
         ${retirar}
         <ul class="list-unstyled small mb-2">${itens}</ul>
         <div class="d-flex flex-wrap align-items-center gap-2 border-top pt-2">
-          <span class="fw-bold me-auto">${reais(pedido.valor_total)}</span>
+          <span class="fw-bold me-auto">${formatarPreco(pedido.valor_total)}</span>
           ${botoes}
         </div>
       </div>
@@ -101,27 +119,47 @@ function cardPedido(pedido) {
 // "Pedir de novo": POST /carrinho/repetir/<id> coloca os mesmos itens no carrinho
 // e leva para o cardápio com o carrinho aberto.
 async function pedirDeNovo(id_pedido) {
-  const { ok, dados } = await api(`/carrinho/repetir/${id_pedido}`, "POST");
-  if (!ok) return avisar(dados.erro || "Não foi possível repetir o pedido.", "erro");
-  window.location.href = "/#carrinho";
+  try {
+    const res = await fetch(`${API_BASE_URL}/carrinho/repetir/${id_pedido}`, { method: "POST" });
+    if (!res.ok) {
+      const erro = await res.json();
+      alert(erro.erro || "Não foi possível repetir o pedido.");
+      return;
+    }
+    window.location.href = "/#carrinho";
+  } catch (erro) {
+    console.error("Erro ao repetir pedido:", erro);
+  }
 }
 
 // "Avaliar": abre a janela de avaliação (nota de 1 a 5 e comentário).
 function abrirAvaliacao(id_pedido) {
   pedidoAvaliando = id_pedido;
   document.getElementById("form-avaliacao").reset();
-  bootstrap.Modal.getOrCreateInstance("#modal-avaliacao").show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-avaliacao")).show();
 }
 
-// Envio da avaliação: POST /pedidos/<id>/avaliacao
+// Envio da avaliação: POST /pedidos/<id>/avaliacao com { nota, comentario }
 document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const { ok, dados } = await api(`/pedidos/${pedidoAvaliando}/avaliacao`, "POST", {
-    nota: Number(document.querySelector('input[name="nota"]:checked').value),
-    comentario: document.getElementById("avaliacao-comentario").value,
-  });
-  bootstrap.Modal.getInstance("#modal-avaliacao").hide();
-  if (!ok) return avisar(dados.erro || "Não foi possível enviar a avaliação.", "erro");
-  avisar("Obrigado pela avaliação!");
-  carregarMeusPedidos(); // some o botão "Avaliar"
+  const nota = Number(document.querySelector('input[name="nota"]:checked').value);
+  const comentario = document.getElementById("avaliacao-comentario").value;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/${pedidoAvaliando}/avaliacao`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nota, comentario }),
+    });
+    bootstrap.Modal.getInstance(document.getElementById("modal-avaliacao")).hide();
+    if (!res.ok) {
+      const erro = await res.json();
+      alert(erro.erro || "Não foi possível enviar a avaliação.");
+      return;
+    }
+    avisar("Obrigado pela avaliação!");
+    carregarMeusPedidos(); // some o botão "Avaliar"
+  } catch (erro) {
+    console.error("Erro ao avaliar:", erro);
+  }
 });

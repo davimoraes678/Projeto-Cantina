@@ -25,7 +25,7 @@
             </ul>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg><span data-aluno="saldo">R$ 0,00</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg><span class="saldo-aluno">R$ 0,00</span>
                 </a>
                 <!-- Sair (no celular e no tablet fica na página Perfil) -->
                 <button class="btn btn-outline-light rounded-pill d-none d-lg-inline-flex align-items-center gap-1 btn-logout" type="button">
@@ -39,11 +39,11 @@
         <!-- Cabeçalho do perfil: iniciais, nome, e-mail e função -->
         <section class="card border-0 shadow-sm rounded-4 mb-3">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-warning text-danger-emphasis fw-bold fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 64px; height: 64px;" data-aluno="iniciais">A</div>
+                <div class="iniciais-aluno rounded-circle bg-warning text-danger-emphasis fw-bold fs-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 64px; height: 64px;">A</div>
                 <div class="flex-grow-1 text-truncate">
-                    <h1 class="h5 fw-bold mb-0 text-truncate" data-aluno="nome">Aluno</h1>
-                    <p class="text-body-secondary small mb-1 text-truncate" data-aluno="email">e-mail</p>
-                    <span class="badge rounded-pill text-bg-light border text-capitalize" data-aluno="funcao">aluno</span>
+                    <h1 class="nome-aluno h5 fw-bold mb-0 text-truncate">Aluno</h1>
+                    <p class="email-aluno text-body-secondary small mb-1 text-truncate">e-mail</p>
+                    <span class="funcao-aluno badge rounded-pill text-bg-light border text-capitalize">aluno</span>
                 </div>
             </div>
         </section>
@@ -53,7 +53,7 @@
             <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/carteira.html">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-5 text-danger" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg>
                 <span class="flex-grow-1">Carteira</span>
-                <span class="badge rounded-pill text-bg-warning" data-aluno="saldo">R$ 0,00</span>
+                <span class="saldo-aluno badge rounded-pill text-bg-warning">R$ 0,00</span>
             </a>
             <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="/front-end/pedidos.html">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-5 text-danger" fill="currentColor" aria-hidden="true"><path d="M222-80q-43.75 0-74.37-30.63Q117-141.25 117-185v-125h127v-570l59.8 60 59.8-60 59.8 60 59.8-60 59.8 60 60-60 60 60 60-60 60 60 60-60v695q0 43.75-30.62 74.37Q781.75-80 738-80H222Zm516-60q20 0 32.5-12.5T783-185v-595H304v470h389v125q0 20 12.5 32.5T738-140ZM357-622v-60h240v60H357Zm0 134v-60h240v60H357Zm333-134q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9Zm0 129q-12 0-21-9t-9-21q0-12 9-21t21-9q12 0 21 9t9 21q0 12-9 21t-21 9ZM221-140h412v-110H177v65q0 20 12.65 32.5T221-140Zm-44 0v-110 110Z"/></svg>
@@ -103,7 +103,7 @@
         </div>
 
         <div class="text-center">
-            <button class="btn btn-link btn-sm text-body-secondary" type="button" onclick="removerConta()">Remover minha conta</button>
+            <button class="btn btn-link btn-sm text-body-secondary" type="button" onclick="removerAluno()">Remover minha conta</button>
         </div>
 
         <!-- Espaço para o conteúdo não ficar atrás da barra de baixo (celular e tablet) -->
@@ -121,9 +121,9 @@
         </nav>
     </div>
 
-    <!-- Aviso rápido (toast do Bootstrap): o avisar() do comum.js preenche e mostra -->
+    <!-- Aviso verde (toast do Bootstrap): o avisar() do comum.js preenche e mostra -->
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
-        <div id="aviso" class="toast border-0" role="status" aria-live="polite" aria-atomic="true">
+        <div id="aviso" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="aviso-texto"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>

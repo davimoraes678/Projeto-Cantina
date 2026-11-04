@@ -66,7 +66,7 @@ flowchart LR
 ## Regras para mexer nas páginas
 
 - **Caminhos absolutos:** use `/front-end/css/style.css`, `/front-end/js/comum.js`, `/front-end/admin.html`. O `index.html` é aberto em `/`, então um caminho relativo como `css/style.css` viraria `/css/style.css` e daria 404.
-- **O que depende da função do usuário** usa as classes `so-admin` (admin e mestre) e `so-mestre` (só mestre), começando escondido com `d-none`. O `carregarAluno()` do `comum.js` tira o `d-none` conforme a função. Isso só esconde da tela: quem realmente bloqueia é o back-end (`@admin_required` / `@master_required` nas rotas e `PAGINAS_ADMIN` no `app.py`).
+- **O que depende da função do usuário** usa as classes `so-admin` (admin e mestre) e `so-mestre` (só mestre), começando escondido com `d-none`. O `funcaoPorAluno()` do `comum.js` tira o `d-none` conforme a função. Isso só esconde da tela: quem realmente bloqueia é o back-end (`@admin_required` / `@master_required` nas rotas e `PAGINAS_ADMIN` no `app.py`).
 - **Elementos que o JS mostra e esconde** começam com a classe `d-none` do Bootstrap; o JS tira e põe a classe com `classList.toggle("d-none", condição)`.
 - **Abra pelo Flask** (`http://127.0.0.1:5000`), não pelo Live Server nem com duplo clique no arquivo. Senão a API fica em outro endereço e o login não funciona.
 - **Os `id` dos elementos são usados pelo JS.** Ao renomear um `id` no HTML (ex.: `lista-carrinho`), procure-o no `.js` da página e troque lá também.

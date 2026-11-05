@@ -14,13 +14,6 @@ class AdicionarItemCarrinhoService:
         if not produto:
             return {"erro": "Produto não encontrado"}, 404
 
-        try:
-            quantidade = int(dados.get('quantidade', 1))
-        except (TypeError, ValueError):
-            quantidade = 0
-        if quantidade < 1:
-            return {"erro": "Quantidade inválida"}, 400
-
         # Se o produto já está no carrinho, só soma a quantidade
         carrinho = ItemPedido.buscar_carrinho(current_user.id_aluno)
         item = next((i for i in carrinho if i.id_produto == produto.id_produto), None)

@@ -70,7 +70,7 @@ class Pedido(db.Model):
             'status_texto': STATUS_TEXTO.get(self.status, self.status),
             'valor_total': self.valor_total,
             # Código de retirada; pedidos de antes do código existir mostram o número ("#12")
-            'codigo': self.codigo or f"#{self.id_pedido}",
+            'codigo': self.codigo,
             'horario_agendado_retirada': self.horario_agendado_retirada.isoformat() if self.horario_agendado_retirada else None,
             'data_hora_retirada': self.data_hora_retirada.isoformat() if self.data_hora_retirada else None,
             'id_aluno': self.id_aluno,

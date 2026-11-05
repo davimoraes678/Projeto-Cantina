@@ -38,7 +38,7 @@ Todas usam JSON. Erros vêm como `{"erro": "mensagem"}`. **"login" = exige login
 | `POST` | `/registro` | | `{nome, email, senha}` | `201` cadastrado **e logado** · `400` faltou campo · `409` e-mail já existe |
 | `POST` | `/login` | | `{email, senha}` | `200` logado · `400` faltou campo · `401` e-mail ou senha errados |
 | `POST` | `/logout` | login | — | `200` |
-| `GET` | `/atual` | login | — | `200` aluno logado: `{id_aluno, nome, primeiro_nome, iniciais, email, saldo, funcao}` |
+| `GET` | `/atual` | login | — | `200` aluno logado: `{id_aluno, nome, email, saldo, funcao}` |
 | `PUT` | `/atual` | login | `{nome?, email?, senha?}` (senha vazia mantém a atual) | `200` |
 | `DELETE` | `/atual` | login | — | `200` conta excluída |
 | `POST` | `/atual/recarga` | login | `{valor}` | `200` saldo novo · `400` fora de R$ 0,01 a R$ 500,00 |

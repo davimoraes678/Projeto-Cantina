@@ -48,14 +48,9 @@ class Aluno(UserMixin, db.Model):
         return self.funcao in ("admin", "mestre")
 
     def to_dict(self):
-        # "Davi Moraes" -> primeiro nome "Davi" e iniciais "DM" (o front-end mostra no topo e no perfil)
-        nomes = self.nome.split() or ["?"]   # "?" se o nome vier só com espaços
-        iniciais = nomes[0][0] + (nomes[-1][0] if len(nomes) > 1 else "")
         return {
             'id_aluno': self.id_aluno,
             'nome': self.nome,
-            'primeiro_nome': nomes[0],
-            'iniciais': iniciais.upper(),
             'email': self.email,
             'saldo': self.saldo,
             'funcao': self.funcao

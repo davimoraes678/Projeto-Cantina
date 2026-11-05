@@ -72,8 +72,6 @@ O `alunoInf()` do `comum.js` preenche os elementos pelas classes:
 | Classe no HTML | Mostra |
 |---|---|
 | `nome-aluno` | Davi Moraes |
-| `primeiro-nome-aluno` | Davi |
-| `iniciais-aluno` | DM |
 | `email-aluno` | davi@... |
 | `saldo-aluno` | R$ 136,50 |
 | `funcao-aluno` | mestre |

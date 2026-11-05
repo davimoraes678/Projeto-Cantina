@@ -8,7 +8,7 @@ As telas do sistema: HTML, [Bootstrap 5.3](https://getbootstrap.com/docs/5.3/) e
 | `login.html` | `/front-end/login.html` | | Entrar (`#form-aluno-login`) |
 | `cadastro.html` | `/front-end/cadastro.html` | | Criar conta (`#form-aluno`) |
 | `pedidos.html` | `/front-end/pedidos.html` | Sim | Meus pedidos: abas "Em andamento" (em preparo e **pronto para retirar**, com o código) e "Histórico" (entregues e cancelados, com "Pedir de novo" e "Avaliar") |
-| `conta.html` | `/front-end/conta.html` | Sim | Perfil: iniciais, nome, e-mail e função; atalhos para Carteira, Meus pedidos e Administração; "Editar dados" (abre e fecha); Sair e remover a própria conta |
+| `conta.html` | `/front-end/conta.html` | Sim | Perfil: nome, e-mail e função; atalhos para Carteira, Meus pedidos e Administração; "Editar dados" (abre e fecha); Sair e remover a própria conta |
 | `carteira.html` | `/front-end/carteira.html` | Sim | Ver o saldo e adicionar saldo (recarga) |
 | `admin.html` | `/front-end/admin.html` | Admin ou mestre | Feita para usar no computador do balcão: menu fixo na lateral (no celular vira abas em cima) e tudo um pouco maior. **Admin:** Pedidos em duas colunas, "Em preparo" (botão **Pronto**) e "Prontos para retirar" (botão **Entregar**, quando o aluno retira), que se atualizam sozinhas a cada 15 s, com aviso de pedido novo e o número de pedidos no título da aba do navegador; e Histórico. **Mestre:** também Produtos (cadastrar e editar numa janela, com prévia da foto e descrição) e Alunos (tornar admin, excluir). Aluno comum é mandado de volta para `/` |
 | `css/style.css` | | | Só as cores da cantina por cima do Bootstrap |

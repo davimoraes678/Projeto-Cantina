@@ -8,18 +8,15 @@
 const API_BASE_URL = "/api";
 
 // Mostra os dados do aluno logado (GET /alunos/atual) nos elementos da página
-// que tiverem as classes: nome-aluno, primeiro-nome-aluno, iniciais-aluno,
-// email-aluno, saldo-aluno e funcao-aluno. Devolve o aluno (ou null).
+// que tiverem as classes: nome-aluno, email-aluno, saldo-aluno e funcao-aluno.
+// Devolve o aluno (ou null).
 async function alunoInf() {
   try {
     const res = await fetch(`${API_BASE_URL}/alunos/atual`);
     if (!res.ok) return null; // não está logado
     const aluno = await res.json();
 
-    // O back-end já manda o primeiro nome e as iniciais ("Davi" e "DM")
     document.querySelectorAll(".nome-aluno").forEach((el) => (el.textContent = aluno.nome));
-    document.querySelectorAll(".primeiro-nome-aluno").forEach((el) => (el.textContent = aluno.primeiro_nome));
-    document.querySelectorAll(".iniciais-aluno").forEach((el) => (el.textContent = aluno.iniciais));
     document.querySelectorAll(".email-aluno").forEach((el) => (el.textContent = aluno.email));
     document.querySelectorAll(".saldo-aluno").forEach((el) => (el.textContent = formatarPreco(aluno.saldo)));
     document.querySelectorAll(".funcao-aluno").forEach((el) => (el.textContent = aluno.funcao));

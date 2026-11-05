@@ -2,7 +2,7 @@
 
 Os **casos de uso** do sistema. **Cada caso de uso é uma classe**, com um único método `executar()`, num arquivo próprio. Os [controllers](../controllers/README.md) chamam os services; os services fazem as validações e usam os [models](../models/README.md) (CRUD) ou os [repositories](../repositories/README.md) (consultas especiais).
 
-Todo `executar()` devolve uma tupla **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)` ou `(carrinho.to_dict(), 201)`. Os services não usam `request` nem `jsonify`; isso é papel do controller.
+Todo `executar()` devolve uma tupla **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)` ou `(pedido.to_dict(), 201)`. Os services não usam `request` nem `jsonify`; isso é papel do controller.
 
 ```python
 class FinalizarPedidoService:
@@ -11,7 +11,7 @@ class FinalizarPedidoService:
     @staticmethod
     def executar():
         ...
-        return carrinho.to_dict(), 200
+        return pedido.to_dict(), 200
 ```
 
 ## `aluno/` — conta, login e carteira
@@ -45,14 +45,14 @@ Detalhes em [`aluno/README.md`](aluno/README.md).
 
 ## `carrinho/` — carrinho do aluno logado
 
-O carrinho é um `Pedido` com `status = "Carrinho"` (constante `STATUS_CARRINHO` em `models/pedido_model.py`), e cada produto é um `ItemPedido`. Todos usam o **aluno logado** (`current_user`).
+O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido` vazio). O `Pedido` só é criado ao finalizar. Todos usam o **aluno logado** (`current_user`).
 
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
-| `ver_carrinho_service.py` | `VerCarrinhoService` | Ver o carrinho (um vazio, sem gravar nada, se ainda não existir) |
-| `adicionar_item_carrinho_service.py` | `AdicionarItemCarrinhoService` | Adicionar produto: cria o carrinho na primeira vez; se o produto já está lá, **soma** a quantidade; guarda nome e preço do momento |
+| `ver_carrinho_service.py` | `VerCarrinhoService` | Ver o carrinho (vazio se o aluno ainda não adicionou nada) |
+| `adicionar_item_carrinho_service.py` | `AdicionarItemCarrinhoService` | Adicionar produto: cria um `ItemPedido` sem pedido; se o produto já está lá, **soma** a quantidade; guarda nome e preço do momento |
 | `remover_item_carrinho_service.py` | `RemoverItemCarrinhoService` | Remover item (só se for do carrinho **do aluno logado**) |
-| `finalizar_pedido_service.py` | `FinalizarPedidoService` | Conferir estoque e saldo; se tudo der, descontar os dois e o carrinho vira pedido `"Pendente"` |
+| `finalizar_pedido_service.py` | `FinalizarPedidoService` | Conferir estoque e saldo; se tudo der, descontar os dois, criar o pedido `"Pendente"` e passar os itens do carrinho para ele |
 | `repetir_pedido_service.py` | `RepetirPedidoService` | "Pedir de novo": confere se o pedido é do aluno e adiciona os itens dele com o `AdicionarItemCarrinhoService` (pula produtos excluídos) |
 | `repetir_ultimo_pedido_service.py` | `RepetirUltimoPedidoService` | Pegar os itens do último pedido (procedure `sp_repetir_ultimo_pedido` pelo `PedidoRepository`; fora do MySQL, pelo ORM) e adicioná-los com o `AdicionarItemCarrinhoService` |
 

@@ -1,6 +1,7 @@
 from flask_login import current_user
 from backend.extensions import db
 from backend.models.aluno_model import Aluno
+from backend.models.item_pedido import ItemPedido
 
 class DeletarAlunoService:
     """Caso de uso: excluir aluno (a própria conta, ou outro aluno pelo mestre)."""
@@ -22,6 +23,10 @@ class DeletarAlunoService:
                 if not pedido.nome_aluno:
                     pedido.nome_aluno = aluno.nome
                 pedido.id_aluno = None
+
+            # O carrinho dele (itens ainda sem pedido) é apagado junto
+            for item in ItemPedido.buscar_carrinho(aluno.id_aluno):
+                db.session.delete(item)
 
             for rateio in aluno.rateio:
                 rateio.id_aluno = None

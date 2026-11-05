@@ -1,6 +1,6 @@
 from flask_login import current_user
 
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
+from backend.models.pedido_model import Pedido
 
 
 class ListarMeusPedidosService:
@@ -13,9 +13,8 @@ class ListarMeusPedidosService:
 
     @staticmethod
     def executar():
-        # O carrinho ainda não é um pedido feito, então não aparece
         pedidos = (Pedido.query
-                   .filter(Pedido.id_aluno == current_user.id_aluno, Pedido.status != STATUS_CARRINHO)
+                   .filter(Pedido.id_aluno == current_user.id_aluno)
                    .order_by(Pedido.id_pedido.desc())
                    .all())
         return {

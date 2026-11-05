@@ -6,12 +6,12 @@ Uma classe por **tabela do banco** (SQLAlchemy). Os [services](../services/READM
 |---|---|---|---|
 | `aluno_model.py` | `Aluno` | `aluno` | Usuário do sistema. Também é o usuário do login (`UserMixin` + `get_id()`) |
 | `produto_model.py` | `Produto` | `produto` | Itens vendidos pela cantina |
-| `pedido_model.py` | `Pedido` | `pedido` | Um pedido **ou o carrinho** de um aluno |
-| `item_pedido.py` | `ItemPedido` | `itens_pedido` | Cada produto dentro de um pedido |
+| `pedido_model.py` | `Pedido` | `pedido` | Um pedido feito (criado ao finalizar o carrinho) |
+| `item_pedido.py` | `ItemPedido` | `itens_pedido` | Cada produto no carrinho ou dentro de um pedido |
 | `avaliacao_model.py` | `Avaliacao` | `avaliacao` | Nota (1 a 5) e comentário de um pedido concluído |
 | `rateio_model.py` | `RateioPagamento` | `rateio` | Divisão do valor entre alunos. **Ainda sem tela nem rota** |
 
-Todas herdam de `db.Model` e têm `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()` e `to_dict()`. O `Pedido` tem também `calcular_total()` e `buscar_carrinho(id_aluno)`.
+Todas herdam de `db.Model` e têm `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()` e `to_dict()`. O `Pedido` tem também `calcular_total()`, e o `ItemPedido` tem `buscar_carrinho(id_aluno)` e `carrinho_to_dict(id_aluno)`.
 
 **Diagrama de classes** (atributos, herança, composição e agregação): [`docs/diagrama-de-classes.md`](../../docs/diagrama-de-classes.md).
 
@@ -23,6 +23,7 @@ Todas herdam de `db.Model` e têm `salvar()`, `atualizar()`, `deletar()`, `lista
 erDiagram
     aluno ||--o{ pedido : "faz"
     pedido ||--|{ itens_pedido : "contém"
+    aluno ||--o{ itens_pedido : "tem no carrinho"
     produto ||--o{ itens_pedido : "aparece em"
     pedido ||--o| avaliacao : "recebe"
     pedido ||--o{ rateio : "é dividido em"
@@ -34,24 +35,30 @@ erDiagram
 | `aluno` | `id_aluno`, `nome`, `email` (único), `senha` (hash), `saldo` |
 | `produto` | `id_produto`, `nome`, `quantidade_estoque`, `preco_atual`, `preco_promocional`, `categoria`, `status` (disponível?), `imagem`, `ingredientes`, `tabela_nutricional` |
 | `pedido` | `id_pedido`, `status`, `valor_total`, `data_hora_criacao`, `horario_agendado_retirada`, `data_hora_retirada`, `id_aluno`, `nome_aluno` |
-| `itens_pedido` | `id_item_pedido`, `quantidade`, `preco_unitario_cobrado`, `id_pedido`, `id_produto`, `nome_produto` |
+| `itens_pedido` | `id_item_pedido`, `quantidade`, `preco_unitario_cobrado`, `id_pedido`, `id_aluno`, `id_produto`, `nome_produto` |
 
-## O carrinho é um pedido
+## O carrinho são itens sem pedido
 
-Não existe tabela de carrinho. O carrinho é um **`Pedido` com `status = "Carrinho"`**, e cada produto é um `ItemPedido`. Assim ele continua salvo ao recarregar a página e vira pedido só trocando o status. Cada aluno tem no máximo um carrinho aberto.
+Não existe tabela de carrinho. O carrinho são os **`ItemPedido` que ainda não têm pedido**:
+
+| Onde o item está | `id_aluno` | `id_pedido` |
+|---|---|---|
+| No carrinho | o dono do carrinho | vazio |
+| Em um pedido | vazio | o pedido |
+
+Assim o carrinho continua salvo ao recarregar a página, e a tabela `pedido` só tem pedidos de verdade. Ao finalizar, o `FinalizarPedidoService` cria o `Pedido` e passa os itens do carrinho para ele.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Carrinho: adiciona o 1º produto
-    Carrinho --> Pendente: Finalizar Pedido
-    Pendente --> EmPreparo
-    EmPreparo --> Pronto
-    Pronto --> Concluído
+    [*] --> Pendente: Finalizar (cria o pedido)
+    Pendente --> Pronto: admin marca pronto
+    Pronto --> Concluído: aluno retira
+    Pendente --> Concluído: aluno retira
     Pendente --> Cancelado
-    EmPreparo --> Cancelado
+    Pronto --> Cancelado
 ```
 
-`Pedido.itens` usa `cascade='all, delete-orphan'`: tirar um item da lista (`carrinho.itens.remove(item)`) já apaga o `ItemPedido` do banco.
+Remover um item do carrinho é só apagar o `ItemPedido` (`item.deletar()`). Ao excluir um aluno, os itens do carrinho dele são apagados junto.
 
 ## Histórico preservado
 

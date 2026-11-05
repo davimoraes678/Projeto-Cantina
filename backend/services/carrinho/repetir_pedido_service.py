@@ -1,6 +1,6 @@
 from flask_login import current_user
 
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
+from backend.models.pedido_model import Pedido
 from backend.services.carrinho.adicionar_item_carrinho_service import AdicionarItemCarrinhoService
 
 
@@ -11,8 +11,8 @@ class RepetirPedidoService:
     @staticmethod
     def executar(id_pedido):
         pedido = Pedido.buscar_por_id(id_pedido)
-        # Só o dono repete o pedido, e o carrinho não conta como pedido feito
-        if not pedido or pedido.id_aluno != current_user.id_aluno or pedido.status == STATUS_CARRINHO:
+        # Só o dono repete o pedido
+        if not pedido or pedido.id_aluno != current_user.id_aluno:
             return {"erro": "Pedido não encontrado"}, 404
 
         # Produtos excluídos depois do pedido ficam com id_produto vazio e são pulados

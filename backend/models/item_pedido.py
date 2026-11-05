@@ -1,12 +1,21 @@
 from backend.extensions import db
 
 class ItemPedido(db.Model):
+    """Um produto (com quantidade e preço) no carrinho ou em um pedido.
+
+    O carrinho não é uma tabela: são os itens que ainda não têm pedido.
+      - no carrinho:     id_aluno = dono do carrinho, id_pedido = None
+      - depois de finalizar: id_pedido = pedido criado, id_aluno = None
+    """
     __tablename__ = "itens_pedido"
-    
+
     id_item_pedido = db.Column(db.Integer, primary_key=True)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     preco_unitario_cobrado = db.Column(db.Float, nullable=False)
-    id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), nullable=False)
+    # Vazio enquanto o item está no carrinho
+    id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), nullable=True)
+    # Dono do carrinho; vazio depois que o item passa para um pedido
+    id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno', ondelete='CASCADE'), nullable=True)
     # nullable=True: permite apagar o produto sem apagar/travar o item do pedido já feito.
     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=True)
     # "Foto" do nome do produto no momento do pedido. Usada quando o produto é excluído depois.
@@ -34,6 +43,22 @@ class ItemPedido(db.Model):
     @staticmethod
     def buscar_por_id(id_item_pedido):
         return ItemPedido.query.get(id_item_pedido)
+
+    @staticmethod
+    def buscar_carrinho(id_aluno):
+        # Os itens no carrinho do aluno (lista vazia se ele ainda não adicionou nada)
+        return ItemPedido.query.filter_by(id_aluno=id_aluno, id_pedido=None).all()
+
+    @staticmethod
+    def carrinho_to_dict(id_aluno):
+        # O carrinho no formato que o front-end usa: itens, total e quantidade de unidades
+        itens = ItemPedido.buscar_carrinho(id_aluno)
+        return {
+            'id_aluno': id_aluno,
+            'itens': [item.to_dict() for item in itens],
+            'valor_total': round(sum((i.preco_unitario_cobrado * i.quantidade for i in itens), 0.0), 2),
+            'quantidade_itens': sum(i.quantidade for i in itens),
+        }
 
     def to_dict(self):
         return {

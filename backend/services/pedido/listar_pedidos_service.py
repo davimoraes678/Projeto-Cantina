@@ -1,4 +1,4 @@
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
+from backend.models.pedido_model import Pedido
 
 
 class ListarPedidosService:
@@ -12,8 +12,7 @@ class ListarPedidosService:
 
     @staticmethod
     def executar():
-        # O carrinho ainda não é um pedido feito, então não aparece
-        pedidos = Pedido.query.filter(Pedido.status != STATUS_CARRINHO).order_by(Pedido.id_pedido).all()
+        pedidos = Pedido.query.order_by(Pedido.id_pedido).all()
         return {
             "preparo": [p.to_dict() for p in pedidos if p.status == "Pendente"],
             "prontos": [p.to_dict() for p in pedidos if p.status == "Pronto"],

@@ -39,7 +39,7 @@ flowchart LR
 ```python
 # service
 return {"erro": "O carrinho está vazio"}, 400     # deu errado
-return carrinho.to_dict(), 200                     # deu certo
+return pedido.to_dict(), 200                       # deu certo
 
 # controller
 resposta, status = FinalizarPedidoService.executar()

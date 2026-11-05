@@ -1,6 +1,6 @@
 from flask_login import current_user
 
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
+from backend.models.pedido_model import Pedido
 from backend.repositories.pedido_repository import PedidoRepository
 from backend.services.carrinho.adicionar_item_carrinho_service import AdicionarItemCarrinhoService
 
@@ -33,7 +33,7 @@ class RepetirUltimoPedidoService:
     def _itens_do_ultimo_pedido_orm():
         """Mesmo resultado da sp_repetir_ultimo_pedido, mas via SQLAlchemy."""
         ultimo = (Pedido.query
-                  .filter(Pedido.id_aluno == current_user.id_aluno, Pedido.status != STATUS_CARRINHO)
+                  .filter(Pedido.id_aluno == current_user.id_aluno)
                   .order_by(Pedido.id_pedido.desc())
                   .first())
         if not ultimo:

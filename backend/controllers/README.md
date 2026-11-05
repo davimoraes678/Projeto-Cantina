@@ -76,12 +76,27 @@ Todas as rotas usam o **aluno logado** (`current_user`), então nenhuma recebe `
 | `POST` | `/repetir/<id_pedido>` | — | `201` carrinho com os itens daquele pedido somados (botão "Pedir de novo") · `404` se o pedido não for do aluno ou nenhum produto dele estiver à venda |
 | `POST` | `/finalizar` | — | `200` pedido agora `"Pendente"`, estoque e saldo descontados · `400` carrinho vazio, estoque ou saldo insuficiente |
 
-Formato do carrinho (igual ao de um pedido):
+Formato do carrinho (as rotas acima, menos `/finalizar`, devolvem isto):
 
 ```json
 {
-  "id_pedido": 3, "status": "Carrinho", "status_texto": "Carrinho", "valor_total": 17.5,
-  "codigo": "#3", "quantidade_itens": 2,
+  "id_aluno": 1, "valor_total": 10.0, "quantidade_itens": 2,
+  "itens": [
+    { "id_item_pedido": 5, "id_produto": 1, "produto_nome": "Suco de Laranja",
+      "quantidade": 2, "preco_unitario_cobrado": 5.0, "subtotal": 10.0, "id_pedido": null }
+  ]
+}
+```
+
+- `quantidade_itens`: soma das quantidades de todos os itens.
+- `id_pedido` é `null` porque o item ainda está no carrinho.
+
+Formato de um pedido (`/finalizar` e as rotas de `/api/pedidos`):
+
+```json
+{
+  "id_pedido": 3, "status": "Pendente", "status_texto": "Em preparo", "valor_total": 10.0,
+  "codigo": "4K9P", "quantidade_itens": 2,
   "id_aluno": 1, "aluno_nome": "Ana",
   "data_hora_criacao": "2026-10-13T10:00:00",
   "horario_agendado_retirada": null, "data_hora_retirada": null,
@@ -95,7 +110,6 @@ Formato do carrinho (igual ao de um pedido):
 
 - `codigo`: o código de retirada (ex.: `"4K9P"`). Pedidos sem código mostram o número (`"#3"`).
 - `status_texto`: o status como aparece na tela: `Pendente` → "Em preparo", `Pronto` → "Pronto para retirar", `Concluído` → "Entregue", `Cancelado` → "Cancelado".
-- `quantidade_itens`: soma das quantidades de todos os itens.
 
 ### `pedido_controller.py` — `/api/pedidos`
 
@@ -109,7 +123,7 @@ Formato do carrinho (igual ao de um pedido):
 | `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` (o aluno retirou; aparece como "Entregue") e grava a hora em `data_hora_retirada` · `400` se já estiver concluído ou cancelado |
 | `POST` | `/<id>/cancelar` | admin ou mestre | Marca como `"Cancelado"` e **devolve o valor ao aluno e os produtos ao estoque** · `400` se já estiver concluído ou cancelado |
 
-Status de um pedido: `Carrinho` → `Pendente` (ao finalizar) → `Pronto` (admin avisa que pode retirar) → `Concluído` (o aluno retirou no balcão). Enquanto não for concluído, o pedido pode ser `Cancelado`.
+Status de um pedido: `Pendente` (criado ao finalizar o carrinho) → `Pronto` (admin avisa que pode retirar) → `Concluído` (o aluno retirou no balcão). Enquanto não for concluído, o pedido pode ser `Cancelado`.
 
 ### `avaliacao_controller.py` — `/api/pedidos/<id>/avaliacao`
 

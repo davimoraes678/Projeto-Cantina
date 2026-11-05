@@ -1,13 +1,8 @@
 from backend.extensions import db
 from datetime import datetime
 
-# O carrinho de um aluno é um Pedido com este status. Os produtos adicionados
-# são gravados como ItemPedido; ao finalizar, o status vira "Pendente".
-STATUS_CARRINHO = "Carrinho"
-
 # Como cada status aparece para o usuário (o front-end mostra este texto)
 STATUS_TEXTO = {
-    "Carrinho": "Carrinho",
     "Pendente": "Em preparo",
     "Pronto": "Pronto para retirar",
     "Concluído": "Entregue",
@@ -67,11 +62,6 @@ class Pedido(db.Model):
     def buscar_por_id(id_pedido):
         return Pedido.query.get(id_pedido)
 
-    @staticmethod
-    def buscar_carrinho(id_aluno):
-        # O carrinho em aberto do aluno (ou None se ele ainda não adicionou nada)
-        return Pedido.query.filter_by(id_aluno=id_aluno, status=STATUS_CARRINHO).first()
-
     def to_dict(self):
         return {
             'id_pedido': self.id_pedido,
@@ -87,7 +77,6 @@ class Pedido(db.Model):
             # Se o aluno ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'aluno_nome': self.aluno.nome if self.aluno else (self.nome_aluno or 'Aluno removido'),
             'itens': [item.to_dict() for item in self.itens],
-            # Total de unidades (o carrinho mostra no botão do topo)
             'quantidade_itens': sum(item.quantidade for item in self.itens),
             # A tela "Meus pedidos" usa para mostrar o botão "Avaliar" só uma vez
             'avaliado': self.avaliacao is not None

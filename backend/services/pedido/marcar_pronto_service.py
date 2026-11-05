@@ -11,7 +11,7 @@ class MarcarProntoService:
     @staticmethod
     def executar(id_pedido):
         pedido = Pedido.buscar_por_id(id_pedido)
-        if not pedido or pedido.status == "Carrinho":
+        if not pedido:
             return {"erro": "Pedido não encontrado"}, 404
         if pedido.status != "Pendente":
             return {"erro": "Só um pedido em preparo pode ficar pronto"}, 400

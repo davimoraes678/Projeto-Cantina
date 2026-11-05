@@ -2,7 +2,6 @@ from flask_login import current_user
 
 from backend.extensions import db
 from backend.models.item_pedido import ItemPedido
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
 from backend.models.produto_model import Produto
 
 
@@ -22,25 +21,21 @@ class AdicionarItemCarrinhoService:
         if quantidade < 1:
             return {"erro": "Quantidade inválida"}, 400
 
-        # Cria o carrinho (pedido em aberto) na primeira vez que o aluno adiciona algo
-        carrinho = Pedido.buscar_carrinho(current_user.id_aluno)
-        if not carrinho:
-            carrinho = Pedido(id_aluno=current_user.id_aluno, nome_aluno=current_user.nome, status=STATUS_CARRINHO)
-            db.session.add(carrinho)
-
         # Se o produto já está no carrinho, só soma a quantidade
-        item = next((i for i in carrinho.itens if i.id_produto == produto.id_produto), None)
+        carrinho = ItemPedido.buscar_carrinho(current_user.id_aluno)
+        item = next((i for i in carrinho if i.id_produto == produto.id_produto), None)
         if item:
             item.quantidade += quantidade
         else:
+            # Item sem pedido e com dono = item no carrinho.
             # Guarda o nome e o preço do produto neste momento (o histórico não muda se o produto mudar)
-            carrinho.itens.append(ItemPedido(
+            db.session.add(ItemPedido(
+                id_aluno=current_user.id_aluno,
                 id_produto=produto.id_produto,
                 nome_produto=produto.nome,
                 quantidade=quantidade,
                 preco_unitario_cobrado=produto.preco_atual
             ))
 
-        carrinho.calcular_total()
         db.session.commit()
-        return carrinho.to_dict(), 201
+        return ItemPedido.carrinho_to_dict(current_user.id_aluno), 201

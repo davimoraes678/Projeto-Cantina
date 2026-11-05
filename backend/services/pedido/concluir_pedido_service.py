@@ -12,7 +12,7 @@ class ConcluirPedidoService:
     @staticmethod
     def executar(id_pedido):
         pedido = Pedido.buscar_por_id(id_pedido)
-        if not pedido or pedido.status == "Carrinho":
+        if not pedido:
             return {"erro": "Pedido não encontrado"}, 404
         if pedido.status in ("Concluído", "Cancelado"):
             return {"erro": f"Este pedido já está {pedido.status.lower()}"}, 400

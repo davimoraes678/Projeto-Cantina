@@ -212,7 +212,7 @@ async function adicionarCombinacao(id_produto1, id_produto2) {
 
 // =============================================================================
 // 3. CARRINHO
-// O carrinho fica no back-end (um pedido com status "Carrinho"). Toda rota do
+// O carrinho fica no back-end (os itens do aluno ainda sem pedido). Toda rota do
 // carrinho devolve o carrinho inteiro, e o renderizarCarrinho mostra na tela.
 // =============================================================================
 

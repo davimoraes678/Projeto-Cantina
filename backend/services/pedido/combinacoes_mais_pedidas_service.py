@@ -33,7 +33,7 @@ class CombinacoesMaisPedidasService:
         """Mesmo resultado da sp_combinacoes_mais_pedidas, mas via SQLAlchemy."""
         # Conta quantas vezes cada dupla de produtos aparece no mesmo pedido
         contagem = Counter()
-        pedidos = Pedido.query.filter(Pedido.status.notin_(["Carrinho", "Cancelado"])).all()
+        pedidos = Pedido.query.filter(Pedido.status != "Cancelado").all()
         for pedido in pedidos:
             produtos = sorted({item.produto for item in pedido.itens if item.produto}, key=lambda p: p.id_produto)
             for par in combinations(produtos, 2):

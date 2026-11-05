@@ -63,7 +63,6 @@ classDiagram
         +deletar()
         +listar_todos()$
         +buscar_por_id(id_pedido)$
-        +buscar_carrinho(id_aluno)$
         +to_dict() dict
     }
 
@@ -72,6 +71,7 @@ classDiagram
         +int quantidade
         +float preco_unitario_cobrado
         +int id_pedido
+        +int id_aluno
         +int id_produto
         +str nome_produto
         +salvar()
@@ -79,6 +79,8 @@ classDiagram
         +deletar()
         +listar_todos()$
         +buscar_por_id(id_item_pedido)$
+        +buscar_carrinho(id_aluno)$
+        +carrinho_to_dict(id_aluno)$
         +to_dict() dict
     }
 
@@ -126,6 +128,7 @@ classDiagram
 
     %% Agregação (a parte continua existindo sem o todo)
     Aluno "0..1" o-- "0..*" Pedido : faz
+    Aluno "0..1" -- "0..*" ItemPedido : tem no carrinho
     Produto "0..1" o-- "0..*" ItemPedido : aparece em
     Aluno "0..1" o-- "0..*" RateioPagamento : paga
 ```
@@ -141,11 +144,12 @@ classDiagram
 
 | Relação | Tipo | Como aparece no código |
 |---|---|---|
-| `Pedido` → `ItemPedido` | **Composição** | `cascade='all, delete-orphan'`: o item só existe dentro do pedido; apagar o pedido (ou tirar o item do carrinho) apaga o item |
+| `Pedido` → `ItemPedido` | **Composição** | `cascade='all, delete-orphan'`: apagar o pedido apaga os itens dele. Enquanto o item está no carrinho, ele ainda não tem pedido (`id_pedido` vazio) |
 | `Pedido` → `Avaliacao` | **Composição** | `uselist=False` e `id_pedido` obrigatório e único: no máximo uma avaliação por pedido, que não existe sem ele |
 | `Pedido` → `RateioPagamento` | **Composição** | `id_pedido` obrigatório: cada parte do rateio pertence a um pedido |
 | `Aluno` → `Pedido` | **Agregação** | `id_aluno` aceita nulo: ao excluir o aluno, os pedidos continuam no histórico com o `nome_aluno` guardado |
 | `Produto` → `ItemPedido` | **Agregação** | `id_produto` aceita nulo: ao excluir o produto, os itens dos pedidos antigos continuam com o `nome_produto` guardado |
+| `Aluno` → `ItemPedido` | **Associação** | O carrinho: itens com `id_aluno` preenchido e sem pedido. Ao finalizar, `id_aluno` fica vazio; ao excluir o aluno, o carrinho dele é apagado |
 | `Aluno` → `RateioPagamento` | **Agregação** | `id_aluno` aceita nulo |
 
 **Carrinho:** não é uma classe à parte. É um `Pedido` com `status = "Carrinho"`; ao finalizar,

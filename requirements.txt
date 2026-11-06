@@ -5,7 +5,3 @@ Flask-Login==0.6.3
 PyMySQL==1.1.1
 python-dotenv==1.0.1
 Pillow>=11.3.0,<13
-# Servidor de produção (AWS). No Windows instala, mas só roda no Linux
-gunicorn==23.0.0
-# O PyMySQL precisa dele para conectar no MySQL 8
-cryptography>=42

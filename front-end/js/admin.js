@@ -37,9 +37,9 @@ async function carregarPedidos() {
     if (!res.ok) return;
     const pedidos = await res.json();
 
-    let htmlPreparo = "";
+    let htmlemPreparo = "";
     pedidos.preparo.forEach((pedido) => {
-      htmlPreparo += cardPedidoAdmin(pedido);
+      htmlemPreparo += cardPedidoAdmin(pedido);
     });
     let htmlProntos = "";
     pedidos.prontos.forEach((pedido) => {
@@ -50,17 +50,17 @@ async function carregarPedidos() {
       htmlHistorico += linhaHistorico(pedido);
     });
 
-    if (htmlPreparo === "") htmlPreparo = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
+    if (htmlemPreparo === "") htmlemPreparo = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
     if (htmlProntos === "") htmlProntos = `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
     if (htmlHistorico === "") htmlHistorico = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
-    document.getElementById("lista-preparo").innerHTML = htmlPreparo;
+    document.getElementById("lista-preparo").innerHTML = htmlemPreparo;
     document.getElementById("lista-prontos").innerHTML = htmlProntos;
     document.getElementById("lista-historico-admin").innerHTML = htmlHistorico;
 
     // Números nas colunas, no menu e no título da aba do navegador ("(3) Administração")
-    const emPreparo = pedidos.preparo.length;
-    const esperando = emPreparo + pedidos.prontos.length;
-    document.getElementById("contador-preparo").textContent = emPreparo;
+    const Preparo = pedidos.preparo.length;
+    const esperando = preparo + pedidos.prontos.length;
+    document.getElementById("contador-preparo").textContent = preparo;
     document.getElementById("contador-prontos").textContent = pedidos.prontos.length;
     const contador = document.getElementById("contador-pedidos-admin");
     contador.textContent = esperando;
@@ -313,7 +313,6 @@ async function enviarImagem(id_produto) {
 
 // Botão "Excluir": DELETE /produtos/<id>. Os pedidos antigos continuam com o nome do produto.
 async function removerProduto(id_produto) {
-  const produto = produtos.find((p) => p.id_produto === id_produto);
   if (!confirm(`Excluir ${produto.nome} do cardápio?`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/produtos/${id_produto}`, { method: "DELETE" });
@@ -396,6 +395,7 @@ async function excluirAluno(id_aluno) {
       alert(erro.erro || "Não foi possível excluir o aluno.");
       return;
     }
+    avisar("Aluno excluído")
     carregarAlunos();
   } catch (erro) {
     console.error("Erro ao excluir aluno:", erro);

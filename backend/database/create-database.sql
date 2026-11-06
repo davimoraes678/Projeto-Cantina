@@ -79,11 +79,7 @@ CREATE TABLE IF NOT EXISTS rateio (
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 
--- =========================================================================
--- PROCEDURES DE BUSCA DE PRODUTO
--- Chamadas apenas pelo ProdutoRepository (backend/repositories/produto_repository.py)
--- via `CALL sp_...`. Controller e Service nunca as chamam diretamente.
--- =========================================================================
+-- Procedures
 
 DELIMITER $
 
@@ -159,13 +155,8 @@ BEGIN
         nome;
 END $
 
--- =========================================================================
--- PROCEDURES DE PEDIDOS (consultas não-CRUD)
--- Chamadas apenas pelo PedidoRepository (backend/repositories/pedido_repository.py)
--- =========================================================================
+-- Consultas não Crud
 
--- Itens (produto e quantidade) do último pedido já feito pelo aluno.
--- Produtos excluídos depois (id_produto NULL) ficam de fora.
 DROP PROCEDURE IF EXISTS sp_repetir_ultimo_pedido $
 CREATE PROCEDURE sp_repetir_ultimo_pedido (IN p_id_aluno INT)
 BEGIN

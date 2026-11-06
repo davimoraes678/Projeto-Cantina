@@ -1,77 +1,93 @@
 # front-end/js/
 
-| Arquivo | O que faz |
-|---|---|
-| `alunos.js` | Todo o JavaScript do sistema: login, alunos, produtos, carrinho e pedidos. É carregado por **todas** as páginas |
+O JavaScript do site: **um arquivo por página**, mais o `comum.js`, que todas usam.
 
-## Como um arquivo atende todas as páginas
-
-No evento `DOMContentLoaded`, o arquivo chama as funções de carregamento (`carregarProdutos`, `carregarCarrinho`, `carregarPedidos`, `alunoInf`...) e liga os formulários. Cada função **confere se os elementos dela existem** antes de agir:
-
-```js
-const tabela = document.getElementById("tabela-carrinho");
-if (!tabela) return;          // esta página não tem carrinho: não faz nada
-```
-
-É isso que permite o mesmo arquivo rodar no login, que não tem produtos, e na cantina, que não tem formulário de login.
-
-> ⚠️ **Um erro no topo do arquivo derruba todas as páginas.** Um erro de sintaxe, ou uma função chamada com o nome errado dentro do `DOMContentLoaded` (ex.: `AlunoInf()` em vez de `alunoInf()`), impede que os formulários sejam ligados: eles passam a recarregar a página sem chamar a API. Depois de mexer, abra o console (F12) e confira se não há erros em vermelho.
-
-## `API_BASE_URL`
-
-```js
-const API_BASE_URL = "/api";
-```
-
-Caminho relativo: a API é chamada no mesmo endereço da página. Funciona no `127.0.0.1:5000`, no Codespaces e em qualquer servidor, e é necessário para o cookie de login. Não troque por um endereço fixo.
-
-## Funções por assunto
-
-| Assunto | Funções | Rotas usadas |
+| Arquivo | Página | O que faz |
 |---|---|---|
-| Login | listener de `#form-aluno-login`, listener de `#btn-logout`, `alunoInf()` (nome, e-mail e saldo) | `POST /alunos/login`, `POST /alunos/logout`, `GET /alunos/atual` |
-| Carteira | listener de `#form-recarga`, `somarRecarga` (botões + R$ 5/10/20, até R$ 500) | `POST /alunos/atual/recarga` com `{valor}` |
-| Alunos | listener de `#form-aluno`, `carregarAlunos`, `promoverAluno`, `excluirAluno`, `editarDados`, `removerAluno`, `funcaoPorAluno` | `POST /alunos/registro`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>`, `PUT` e `DELETE /alunos/atual` |
-| Produtos | listener de `#form-produto`, `enviarImagem`, `carregarProdutos`, `buscarProdutos`, `filtrar`, `editarProduto`, `sairModoEdicaoProduto`, `removerProduto` | `/produtos`, `/produtos/buscar`, `/produtos/<id>/imagem` |
-| Carrinho | `adicionarItemAoCarrinho`, `removerItemDoCarrinho`, `carregarCarrinho`, `renderizarCarrinho`, `finalizarPedido`, `repetirUltimoPedido`, `avisarCarrinho` (toast "adicionado ao carrinho") | `/carrinho`, `/carrinho/itens`, `/carrinho/finalizar`, `/carrinho/repetir` |
-| Combinações | `carregarCombinacoes`, `adicionarCombinacao` | `GET /pedidos/combinacoes`, `POST /carrinho/itens` |
-| Pedidos | `carregarPedidos` (no `admin.html` mostra os em andamento; no `historico.html`, marcado com `data-historico="sim"`, os concluídos e cancelados), `concluirPedido`, `cancelarPedido` (os dois usam `mudarPedido`) | `GET /pedidos`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar` |
-| Avaliação | `verificarAvaliacao`, listener de `#form-avaliacao` | `GET /pedidos/<id>`, `POST /pedidos/<id>/avaliacao` |
+| `comum.js` | todas | `API_BASE_URL`, `alunoInf()` (nome, saldo etc. do aluno logado), `funcaoPorAluno()` (mostra o que é de admin/mestre), botões Sair, `avisar()` (aviso verde), `formatarPreco()` e `escaparTexto()` |
+| `login.js` | `login.html` e `cadastro.html` | Envia o login e o cadastro |
+| `cardapio.js` | `index.html` | Produtos, janela de detalhes, categorias e filtros; combos; carrinho (adicionar, remover, repetir, finalizar); aviso de pedido em andamento |
+| `pedidos.js` | `pedidos.html` | Meus pedidos: em andamento e histórico; "Pedir de novo"; avaliação |
+| `carteira.js` | `carteira.html` | Recarga de saldo |
+| `conta.js` | `conta.html` | Editar dados e remover a conta |
+| `admin.js` | `admin.html` | Pedidos (pronto, entregar, cancelar) e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
 
-**Como a avaliação chega ao aluno:** ao finalizar, o `finalizarPedido` guarda o número do pedido no navegador (`localStorage`, chave `pedidoParaAvaliar`). Ao abrir o `index.html`, o `verificarAvaliacao` consulta esse pedido e, se estiver `Concluído`, abre a janela. Depois de avaliar (ou no logout) a chave é apagada. A janela só aparece no navegador onde o pedido foi feito.
-| Util | `escapeAttr` | — |
+## Como uma página carrega o JavaScript
 
-**O formulário `#form-aluno` faz duas coisas.** Com `editandoAlunoId = null`, ele **cadastra** (`POST /alunos/registro`) e leva para `/`. Com um número, ele **edita** no admin (`PUT /alunos/<id>`). O formulário de produto funciona igual, com `editandoProdutoId`.
+No fim do `<body>`, sempre nesta ordem:
 
-## Padrão de uma chamada à API
+```html
+<script src="https://cdn.jsdelivr.net/.../bootstrap.bundle.min.js" defer></script>
+<script src="/front-end/js/comum.js" defer></script>
+<script src="/front-end/js/cardapio.js" defer></script>
+```
+
+Com `defer`, os arquivos rodam **depois** que o HTML terminou de ser lido e **na ordem em que aparecem**. Por isso o arquivo da página já pode usar os elementos do HTML, o Bootstrap e as funções do `comum.js`.
+
+## O padrão de uma chamada à API
+
+Toda função que fala com o back-end segue o mesmo modelo:
 
 ```js
-try {
-    const res = await fetch(`${API_BASE_URL}/carrinho/itens`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_produto, quantidade })
-    });
-    const dados = await res.json();
-    if (!res.ok) {                       // 400, 401, 404...
-        alert(dados.erro || "Mensagem padrão");
-        return;
+async function removerItemDoCarrinho(id_item_pedido) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/carrinho/itens/${id_item_pedido}`, { method: "DELETE" });
+    const dados = await res.json();          // lê a resposta (JSON) como objeto
+    if (!res.ok) {                           // deu errado (o back-end respondeu com erro)
+      alert(dados.erro || "Não foi possível remover o item.");
+      return;
     }
-    renderizarCarrinho(dados);           // deu certo
-} catch (erro) {                          // servidor fora do ar
-    console.error(erro);
+    renderizarCarrinho(dados);               // deu certo: usa a resposta
+  } catch (erro) {
+    console.error("Erro ao remover item:", erro);   // erro de rede: aparece no console (F12)
+  }
 }
 ```
 
-- Use `await` antes de `fetch`, `res.json()` e de qualquer função `async`; sem ele, você recebe uma *Promise* em vez do valor.
-- `await` só funciona **dentro** de uma `async function`; solto no arquivo, ele quebra o script inteiro.
+- `res.ok` é `true` quando o back-end respondeu com sucesso (2xx).
+- Quando dá errado, o back-end manda `{ "erro": "mensagem" }`, que aparece num `alert`. Quando dá certo, algumas ações mostram o aviso verde com `avisar("...")`.
+- Para enviar dados (POST/PUT), a chamada leva `headers: { "Content-Type": "application/json" }` e `body: JSON.stringify({...})`.
+- A foto do produto é a exceção: vai como `FormData` (formulário com arquivo), não como JSON (`enviarImagem` no `admin.js`).
 
-## Convenções de nomes
+## O padrão de uma lista na tela
 
-- `camelCase` para funções e variáveis (`carregarCarrinho`, `pedidosCache`).
-- Sufixo `El` para variáveis que guardam um elemento do HTML (`totalEl`, `nomeEl`), para diferenciar dos dados.
+A API devolve uma lista, o `forEach` junta o HTML de cada item numa variável, e no fim ela vai para a tela:
 
-## Pontos a melhorar
+```js
+let html = "";
+produtos.forEach((produto) => {
+  html += cardProduto(produto);   // junta o texto (ainda não mexe na tela)
+});
+lista.innerHTML = html;           // escreve na tela uma vez só
+```
 
-- `enviarImagem` está definida duas vezes (uma dentro do `DOMContentLoaded` e outra global); a de dentro é a usada ao salvar o produto.
-- Dados vindos da API são colocados com `innerHTML` sem escapar HTML; um nome com `<script>` seria executado. O `escapeAttr` só trata aspas simples.
+- Juntar numa variável e escrever **uma vez só** é mais rápido do que fazer `lista.innerHTML +=` dentro do `forEach`: a cada `+=`, o navegador apaga e redesenha a lista inteira (inclusive as fotos).
+- Texto que veio do usuário (nome, e-mail, nome do produto) passa pelo `escaparTexto()` antes de entrar no HTML.
+- Os botões de cada item chamam uma função com o **id**: `onclick="editarProduto(5)"`. A função acha o resto dos dados na lista que já foi carregada, com `produtos.find(...)`.
+
+## Dados do aluno nas páginas
+
+O `alunoInf()` do `comum.js` preenche os elementos pelas classes:
+
+| Classe no HTML | Mostra |
+|---|---|
+| `nome-aluno` | Davi Moraes |
+| `email-aluno` | davi@... |
+| `saldo-aluno` | R$ 136,50 |
+| `funcao-aluno` | mestre |
+
+Exemplo: `<span class="saldo-aluno">R$ 0,00</span>` mostra o saldo. Pode haver vários na mesma página (no topo e no carrinho, por exemplo).
+
+## API usada por cada página
+
+| Página | Rotas |
+|---|---|
+| login / cadastro | `POST /alunos/login`, `POST /alunos/registro` |
+| todas (comum.js) | `GET /alunos/atual`, `POST /alunos/logout` |
+| cardápio | `GET /produtos/buscar`, `GET /pedidos/combinacoes`, `GET /carrinho`, `POST /carrinho/itens`, `DELETE /carrinho/itens/<id>`, `POST /carrinho/repetir`, `POST /carrinho/finalizar`, `GET /pedidos/meus` |
+| meus pedidos | `GET /pedidos/meus`, `POST /carrinho/repetir/<id>`, `POST /pedidos/<id>/avaliacao` |
+| carteira | `POST /alunos/atual/recarga` |
+| perfil | `PUT /alunos/atual`, `DELETE /alunos/atual` |
+| admin | `GET /pedidos`, `POST /pedidos/<id>/pronto`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar`, `GET` `POST` `PUT` `DELETE /produtos`, `POST /produtos/<id>/imagem`, `GET /alunos`, `PUT` `DELETE /alunos/<id>` |
+
+> **Atenção:** um erro de sintaxe num arquivo `.js` faz aquela página parar de funcionar. Depois de mexer, abra o console do navegador (F12) e confira se não há erros em vermelho.

@@ -1,6 +1,6 @@
 from flask_login import current_user
 
-from backend.models.pedido_model import Pedido, STATUS_CARRINHO
+from backend.models.item_pedido import ItemPedido
 
 
 class VerCarrinhoService:
@@ -8,9 +8,4 @@ class VerCarrinhoService:
 
     @staticmethod
     def executar():
-        carrinho = Pedido.buscar_carrinho(current_user.id_aluno)
-        if not carrinho:
-            # Ainda não existe carrinho no banco: devolve um vazio, sem gravar nada
-            return {"id_pedido": None, "id_aluno": current_user.id_aluno, "status": STATUS_CARRINHO,
-                    "valor_total": 0.0, "itens": []}, 200
-        return carrinho.to_dict(), 200
+        return ItemPedido.carrinho_to_dict(current_user.id_aluno), 200

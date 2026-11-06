@@ -1,14 +1,18 @@
-/* Cantina Real: só as cores e alguns ajustes por cima do Bootstrap 5.3.
-   Layout, espaçamentos e componentes vêm das classes do próprio Bootstrap. */
+/* Cantina Real: só as cores da cantina por cima do Bootstrap 5.3.
+   Layout, espaçamentos e componentes (inclusive a barra de baixo do celular)
+   vêm das classes do próprio Bootstrap. */
 
 :root {
     --cantina-vermelho: #aa0e1b;
     --cantina-vermelho-escuro: #870b15;
     --cantina-amarelo: #f3c719;
 
-    /* Links na cor da cantina */
+    /* Cores do Bootstrap trocadas pelas da cantina: text-primary, bg-primary,
+       links e o fundo das páginas */
+    --bs-primary-rgb: 170, 14, 27;
     --bs-link-color-rgb: 170, 14, 27;
     --bs-link-hover-color-rgb: 135, 11, 21;
+    --bs-body-bg: #fdf7ef;
 }
 
 .bg-cantina {
@@ -17,6 +21,15 @@
 
 .text-cantina-amarelo {
     color: var(--cantina-amarelo);
+}
+
+/* Ícones: SVG copiado de https://fonts.google.com/icons e colado direto no HTML,
+   com class="icone" e fill="currentColor" (o ícone fica da cor do texto em volta).
+   A classe deixa o ícone um pouco maior que o texto ao lado e alinhado com ele. */
+.icone {
+    width: 1.25em;
+    height: 1.25em;
+    vertical-align: -.25em;
 }
 
 /* Botões "primary" e "outline-primary" em vermelho em vez de azul */
@@ -42,58 +55,59 @@
     --bs-btn-focus-shadow-rgb: 170, 14, 27;
 }
 
+/* Abas (nav-pills) e links da barra de baixo em vermelho */
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--cantina-vermelho);
+}
+
+.nav {
+    --bs-nav-link-color: var(--bs-secondary-color);
+    --bs-nav-link-hover-color: var(--cantina-vermelho);
+}
+
+.nav-link.active {
+    color: var(--cantina-vermelho);
+}
+
+.nav-pills .nav-link.active {
+    color: #fff;
+}
+
 .form-control:focus,
 .form-select:focus {
     border-color: #d98a91;
-    box-shadow: 0 0 0 .25rem rgba(170, 14, 27, .25);
+    box-shadow: 0 0 0 .25rem rgba(170, 14, 27, .2);
 }
 
-/* Botões das tabelas e do formulário "Editar Dados": o alunos.js monta sem classes do Bootstrap */
-.editar,
-.excluir,
-.concluir,
-#tabela-alunos button,
-#form-editar-dados button {
-    padding: .25rem .5rem;
-    font-size: .875rem;
-    border: 1px solid var(--bs-secondary);
-    border-radius: var(--bs-border-radius-sm);
-    background: #fff;
+/* Card de produto do cardápio: tocar abre a janela de detalhes (mãozinha no mouse) */
+.card-produto {
+    cursor: pointer;
 }
 
-.excluir {
-    border-color: var(--bs-danger);
-    color: var(--bs-danger);
+/* Teclado: quem navega com Tab vê bem onde está (contorno amarelo).
+   :focus-visible só aparece no teclado, não no clique do mouse. */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.list-group-item:focus-visible,
+a:focus-visible {
+    outline: 3px solid var(--cantina-amarelo);
+    outline-offset: 2px;
+    box-shadow: none;
 }
 
-.concluir {
-    border-color: var(--bs-success);
-    color: var(--bs-success);
+/* Administração no computador: tudo um pouco maior, para ler de longe no balcão.
+   Como o Bootstrap mede quase tudo em rem, aumentar a fonte do <html> aumenta
+   textos, botões e espaçamentos juntos. */
+@media (min-width: 992px) {
+    html.pagina-admin {
+        font-size: 17px;
+    }
 }
 
-#form-editar-dados form {
-    display: grid;
-    gap: .5rem;
-}
-
-#form-editar-dados input {
-    padding: .375rem .75rem;
-    border: var(--bs-border-width) solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
-}
-
-/* Imagem dos cards de produto e da tabela do admin: todas na mesma altura,
-   e "contain" mostra o produto inteiro (sem cortar) */
-#tabela-produtos .card img {
-    width: 100%;
-    height: 160px;
-    object-fit: contain;
-    background: var(--bs-tertiary-bg);
-    border-radius: var(--bs-border-radius);
-}
-
-#tabela-produtos-admin img {
-    width: 60px;
-    height: 45px;
-    object-fit: contain;
+/* Celulares pequenos (até 389px): esconde o nome "Cantina Real" ao lado da
+   logo, para a barra de cima (logo, saldo e carrinho) caber na tela. */
+@media (max-width: 389px) {
+    .navbar-brand span {
+        display: none;
+    }
 }

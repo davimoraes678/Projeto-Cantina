@@ -1,9 +1,13 @@
 from backend.extensions import db
 from datetime import datetime
 
-# O carrinho de um aluno é um Pedido com este status. Os produtos adicionados
-# são gravados como ItemPedido; ao finalizar, o status vira "Pendente".
-STATUS_CARRINHO = "Carrinho"
+# Como cada status aparece para o usuário (o front-end mostra este texto)
+STATUS_TEXTO = {
+    "Pendente": "Em preparo",
+    "Pronto": "Pronto para retirar",
+    "Concluído": "Entregue",
+    "Cancelado": "Cancelado",
+}
 
 class Pedido(db.Model):
     __tablename__ = "pedido"
@@ -14,6 +18,7 @@ class Pedido(db.Model):
     valor_total = db.Column(db.Float, nullable=False, default=0.0)
     horario_agendado_retirada = db.Column(db.DateTime, nullable=True)
     data_hora_retirada = db.Column(db.DateTime, nullable=True)
+    codigo = db.Column(db.String(4))
 
     # nullable=True: permite apagar o aluno sem apagar/travar o pedido (o histórico é preservado).
     id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno'), nullable=True)
@@ -34,9 +39,11 @@ class Pedido(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def atualizar(self, status=None, data_hora_retirada=None, horario_agendado_retirada=None):
+    def atualizar(self, status=None, codigo=None, data_hora_retirada=None, horario_agendado_retirada=None):
         if status is not None:
             self.status = status
+        if codigo is not None:
+            self.codigo = codigo
         if data_hora_retirada is not None:
             self.data_hora_retirada = data_hora_retirada
         if horario_agendado_retirada is not None:
@@ -55,21 +62,22 @@ class Pedido(db.Model):
     def buscar_por_id(id_pedido):
         return Pedido.query.get(id_pedido)
 
-    @staticmethod
-    def buscar_carrinho(id_aluno):
-        # O carrinho em aberto do aluno (ou None se ele ainda não adicionou nada)
-        return Pedido.query.filter_by(id_aluno=id_aluno, status=STATUS_CARRINHO).first()
-
     def to_dict(self):
         return {
             'id_pedido': self.id_pedido,
             'data_hora_criacao': self.data_hora_criacao.isoformat() if self.data_hora_criacao else None,
             'status': self.status,
+            'status_texto': STATUS_TEXTO.get(self.status, self.status),
             'valor_total': self.valor_total,
+            # Código de retirada; pedidos de antes do código existir mostram o número ("#12")
+            'codigo': self.codigo,
             'horario_agendado_retirada': self.horario_agendado_retirada.isoformat() if self.horario_agendado_retirada else None,
             'data_hora_retirada': self.data_hora_retirada.isoformat() if self.data_hora_retirada else None,
             'id_aluno': self.id_aluno,
             # Se o aluno ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'aluno_nome': self.aluno.nome if self.aluno else (self.nome_aluno or 'Aluno removido'),
-            'itens': [item.to_dict() for item in self.itens]
+            'itens': [item.to_dict() for item in self.itens],
+            'quantidade_itens': sum(item.quantidade for item in self.itens),
+            # A tela "Meus pedidos" usa para mostrar o botão "Avaliar" só uma vez
+            'avaliado': self.avaliacao is not None
         }

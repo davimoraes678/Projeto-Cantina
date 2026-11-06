@@ -10,13 +10,11 @@ from tempfile import NamedTemporaryFile
 from flask import current_app
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-
+# Formata o nome
 def nome_imagem(nome):
     nome = unicodedata.normalize("NFD", nome)
     nome = "".join(letra for letra in nome if not unicodedata.combining(letra))
     nome = re.sub(r"[^a-z0-9]+", "-", nome.lower()).strip("-")
-    if not nome:
-        raise ValueError("O nome do produto precisa conter letras ou números.")
     return f"{nome}-imagem.png"
 
 
@@ -34,9 +32,9 @@ def verificar_nome_disponivel(produto, nome):
             except ValueError:
                 continue
             if nome_outro == destino:
-                raise ValueError("Outro produto usa o mesmo nome de imagem. Use um nome diferente.")
+                raise ValueError("Outro produto usa esse mesmo nome. Use um nome diferente.")
 
-
+# Formata a imagem
 def salvar_imagem(produto, arquivo):
     verificar_nome_disponivel(produto, produto.nome)
     dados = arquivo.stream.read(5 * 1024 * 1024 + 1)
@@ -49,7 +47,7 @@ def salvar_imagem(produto, arquivo):
             if imagem.width * imagem.height > 20_000_000:
                 raise ValueError("A imagem deve ter no máximo 20 milhões de pixels.")
             imagem = ImageOps.exif_transpose(imagem).convert("RGBA")
-            # Reduz para no máximo 600x600 (mantém a proporção): o card mostra bem menor que isso
+            # Reduz para no maximo 600x600
             imagem.thumbnail((600, 600))
             destino = caminho_imagem(produto.nome)
             destino.parent.mkdir(parents=True, exist_ok=True)

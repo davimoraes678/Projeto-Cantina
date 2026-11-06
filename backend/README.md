@@ -7,7 +7,7 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**; quem desenha as
 | `extensions.py` | Cria `db` (banco, SQLAlchemy) e `lm` (login, LoginManager) **uma única vez**, para todo o projeto importar daqui |
 | `routes.py` | `register_routes(app)`: registra todos os controllers no app. **Controller novo precisa ser registrado aqui.** |
 | `autenticacao.py` | Login e permissões: `load_user` (Flask-Login) e os decorators `admin_required` / `master_required` |
-| [`controllers/`](controllers/README.md) | Uma classe por recurso: recebe a requisição HTTP e devolve JSON |
+| [`controllers/`](controllers/README.md) | Um arquivo por recurso, uma função por rota (`@bp.route`): recebe a requisição HTTP e devolve JSON |
 | [`services/`](services/README.md) | Uma classe por caso de uso, com as regras de negócio |
 | [`models/`](models/README.md) | Entidades do domínio / tabelas do banco |
 | [`repositories/`](repositories/README.md) | Consultas não-CRUD por stored procedures do MySQL |
@@ -19,7 +19,7 @@ Toda requisição passa pelas mesmas camadas, nesta ordem:
 
 ```mermaid
 flowchart LR
-    F["Front-end<br/>(fetch no alunos.js)"] -->|"HTTP + JSON"| C["Controller"]
+    F["Front-end<br/>(fetch no js da página)"] -->|"HTTP + JSON"| C["Controller"]
     C --> S["Service"]
     S --> M["Model"]
     S -.->|"consultas não-CRUD"| R["Repository"]
@@ -29,7 +29,7 @@ flowchart LR
 
 | Camada | Responsabilidade | O que **não** faz |
 |---|---|---|
-| **Controller** | Classe por recurso. Liga URL e método, lê a requisição, aplica a permissão, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
+| **Controller** | Um arquivo por recurso, uma função por rota. Liga URL e método (`@bp.route`), lê a requisição, aplica a permissão, chama o service, devolve JSON | Regra de negócio ou acesso ao banco |
 | **Service** | Classe por caso de uso, com `executar()`. Regras e validações. Devolve sempre `(dicionário, código_http)` | Não usa `request` nem `jsonify` |
 | **Model** | Uma classe por tabela (`db.Model`), com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()`, `to_dict()` | Decisões de negócio |
 | **Repository** | Consultas não-CRUD: monta o `CALL sp_...` | CRUD simples (isso fica no Model) |
@@ -39,7 +39,7 @@ flowchart LR
 ```python
 # service
 return {"erro": "O carrinho está vazio"}, 400     # deu errado
-return carrinho.to_dict(), 200                     # deu certo
+return pedido.to_dict(), 200                       # deu certo
 
 # controller
 resposta, status = FinalizarPedidoService.executar()
@@ -65,10 +65,10 @@ O `app.py` fica na raiz do projeto. A função `create_app()`:
 3. Configura o banco (`DATABASE_URL`, padrão SQLite), a pasta de imagens (`arquivos/`), o tamanho máximo de upload (6 MB) e a `SECRET_KEY`.
 4. Liga o banco (`db.init_app`) e o login (`lm.init_app`). Rotas protegidas sem login respondem `401`.
 5. Registra os controllers (`register_routes(app)`).
-6. Protege as páginas: sem login, vai para o cadastro; `admin.html` e `historico.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
+6. Protege as páginas: sem login, vai para o cadastro; `admin.html` só para admin e mestre. Define `/` (entrega o `index.html`) e `/api` (lista de rotas, gerada automaticamente).
 7. Cria as tabelas que ainda não existem (`db.create_all()`).
 
-> ⚠️ O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
+> **Atenção:** O `app.py` importa **todos** os models, inclusive os que parecem sem uso (`avaliacao_model`, `rateio_model`). Sem isso, o SQLAlchemy não encontra as classes dos relacionamentos e **toda consulta ao banco dá erro 500**.
 
 ## Login (Flask-Login)
 
@@ -129,22 +129,20 @@ class AvaliarPedidoService:
         return avaliacao.to_dict(), 201
 ```
 
-**3. Controller** (`controllers/avaliacao_controller.py`), **uma classe por recurso**:
+**3. Controller** (`controllers/avaliacao_controller.py`), **uma função por rota**:
 ```python
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
 
-class AvaliacaoController:
-    @staticmethod
-    @login_required
-    def avaliar(id_pedido):
-        dados = request.get_json(silent=True) or {}
-        resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
-        return jsonify(resposta), status
-
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
-bp_avaliacao.add_url_rule('/<int:id_pedido>/avaliacao', view_func=AvaliacaoController.avaliar, methods=['POST'])
+
+@bp_avaliacao.route('/<int:id_pedido>/avaliacao', methods=['POST'])
+@login_required
+def avaliar(id_pedido):
+    dados = request.get_json(silent=True) or {}
+    resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
+    return jsonify(resposta), status
 ```
 
 **4. Registrar** em `routes.py`:
@@ -156,4 +154,4 @@ E acrescente a rota em [`controllers/README.md`](controllers/README.md) e a func
 
 **Consulta especial (ranking, relatório, filtro complexo)?** Crie a stored procedure no `database/create-database.sql`, um método no repository que faz o `CALL` (ver [`repositories/`](repositories/README.md)) e chame o repository no service.
 
-**5. Front-end:** uma função `async` no `alunos.js`, seguindo o padrão de [`front-end/js/README.md`](../front-end/js/README.md).
+**5. Front-end:** uma função `async` com `fetch` no `.js` da página, seguindo o padrão de [`front-end/js/README.md`](../front-end/js/README.md).

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS produto (
 );
 
 -- id_aluno é NULLABLE de propósito: permite apagar o aluno sem apagar o pedido.
--- nome_aluno guarda uma "foto" do nome no momento do pedido, usada quando o
+-- nome_aluno guarda o nome no momento do pedido, usado quando o
 -- aluno já não existe mais.
 CREATE TABLE IF NOT EXISTS pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,19 +38,25 @@ CREATE TABLE IF NOT EXISTS pedido (
     data_hora_retirada DATETIME DEFAULT NULL,
     id_aluno INT NULL,
     nome_aluno VARCHAR(100) NULL,
+    codigo VARCHAR(4), -- código de retirada, ex.: "4K9P" (tem letras, por isso VARCHAR)
     FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE SET NULL
 );
 
+-- O carrinho não tem tabela própria: são os itens ainda sem pedido.
+--   no carrinho:          id_aluno = dono do carrinho, id_pedido = NULL
+--   depois de finalizar:  id_pedido = pedido criado,   id_aluno = NULL
 -- id_produto é NULLABLE de propósito: permite apagar o produto sem apagar o item já pedido.
 -- nome_produto guarda uma "foto" do nome no momento do pedido.
 CREATE TABLE IF NOT EXISTS itens_pedido (
     id_item_pedido INT AUTO_INCREMENT PRIMARY KEY,
     quantidade INT NOT NULL DEFAULT 1,
     preco_unitario_cobrado DECIMAL(10, 2) NOT NULL,
-    id_pedido INT NOT NULL,
+    id_pedido INT NULL,
+    id_aluno INT NULL,
     id_produto INT NULL,
     nome_produto VARCHAR(100) NULL,
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido) ON DELETE CASCADE,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno) ON DELETE CASCADE,
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto) ON DELETE SET NULL
 );
 
@@ -73,11 +79,7 @@ CREATE TABLE IF NOT EXISTS rateio (
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 
--- =========================================================================
--- PROCEDURES DE BUSCA DE PRODUTO
--- Chamadas apenas pelo ProdutoRepository (backend/repositories/produto_repository.py)
--- via `CALL sp_...`. Controller e Service nunca as chamam diretamente.
--- =========================================================================
+-- Procedures
 
 DELIMITER $
 
@@ -153,13 +155,8 @@ BEGIN
         nome;
 END $
 
--- =========================================================================
--- PROCEDURES DE PEDIDOS (consultas não-CRUD)
--- Chamadas apenas pelo PedidoRepository (backend/repositories/pedido_repository.py)
--- =========================================================================
+-- Consultas não Crud
 
--- Itens (produto e quantidade) do último pedido já feito pelo aluno.
--- O carrinho não conta, e produtos excluídos depois (id_produto NULL) ficam de fora.
 DROP PROCEDURE IF EXISTS sp_repetir_ultimo_pedido $
 CREATE PROCEDURE sp_repetir_ultimo_pedido (IN p_id_aluno INT)
 BEGIN
@@ -173,7 +170,7 @@ BEGIN
         AND id_pedido = (
             SELECT id_pedido
             FROM pedido
-            WHERE id_aluno = p_id_aluno AND status <> 'Carrinho'
+            WHERE id_aluno = p_id_aluno
             ORDER BY id_pedido DESC
             LIMIT 1
         );
@@ -182,7 +179,7 @@ END $
 -- As 3 duplas de produtos que mais aparecem juntas num mesmo pedido.
 -- Junta itens_pedido com ela mesma (a = primeiro produto, b = segundo produto do
 -- mesmo pedido); "b.id_produto > a.id_produto" evita contar Coxinha+Refri e
--- Refri+Coxinha como duplas diferentes. Carrinhos e cancelados não contam.
+-- Refri+Coxinha como duplas diferentes. Pedidos cancelados não contam.
 DROP PROCEDURE IF EXISTS sp_combinacoes_mais_pedidas $
 CREATE PROCEDURE sp_combinacoes_mais_pedidas ()
 BEGIN
@@ -203,7 +200,7 @@ BEGIN
     JOIN
         produto pb ON pb.id_produto = b.id_produto
     WHERE
-        p.status NOT IN ('Carrinho', 'Cancelado')
+        p.status <> 'Cancelado'
     GROUP BY
         a.id_produto, pa.nome, b.id_produto, pb.nome
     ORDER BY

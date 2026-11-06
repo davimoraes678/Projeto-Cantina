@@ -164,7 +164,7 @@ Erros que já aconteceram neste projeto:
 
 ## Limitações conhecidas
 
-- **Stored procedures só existem no MySQL.** Rodando com SQLite, a busca de produtos, o "repetir último pedido" e as combinações usam a mesma consulta pelo ORM (mesmo resultado). Ao mudar o `create-database.sql`, rode o script de novo no MySQL.
+- **Stored procedures só existem no MySQL.** Rodando com SQLite, cada método dos repositories faz a mesma consulta pelo ORM (mesmo resultado), então a busca de produtos, o "repetir último pedido" e as combinações funcionam nos dois bancos. Ao mudar o `create-database.sql`, rode o script de novo no MySQL.
 - **Preço promocional** não é aplicado; o item usa sempre `preco_atual`.
 - **Dividir conta (rateio):** a classe `RateioPagamento` e a tabela existem, mas ainda não há tela nem rota.
 - **Avaliação:** a janela aparece no navegador onde o pedido foi feito, ao abrir a cantina.

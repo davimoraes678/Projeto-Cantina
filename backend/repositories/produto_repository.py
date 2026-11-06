@@ -1,55 +1,72 @@
 from sqlalchemy import text
+
 from backend.extensions import db
+from backend.models.produto_model import Produto
 
 
 class ProdutoRepository:
-    """Única camada da aplicação que conhece e executa os `CALL sp_...`.
+    """Consultas não-CRUD de produto: busca por categoria, por faixa de preço e ordenação.
 
-    Fluxo:
-        Controller -> Service -> Repository -> CALL sp_...(...) -> MySQL
+    No MySQL, cada método chama uma stored procedure (ver backend/database/create-database.sql).
+    Em outro banco (ex.: SQLite no Codespaces), faz a mesma consulta pelo ORM.
+    Todos devolvem uma lista de objetos Produto.
 
-    Controller e Service nunca montam SQL nem chamam procedure diretamente;
-    apenas pedem ao repository o resultado já pronto.
+    Fluxo:  Controller -> Service -> Repository -> CALL sp_...(...) -> MySQL
     """
 
     @staticmethod
-    def _chamar_procedure(nome_procedure, params=None):
-        params = params or {}
-
-        if db.engine.dialect.name != "mysql":
-            # As procedures só existem no MySQL (ver backend/database/create-database.sql).
-            # Se a app estiver rodando com outro banco (ex.: SQLite em DATABASE_URL),
-            # a busca não tem como funcionar - avisamos isso claramente ao dev.
-            raise RuntimeError(
-                "A busca de produtos depende de stored procedures do MySQL. "
-                "Configure DATABASE_URL no .env apontando para o MySQL, por exemplo: "
-                "mysql+pymysql://usuario:senha@localhost/cantina_db?charset=utf8mb4"
-            )
-
-        placeholders = ", ".join(f":{chave}" for chave in params.keys())
-        sql = text(f"CALL {nome_procedure}({placeholders})")
-
-        resultado = db.session.execute(sql, params)
-        colunas = resultado.keys()
-        linhas = resultado.fetchall()
-        return [dict(zip(colunas, linha)) for linha in linhas]
-
-    @staticmethod
     def buscar_por_categoria(categoria):
-        return ProdutoRepository._chamar_procedure(
-            "sp_produtos_por_categoria", {"p_categoria": categoria}
-        )
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_produtos_por_categoria(:categoria)")
+            resultado = db.session.execute(sql, {"categoria": categoria})
+            linhas = resultado.mappings().all()
+            resultado.close()
+
+            return [Produto(**dict(linha)) for linha in linhas]
+
+        # Sem MySQL: a mesma busca pelo ORM
+        return Produto.query.filter_by(categoria=categoria).all()
 
     @staticmethod
     def buscar_por_faixa_de_preco(preco_min, preco_max):
-        return ProdutoRepository._chamar_procedure(
-            "sp_produtos_por_faixa_de_preco", {"p_min": preco_min, "p_max": preco_max}
-        )
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_produtos_por_faixa_de_preco(:minimo, :maximo)")
+            resultado = db.session.execute(sql, {"minimo": preco_min, "maximo": preco_max})
+            linhas = resultado.mappings().all()
+            resultado.close()
+
+            return [Produto(**dict(linha)) for linha in linhas]
+
+        return Produto.query.filter(Produto.preco_atual.between(preco_min, preco_max)).all()
 
     @staticmethod
     def ordenar_por_preco():
-        return ProdutoRepository._chamar_procedure("sp_produtos_ordenar_por_preco")
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_produtos_ordenar_por_preco()")
+            resultado = db.session.execute(sql)
+            linhas = resultado.mappings().all()
+            resultado.close()
+
+            return [Produto(**dict(linha)) for linha in linhas]
+
+        return Produto.query.order_by(Produto.preco_atual, Produto.preco_promocional).all()
 
     @staticmethod
     def ordenar_por_nome():
-        return ProdutoRepository._chamar_procedure("sp_produtos_ordenar_por_nome")
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_produtos_ordenar_por_nome()")
+            resultado = db.session.execute(sql)
+            linhas = resultado.mappings().all()
+            resultado.close()
+
+            return [Produto(**dict(linha)) for linha in linhas]
+
+        return Produto.query.order_by(Produto.nome).all()

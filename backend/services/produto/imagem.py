@@ -1,6 +1,4 @@
-"""Funções de apoio usadas pelos services de produto: imagens dos produtos.
-
-O nome do arquivo é derivado do nome do produto."""
+# Funções de imagem usadas pelos services de produto
 import re
 import unicodedata
 from io import BytesIO
@@ -10,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from flask import current_app
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-# Formata o nome
+# "Pão de Queijo" -> "pao-de-queijo-imagem.png"
 def nome_imagem(nome):
     nome = unicodedata.normalize("NFD", nome)
     nome = "".join(letra for letra in nome if not unicodedata.combining(letra))
@@ -34,7 +32,7 @@ def verificar_nome_disponivel(produto, nome):
             if nome_outro == destino:
                 raise ValueError("Outro produto usa esse mesmo nome. Use um nome diferente.")
 
-# Formata a imagem
+# Valida, reduz e salva como PNG
 def salvar_imagem(produto, arquivo):
     verificar_nome_disponivel(produto, produto.nome)
     dados = arquivo.stream.read(5 * 1024 * 1024 + 1)
@@ -47,7 +45,7 @@ def salvar_imagem(produto, arquivo):
             if imagem.width * imagem.height > 20_000_000:
                 raise ValueError("A imagem deve ter no máximo 20 milhões de pixels.")
             imagem = ImageOps.exif_transpose(imagem).convert("RGBA")
-            # Reduz para no maximo 600x600
+            # No máximo 600x600
             imagem.thumbnail((600, 600))
             destino = caminho_imagem(produto.nome)
             destino.parent.mkdir(parents=True, exist_ok=True)

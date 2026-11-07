@@ -7,7 +7,7 @@ class RateioPagamento(db.Model):
     valor_parte = db.Column(db.Float, nullable=False)
     status_pagamento = db.Column(db.String(50), default="Pendente")
 
-    # nullable=True: permite apagar o aluno sem travar o rateio já gerado.
+    # Vazio se o aluno for excluído
     id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno'), nullable=True)
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), nullable=False)
 

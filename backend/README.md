@@ -116,8 +116,6 @@ from backend.models.pedido_model import Pedido
 from backend.models.avaliacao_model import Avaliacao
 
 class AvaliarPedidoService:
-    """Caso de uso: o aluno dá nota (1 a 5) e um comentário opcional para o pedido."""
-
     @staticmethod
     def executar(id_pedido, dados):
         pedido = Pedido.buscar_por_id(id_pedido)

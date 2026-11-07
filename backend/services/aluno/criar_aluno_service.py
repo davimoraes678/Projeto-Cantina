@@ -4,8 +4,6 @@ from backend.extensions import login_user
 
 
 class CriarAlunoService:
-    """Caso de uso: cadastrar aluno (e já deixar logado)."""
-
     @staticmethod
     def executar(dados):
         nome = dados.get("nome")
@@ -16,7 +14,7 @@ class CriarAlunoService:
         if Aluno.query.filter_by(email=email).first():
             return {"erro": "Já existe um aluno cadastrado com esse email"}, 409
 
-        # O primeiro cadastro do sistema vira o mestre; os outros são alunos comuns
+        # O primeiro cadastro vira mestre
         funcao = "aluno" if Aluno.query.filter_by(funcao="mestre").first() else "mestre"
 
         novo_aluno = Aluno(nome=nome, email=email, senha=generate_password_hash(senha), funcao=funcao)

@@ -1,16 +1,9 @@
-// =============================================================================
-// pedidos.js: "Meus pedidos" do aluno (pedidos.html).
-//   - aba "Em andamento": pedidos em preparo e prontos para retirar
-//   - aba "Histórico": entregues e cancelados, com "Pedir de novo" e "Avaliar"
-// =============================================================================
-
-let pedidoAvaliando = null; // pedido que a janela de avaliação está avaliando
+let pedidoAvaliando = null;
 
 alunoInf();
 carregarMeusPedidos();
 
-// Busca os pedidos do aluno (GET /pedidos/meus). O back-end já manda separado:
-// { andamento: [...], historico: [...] }, o mais recente primeiro.
+// O back-end manda { andamento, historico }
 async function carregarMeusPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/meus`);
@@ -44,19 +37,12 @@ async function carregarMeusPedidos() {
   }
 }
 
-// HTML do card de um pedido. O texto do status vem pronto do back-end
-// (status_texto); aqui só escolhemos a cor e os botões:
-//   Pendente  -> amarelo
-//   Pronto    -> verde, com o código para mostrar no balcão
-//   Concluído -> cinza, com "Avaliar" e "Pedir de novo"
-//   Cancelado -> vermelho, com "Pedir de novo"
 function cardPedido(pedido) {
   let cor = "warning";
   if (pedido.status === "Pronto") cor = "success";
   if (pedido.status === "Concluído") cor = "secondary";
   if (pedido.status === "Cancelado") cor = "danger";
 
-  // Itens: "2x Coxinha ... R$ 13,00"
   let itens = "";
   pedido.itens.forEach((item) => {
     itens += `
@@ -66,13 +52,11 @@ function cardPedido(pedido) {
       </li>`;
   });
 
-  // Pronto: aviso para o aluno ir buscar
   let retirar = "";
   if (pedido.status === "Pronto") {
     retirar = `<div class="alert alert-success py-2 mb-2">Seu pedido está pronto! Retire no balcão com o código <strong>${pedido.codigo}</strong>.</div>`;
   }
 
-  // Botões do rodapé (só para pedidos que já terminaram)
   let botoes = "";
   if (pedido.status === "Cancelado") {
     botoes += `<small class="text-body-secondary me-auto">Valor devolvido à carteira</small>`;
@@ -104,8 +88,7 @@ function cardPedido(pedido) {
     </div>`;
 }
 
-// "Pedir de novo": POST /carrinho/repetir/<id> coloca os mesmos itens no carrinho
-// e leva para o cardápio com o carrinho aberto.
+// Coloca os itens no carrinho e abre o cardápio com o carrinho aberto
 async function pedirDeNovo(id_pedido) {
   try {
     const res = await fetch(`${API_BASE_URL}/carrinho/repetir/${id_pedido}`, { method: "POST" });
@@ -120,14 +103,12 @@ async function pedirDeNovo(id_pedido) {
   }
 }
 
-// "Avaliar": abre a janela de avaliação (nota de 1 a 5 e comentário).
 function abrirAvaliacao(id_pedido) {
   pedidoAvaliando = id_pedido;
   document.getElementById("form-avaliacao").reset();
   bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-avaliacao")).show();
 }
 
-// Envio da avaliação: POST /pedidos/<id>/avaliacao com { nota, comentario }
 document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
   e.preventDefault();
   const nota = Number(document.querySelector('input[name="nota"]:checked').value);
@@ -146,7 +127,7 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
       return;
     }
     avisar("Obrigado pela avaliação!");
-    carregarMeusPedidos(); // some o botão "Avaliar"
+    carregarMeusPedidos();
   } catch (erro) {
     console.error("Erro ao avaliar:", erro);
   }

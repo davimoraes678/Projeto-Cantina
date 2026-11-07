@@ -2,9 +2,8 @@ from backend.extensions import db
 from backend.models.produto_model import Produto
 
 
+# Os pedidos antigos mantêm o nome do produto
 class DeletarProdutoService:
-    """Caso de uso: excluir produto (só o mestre). Os pedidos antigos mantêm o nome dele."""
-
     @staticmethod
     def executar(id_produto):
         produto = Produto.buscar_por_id(id_produto)
@@ -12,9 +11,7 @@ class DeletarProdutoService:
             return {"erro": "Produto não encontrado"}, 404
 
         try:
-            # Antes de apagar o produto, preserva o histórico dos itens de pedido que o usam:
-            # guarda o nome (caso ainda não tenha sido salvo) e solta o vínculo com o produto,
-            # para que o pedido continue existindo mesmo depois do produto ser excluído.
+            # Mantém os pedidos com o nome do produto
             for item in produto.itens_pedido:
                 if not item.nome_produto:
                     item.nome_produto = produto.nome

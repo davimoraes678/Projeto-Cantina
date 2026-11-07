@@ -7,12 +7,6 @@ from backend.services.produto.imagem import nome_imagem
 
 
 class BuscarImagemProdutoService:
-    """Caso de uso: achar o arquivo da foto de um produto.
-
-    Devolve o nome do arquivo dentro da pasta arquivos/; o controller é quem
-    envia o arquivo na resposta HTTP.
-    """
-
     @staticmethod
     def executar(id_produto):
         produto = Produto.buscar_por_id(id_produto)

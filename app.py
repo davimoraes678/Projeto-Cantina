@@ -16,7 +16,6 @@ def create_app():
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/front-end")
 
-    # Permite que o front-end (servido de outra origem/porta) consuma a API
     CORS(app)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///cantina.db")
@@ -42,7 +41,7 @@ def create_app():
         '/front-end/carteira.html',
         '/front-end/pedidos.html',
     }
-    # Páginas só para admin e mestre: um aluno comum volta para a cantina
+    # Aluno comum que abrir estas páginas volta para a cantina
     PAGINAS_ADMIN = {
         '/front-end/admin.html',
     }
@@ -66,12 +65,12 @@ def create_app():
     @app.get('/api')
     @login_required
     def api_info():
-        # Monta a lista de rotas a partir das que o Flask conhece (assim nunca fica desatualizada)
+        # Lista as rotas /api/ registradas no Flask
         rotas = []
-        for regra in app.url_map.iter_rules():               # todas as rotas registradas
-            if regra.rule.startswith('/api/'):                # só as da API
-                metodos = regra.methods - {'HEAD', 'OPTIONS'}  # tira os que o Flask cria sozinho
-                rotas.append(f"{' '.join(sorted(metodos))} {regra.rule}")  # ex.: "GET /api/pedidos"
+        for regra in app.url_map.iter_rules():
+            if regra.rule.startswith('/api/'):
+                metodos = regra.methods - {'HEAD', 'OPTIONS'}
+                rotas.append(f"{' '.join(sorted(metodos))} {regra.rule}")
         return jsonify({
             "message": "API Flask + SQLAlchemy funcionando!",
             "rotas": sorted(rotas)

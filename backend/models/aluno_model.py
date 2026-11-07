@@ -10,7 +10,6 @@ class Aluno(UserMixin, db.Model):
     senha = db.Column(db.String(255), nullable=False)
     saldo = db.Column(db.Float, nullable=False, default=0.0)
     funcao = db.Column(db.String(20), nullable=False, default='aluno')
-    # Relacionamentos
     pedido = db.relationship('Pedido', backref='aluno', lazy=True)
     rateio = db.relationship('RateioPagamento', backref='aluno', lazy=True)
 

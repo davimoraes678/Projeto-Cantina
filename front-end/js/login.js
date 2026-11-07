@@ -1,13 +1,8 @@
-// =============================================================================
-// login.js: telas de cadastro (cadastro.html) e login (login.html).
-// Nos dois casos o back-end já deixa o aluno logado, e aí vamos para o cardápio.
-// =============================================================================
-
-// --- CADASTRO: POST /alunos/registro com nome, e-mail e senha ---
+// Cadastro
 const formAluno = document.getElementById("form-aluno");
 if (formAluno) {
   formAluno.addEventListener("submit", async (e) => {
-    e.preventDefault(); // não deixa o navegador recarregar a página
+    e.preventDefault();
     const nome = document.getElementById("aluno-nome").value;
     const email = document.getElementById("aluno-email").value;
     const senha = document.getElementById("aluno-senha").value;
@@ -23,7 +18,7 @@ if (formAluno) {
         alert(erro.erro || "Não foi possível fazer o cadastro.");
         return;
       }
-      window.location.href = "/"; // cadastrou e já está logado
+      window.location.href = "/";
     } catch (erro) {
       console.error("Erro ao cadastrar:", erro);
       alert("Ocorreu um erro ao fazer o cadastro.");
@@ -31,7 +26,7 @@ if (formAluno) {
   });
 }
 
-// --- LOGIN: POST /alunos/login com e-mail e senha ---
+// Login
 const formLogin = document.getElementById("form-aluno-login");
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
@@ -50,7 +45,7 @@ if (formLogin) {
         alert(erro.erro || "E-mail ou senha incorretos.");
         return;
       }
-      window.location.href = "/"; // logado: vai para o cardápio
+      window.location.href = "/";
     } catch (erro) {
       console.error("Erro ao fazer login:", erro);
       alert("Ocorreu um erro ao fazer login.");

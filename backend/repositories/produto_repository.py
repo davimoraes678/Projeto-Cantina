@@ -4,16 +4,8 @@ from backend.extensions import db
 from backend.models.produto_model import Produto
 
 
+# No MySQL chama a procedure; em outro banco (SQLite) faz a mesma consulta pelo ORM
 class ProdutoRepository:
-    """Consultas não-CRUD de produto: busca por categoria, por faixa de preço e ordenação.
-
-    No MySQL, cada método chama uma stored procedure (ver backend/database/create-database.sql).
-    Em outro banco (ex.: SQLite no Codespaces), faz a mesma consulta pelo ORM.
-    Todos devolvem uma lista de objetos Produto.
-
-    Fluxo:  Controller -> Service -> Repository -> CALL sp_...(...) -> MySQL
-    """
-
     @staticmethod
     def buscar_por_categoria(categoria):
         banco = db.session.get_bind().dialect.name
@@ -26,7 +18,6 @@ class ProdutoRepository:
 
             return [Produto(**dict(linha)) for linha in linhas]
 
-        # Sem MySQL: a mesma busca pelo ORM
         return Produto.query.filter_by(categoria=categoria).all()
 
     @staticmethod

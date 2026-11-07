@@ -3,8 +3,7 @@ from flask_login import login_required
 
 from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
 
-# Rotas do recurso Avaliação: lê a requisição, chama o service e devolve JSON.
-# URL: /api/pedidos/<id>/avaliacao (a avaliação é sempre de um pedido)
+# /api/pedidos/<id>/avaliacao
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
 
 

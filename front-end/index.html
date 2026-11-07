@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/front-end/css/style.css">
 </head>
 <body>
-    <!-- Barra de cima. No celular e no tablet os links ficam na barra de baixo -->
+    <!-- Barra de cima -->
     <nav class="navbar navbar-expand navbar-dark bg-cantina sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
@@ -27,12 +27,10 @@
                 <a class="badge rounded-pill bg-white bg-opacity-25 text-white text-decoration-none fs-6 fw-semibold py-2 px-3" href="/front-end/carteira.html">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone me-1" fill="currentColor" aria-hidden="true"><path d="M180-233v53-600 547Zm0 113q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v134h-60v-134H180v600h600v-133h60v133q0 24.75-17.62 42.37Q804.75-120 780-120H180Zm358-173q-30.52 0-52.26-21.44Q464-335.89 464-366v-227q0-30.11 21.74-51.56Q507.48-666 538-666h270q30.53 0 52.26 21.44Q882-623.11 882-593v227q0 30.11-21.74 51.56Q838.53-293 808-293H538Zm284-60v-253H524v253h298Zm-124.5-81.96Q716-453.92 716-481q0-26.25-19-44.63Q678-544 652-544t-45 18.37q-19 18.38-19 44.63 0 27.08 18.74 46.04Q625.47-416 652.24-416q26.76 0 45.26-18.96Z"/></svg><span class="saldo-aluno">R$ 0,00</span>
                 </a>
-                <!-- Abre o carrinho (painel lateral #carrinho) -->
                 <button class="btn btn-light rounded-pill position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" aria-label="Abrir carrinho">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone" fill="currentColor" aria-hidden="true"><path d="M236-102.21q-21-21.21-21-51T236.21-204q21.21-21 51-21T338-203.79q21 21.21 21 51T337.79-102q-21.21 21-51 21T236-102.21Zm400 0q-21-21.21-21-51T636.21-204q21.21-21 51-21T738-203.79q21 21.21 21 51T737.79-102q-21.21 21-51 21T636-102.21ZM235-741l110 228h288l125-228H235Zm-30-60h589.07q22.97 0 34.95 21 11.98 21-.02 42L694-495q-11 19-28.56 30.5T627-453H324l-56 104h491v60H277q-42 0-60.5-28t.5-63l64-118-152-322H51v-60h117l37 79Zm140 288h288-288Z"/></svg><span class="d-none d-xl-inline ms-1">Carrinho</span>
                     <span id="contador-carrinho" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"></span>
                 </button>
-                <!-- Sair (no celular e no tablet fica na página Perfil) -->
                 <button class="btn btn-outline-light rounded-pill d-none d-lg-inline-flex align-items-center gap-1 btn-logout" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone " fill="currentColor" aria-hidden="true"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h299v60H180v600h299v60H180Zm486-185-43-43 102-102H360v-60h363L621-612l43-43 176 176-174 174Z"/></svg> Sair
                 </button>
@@ -46,7 +44,7 @@
             <p class="mb-0 opacity-75">Peça pelo site e retire na cantina, sem fila.</p>
         </section>
 
-        <!-- Pedido em andamento: o cardapio.js mostra quando há um pedido em preparo -->
+        <!-- Aviso de pedido em andamento -->
         <a id="aviso-pedido" class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 text-decoration-none mb-3 d-none" href="/front-end/pedidos.html">
             <span class="spinner-grow spinner-grow-sm text-warning" aria-hidden="true"></span>
             <span class="flex-grow-1">
@@ -56,7 +54,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone fs-4" fill="currentColor" aria-hidden="true"><path d="M530-481 332-679l43-43 241 241-241 241-43-43 198-198Z"/></svg>
         </a>
 
-        <!-- Categorias (botões) + botão que abre os filtros de preço e ordenação -->
+        <!-- Categorias e botão de filtros -->
         <div class="d-flex gap-2 align-items-center mb-2">
             <div class="d-flex gap-2 overflow-x-auto flex-nowrap py-1">
                 <button class="btn btn-primary rounded-pill text-nowrap" type="button" data-categoria="" onclick="filtrar('')">Tudo</button>
@@ -69,7 +67,7 @@
             </button>
         </div>
 
-        <!-- Filtros de preço e ordenação (abre e fecha com o collapse do Bootstrap) -->
+        <!-- Filtros de preço e ordenação -->
         <div class="collapse" id="filtros">
             <form id="form-filtros" class="card card-body border-0 shadow-sm mb-3">
                 <div class="row g-2">
@@ -94,23 +92,21 @@
             </form>
         </div>
 
-        <!-- Combos mais pedidos: o cardapio.js mostra quando já existem pedidos -->
+        <!-- Combos mais pedidos -->
         <section id="secao-combos" class="mb-3 d-none">
             <h2 class="h6 fw-bold text-body-secondary mb-2">Combos mais pedidos</h2>
             <div id="lista-combos" class="d-flex gap-2 overflow-x-auto flex-nowrap pb-1"></div>
         </section>
 
         <h2 class="h5 fw-bold mb-2">Cardápio</h2>
-        <!-- Cards dos produtos, montados pelo cardapio.js -->
+        <!-- Produtos (montados pelo cardapio.js) -->
         <div id="lista-produtos" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-md-3"></div>
 
-        <!-- Espaço para o conteúdo não ficar atrás da barra de baixo (celular e tablet) -->
         <div class="d-lg-none py-5"></div>
     </main>
 
-    <!-- Celular e tablet: barra de navegação de baixo (o item Admin só aparece para admin e mestre) -->
+    <!-- Barra de baixo (celular e tablet) -->
     <div class="fixed-bottom d-lg-none">
-        <!-- Botão "Ver carrinho": aparece quando há itens no carrinho -->
         <div class="px-3 pb-2 d-none" id="barra-carrinho">
             <button class="btn btn-primary btn-lg w-100 rounded-pill shadow fs-6" type="button" data-bs-toggle="offcanvas" data-bs-target="#carrinho" id="barra-carrinho-texto">Ver carrinho</button>
         </div>
@@ -123,11 +119,10 @@
         </nav>
     </div>
 
-    <!-- Detalhes do produto: o cardapio.js preenche e abre quando o aluno toca num card -->
+    <!-- Detalhes do produto -->
     <div class="modal fade" id="modal-detalhe" tabindex="-1" aria-labelledby="detalhe-nome" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 overflow-hidden">
-                <!-- Foto: o cardapio.js coloca a imagem aqui; se o produto não tiver foto, esta área some -->
                 <div class="ratio ratio-4x3" id="detalhe-foto"></div>
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3 bg-white rounded-circle p-2 shadow-sm" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 <div class="modal-body p-4">
@@ -150,7 +145,7 @@
         </div>
     </div>
 
-    <!-- Carrinho: painel lateral (offcanvas do Bootstrap) -->
+    <!-- Carrinho -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="carrinho" aria-labelledby="carrinho-titulo">
         <div class="offcanvas-header bg-cantina text-white">
             <h5 class="offcanvas-title" id="carrinho-titulo">Seu pedido</h5>
@@ -174,7 +169,7 @@
         </div>
     </div>
 
-    <!-- Janela "Pedido enviado!" com o código de retirada -->
+    <!-- Pedido enviado, com o código de retirada -->
     <div class="modal fade" id="modal-pedido-feito" tabindex="-1" aria-labelledby="modal-pedido-feito-titulo" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 text-center">
@@ -192,7 +187,7 @@
         </div>
     </div>
 
-    <!-- Aviso verde (toast do Bootstrap): o avisar() do comum.js preenche e mostra -->
+    <!-- Aviso verde (avisar() do comum.js) -->
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
         <div id="aviso" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
             <div class="d-flex">

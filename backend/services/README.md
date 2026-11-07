@@ -6,8 +6,6 @@ Todo `executar()` devolve uma tupla **`(dicionário, código_http)`**, por exemp
 
 ```python
 class FinalizarPedidoService:
-    """Caso de uso: fechar o carrinho como pedido, descontando estoque e saldo."""
-
     @staticmethod
     def executar():
         ...

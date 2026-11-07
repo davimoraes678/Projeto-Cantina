@@ -12,8 +12,7 @@ from backend.services.aluno.logout_aluno_service import LogoutAlunoService
 from backend.services.aluno.promover_aluno_service import PromoverAlunoService
 from backend.services.aluno.recarregar_saldo_service import RecarregarSaldoService
 
-# Rotas do recurso Aluno: lê a requisição, chama o service e devolve JSON.
-# URLs do recurso: /api/alunos/...
+# /api/alunos
 bp_aluno = Blueprint('alunos', __name__, url_prefix='/api/alunos')
 
 

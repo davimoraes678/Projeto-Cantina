@@ -11,10 +11,9 @@ class Produto(db.Model):
     preco_promocional = db.Column(db.Float, nullable=True)
     ingredientes = db.Column(db.String(500), nullable=True)
     categoria = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.Boolean, default=True) # ou db.String, dependendo de como você controla status
+    status = db.Column(db.Boolean, default=True)
     imagem = db.Column(db.String(100), nullable=True)
 
-    # Relacionamento 1:N com ItemPedido
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)
 
     def salvar(self):

@@ -10,8 +10,7 @@ from backend.services.produto.enviar_imagem_produto_service import EnviarImagemP
 from backend.services.produto.filtrar_produtos_service import FiltrarProdutosService
 from backend.services.produto.listar_produtos_service import ListarProdutosService
 
-# Rotas do recurso Produto: lê a requisição, chama o service e devolve JSON.
-# URLs do recurso: /api/produtos/...
+# /api/produtos
 bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
 
 
@@ -31,7 +30,7 @@ def criar():
 
 @bp_produto.route('/buscar', methods=['GET'])
 def filtrar():
-    # Query params: ?categoria=Bebida  ?preco_min=2&preco_max=10  ?ordenar=preco|nome
+    # ?categoria=Bebida  ?preco_min=2&preco_max=10  ?ordenar=preco|nome
     filtros = {
         'categoria': request.args.get('categoria') or None,
         'preco_min': request.args.get('preco_min', type=float),
@@ -75,7 +74,7 @@ def ver_imagem(id_produto):
     resposta, status = BuscarImagemProdutoService.executar(id_produto)
     if status != 200:
         return jsonify(resposta), status
-    # A resposta aqui é o próprio arquivo da imagem
+    # Devolve o arquivo da imagem
     arquivo = send_from_directory(current_app.config["ARQUIVOS_DIR"], resposta["arquivo"])
     arquivo.headers["Cache-Control"] = "no-cache"
     return arquivo

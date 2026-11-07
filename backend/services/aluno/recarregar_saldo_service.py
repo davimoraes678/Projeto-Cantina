@@ -2,8 +2,6 @@ from flask_login import current_user
 
 
 class RecarregarSaldoService:
-    """Caso de uso: adicionar saldo na carteira do aluno logado."""
-
     @staticmethod
     def executar(dados):
         try:

@@ -1,10 +1,5 @@
-// =============================================================================
-// conta.js: perfil do aluno (conta.html): editar dados e remover a conta.
-// =============================================================================
-
 preencherFormulario();
 
-// Mostra os dados do aluno na página e deixa o formulário "Editar dados" preenchido.
 async function preencherFormulario() {
   const aluno = await alunoInf();
   if (!aluno) return;
@@ -12,7 +7,7 @@ async function preencherFormulario() {
   document.getElementById("aluno-email").value = aluno.email;
 }
 
-// "Salvar": PUT /alunos/atual. Senha em branco = continua a mesma.
+// Senha em branco mantém a atual
 document.getElementById("form-editar-aluno").addEventListener("submit", async (e) => {
   e.preventDefault();
   const corpo = {
@@ -34,15 +29,14 @@ document.getElementById("form-editar-aluno").addEventListener("submit", async (e
       return;
     }
     document.getElementById("aluno-senha").value = "";
-    bootstrap.Collapse.getOrCreateInstance(document.getElementById("form-editar-dados")).hide(); // fecha o "Editar dados"
-    alunoInf(); // mostra o nome novo
+    bootstrap.Collapse.getOrCreateInstance(document.getElementById("form-editar-dados")).hide();
+    alunoInf();
     avisar("Dados atualizados");
   } catch (erro) {
     console.error("Erro ao editar dados:", erro);
   }
 });
 
-// "Remover minha conta": DELETE /alunos/atual. Os pedidos continuam no histórico.
 async function removerAluno() {
   if (!confirm("Remover sua conta? Seus pedidos continuam no histórico da cantina.")) return;
   try {

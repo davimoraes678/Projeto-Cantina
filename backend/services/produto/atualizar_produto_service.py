@@ -2,16 +2,15 @@ from backend.models.produto_model import Produto
 from backend.services.produto.imagem import renomear_imagem
 
 
+# Muda só os campos enviados
 class AtualizarProdutoService:
-    """Caso de uso: editar produto (só o mestre). Muda só os campos enviados."""
-
     @staticmethod
     def executar(id_produto, dados):
         produto = Produto.buscar_por_id(id_produto)
         if not produto:
             return {"erro": "Produto não encontrado"}, 404
 
-        # A imagem tem o nome do produto: ao renomear o produto, renomeia o arquivo junto
+        # Renomeou o produto: renomeia a imagem
         if dados.get('nome'):
             try:
                 renomear_imagem(produto, dados['nome'])

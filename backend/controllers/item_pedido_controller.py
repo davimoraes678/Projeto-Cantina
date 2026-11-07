@@ -8,10 +8,7 @@ from backend.services.carrinho.repetir_pedido_service import RepetirPedidoServic
 from backend.services.carrinho.repetir_ultimo_pedido_service import RepetirUltimoPedidoService
 from backend.services.carrinho.ver_carrinho_service import VerCarrinhoService
 
-# Rotas do carrinho (itens de pedido do aluno logado).
-# 
-# Todas usam o aluno logado (current_user), por isso nenhuma recebe id_aluno na URL.
-# URLs do recurso: /api/carrinho/...
+# /api/carrinho (sempre do aluno logado)
 bp_item_pedido = Blueprint('carrinho', __name__, url_prefix='/api/carrinho')
 
 

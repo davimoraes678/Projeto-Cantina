@@ -3,8 +3,6 @@ from backend.services.produto.imagem import salvar_imagem
 
 
 class EnviarImagemProdutoService:
-    """Caso de uso: enviar a foto de um produto (só o mestre)."""
-
     @staticmethod
     def executar(id_produto, arquivo):
         produto = Produto.buscar_por_id(id_produto)

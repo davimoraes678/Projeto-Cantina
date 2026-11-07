@@ -7,8 +7,6 @@ from backend.models.pedido_model import Pedido
 
 
 class FinalizarPedidoService:
-    """Caso de uso: transformar o carrinho em pedido, descontando estoque e saldo."""
-
     @staticmethod
     def executar():
         itens = ItemPedido.buscar_carrinho(current_user.id_aluno)
@@ -17,7 +15,7 @@ class FinalizarPedidoService:
 
         total = round(sum(item.preco_unitario_cobrado * item.quantidade for item in itens), 2)
 
-        # Confere estoque e saldo antes de mudar qualquer coisa
+        # Confere estoque e saldo antes de mudar algo
         for item in itens:
             if not item.produto:
                 return {"erro": f"{item.nome_produto} não está mais à venda. Remova-o do carrinho."}, 400
@@ -26,21 +24,21 @@ class FinalizarPedidoService:
         if current_user.saldo < total:
             return {"erro": "Saldo insuficiente. Adicione saldo na sua carteira."}, 400
 
-        # Cria o codigo de retirada
-        numeros = random.choices(string.digits, k=2)  # Ex: ['4', '9']
-        letras = random.choices(string.ascii_uppercase, k=2)  # Ex: ['A', 'Z']
+        # Código de retirada, ex.: 49AZ
+        numeros = random.choices(string.digits, k=2)
+        letras = random.choices(string.ascii_uppercase, k=2)
         codigo_lista = numeros + letras
         random.shuffle(codigo_lista)
         codigo_final = "".join(codigo_lista)
 
-        # Tudo certo: cria o pedido e passa os itens do carrinho para ele
+        # Passa os itens do carrinho para o pedido
         pedido = Pedido(id_aluno=current_user.id_aluno, nome_aluno=current_user.nome,
                         status="Pendente", valor_total=total, codigo=codigo_final)
         db.session.add(pedido)
         for item in itens:
             item.produto.quantidade_estoque -= item.quantidade
-            pedido.itens.append(item)  # o item agora pertence ao pedido...
-            item.id_aluno = None       # ...e saiu do carrinho
+            pedido.itens.append(item)
+            item.id_aluno = None
         current_user.saldo = round(current_user.saldo - total, 2)
         db.session.commit()
         return pedido.to_dict(), 200

@@ -4,8 +4,6 @@ from backend.extensions import login_user
 
 
 class LoginAlunoService:
-    """Caso de uso: entrar no sistema com e-mail e senha."""
-
     @staticmethod
     def executar(dados):
         email = dados.get("email")

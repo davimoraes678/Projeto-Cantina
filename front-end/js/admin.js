@@ -294,7 +294,34 @@ async function removerProduto(id_produto) {
   }
 }
 
+async function carregarAvaliacoes() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/avaliacao`);
+    if (!res.ok) return;
 
+    const avaliacoes = await res.json();
+    let ratehtml = "";
+
+    avaliacoes.forEach((avaliacao) => {
+      ratehtml += `
+        <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
+          <div class="flex-grow-1">
+            <div class="fw-semibold">ID: ${escaparTexto(avaliacao.id_avaliacao)}</div>
+            <div class="fw-bold text-warning">Nota: ${escaparTexto(avaliacao.nota)} ★</div>
+            <div class="mt-1">
+              <span class="badge rounded-pill text-bg-light border text-capitalize">
+                ${escaparTexto(avaliacao.comentario)}
+              </span>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById("lista-avaliacoes").innerHTML = ratehtml;
+  } catch (erro) {
+    console.error("Erro ao carregar avaliações:", erro);
+  }
+}
 
 // Alunos (só mestre)
 

@@ -1,6 +1,7 @@
 let categoriaAtual = "";
 let produtos = [];
 let produtoAberto = null; // id do produto aberto na janela de detalhes
+let pedidoAvaliando = null;
 
 iniciar();
 
@@ -10,6 +11,7 @@ function iniciar() {
   carregarCombinacoes();
   carregarCarrinho();
   verificarPedidoAndamento();
+  verificarAvaliacao();
 
   // Veio do "Pedir de novo" (/#carrinho)
   if (window.location.hash === "#carrinho") {
@@ -73,7 +75,7 @@ function cardProduto(produto) {
 
   return `
     <div class="col">
-      <div class="card card-produto h-100 border-0 shadow-sm rounded-4" role="button" onclick="abrirProduto(${id})">
+      <div class="card card-produto h-100 border-0 shadow-sm rounded-4" onclick="abrirProduto(${id})">
         <div class="ratio ratio-4x3 rounded-top-4">
           <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="" class="object-fit-contain p-2" loading="lazy" onerror="this.remove()">
         </div>
@@ -258,7 +260,7 @@ function renderizarCarrinho(carrinho) {
         <span class="badge rounded-pill text-bg-light border">${item.quantidade}x</span>
         <span class="flex-grow-1">${escaparTexto(item.produto_nome)}</span>
         <span class="fw-semibold">${formatarPreco(item.subtotal)}</span>
-        <button class="btn-close" type="button" onclick="removerItemDoCarrinho(${item.id_item_pedido})" aria-label="Remover"></button>
+        <button class="btn-close" type="button" onclick="removerItemDoCarrinho(${item.id_item_pedido})"></button>
       </li>`;
   });
   document.getElementById("lista-carrinho").innerHTML = html;
@@ -307,6 +309,8 @@ async function finalizarPedido() {
       return;
     }
 
+    localStorage.setItem("pedidoParaAvaliar", pedido.id_pedido); // pede a avaliação quando for concluído
+
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("carrinho")).hide();
     document.getElementById("pedido-feito-codigo").textContent = pedido.codigo;
     bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-pedido-feito")).show();
@@ -339,3 +343,51 @@ async function verificarPedidoAndamento() {
     console.error("Erro ao verificar pedidos:", erro);
   }
 }
+
+// Avaliação
+
+// Se o último pedido já foi concluído, abre a janela de avaliação
+async function verificarAvaliacao() {
+  const id = localStorage.getItem("pedidoParaAvaliar");
+  if (!id) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/${id}`);
+    if (!res.ok) return;
+    const pedido = await res.json();
+    if (pedido.avaliado) {
+      localStorage.removeItem("pedidoParaAvaliar");
+      return;
+    }
+    if (pedido.status === "Concluído") {
+      pedidoAvaliando = pedido.id_pedido;
+      document.getElementById("form-avaliacao").reset();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-avaliacao")).show();
+    }
+  } catch (erro) {
+    console.error("Erro ao verificar avaliação:", erro);
+  }
+}
+
+document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nota = Number(document.getElementById("avaliacao-nota").value);
+  const comentario = document.getElementById("avaliacao-comentario").value;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/pedidos/${pedidoAvaliando}/avaliacao`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nota, comentario }),
+    });
+    localStorage.removeItem("pedidoParaAvaliar");
+    bootstrap.Modal.getInstance(document.getElementById("modal-avaliacao")).hide();
+    if (!res.ok) {
+      const erro = await res.json();
+      alert(erro.erro || "Não foi possível enviar a avaliação.");
+      return;
+    }
+    avisar("Obrigado pela avaliação!");
+  } catch (erro) {
+    console.error("Erro ao avaliar:", erro);
+  }
+});

@@ -111,7 +111,7 @@ function abrirAvaliacao(id_pedido) {
 
 document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const nota = Number(document.querySelector('input[name="nota"]:checked').value);
+  const nota = Number(document.getElementById("avaliacao-nota").value);
   const comentario = document.getElementById("avaliacao-comentario").value;
 
   try {
@@ -120,6 +120,9 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nota, comentario }),
     });
+    if (localStorage.getItem("pedidoParaAvaliar") === String(pedidoAvaliando)) {
+      localStorage.removeItem("pedidoParaAvaliar");
+    }
     bootstrap.Modal.getInstance(document.getElementById("modal-avaliacao")).hide();
     if (!res.ok) {
       const erro = await res.json();

@@ -36,6 +36,7 @@ document.querySelectorAll(".btn-logout").forEach((botao) => {
   botao.addEventListener("click", async () => {
     try {
       await fetch(`${API_BASE_URL}/alunos/logout`, { method: "POST" });
+      localStorage.removeItem("pedidoParaAvaliar"); // outro aluno pode entrar neste navegador
       window.location.href = "/front-end/login.html";
     } catch (erro) {
       console.error("Erro ao sair:", erro);

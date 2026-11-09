@@ -78,16 +78,6 @@
     cursor: pointer;
 }
 
-/* Contorno amarelo ao navegar com Tab */
-.btn:focus-visible,
-.nav-link:focus-visible,
-.list-group-item:focus-visible,
-a:focus-visible {
-    outline: 3px solid var(--cantina-amarelo);
-    outline-offset: 2px;
-    box-shadow: none;
-}
-
 /* Admin no computador: tudo um pouco maior */
 @media (min-width: 992px) {
     html.pagina-admin {

@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 
 from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
+from backend.services.avaliacao.listar_avaliacao_service import ListarAvaliacaoService
+
 
 # /api/pedidos/<id>/avaliacao
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
@@ -13,3 +15,7 @@ def avaliar(id_pedido):
     dados = request.get_json(silent=True) or {}
     resposta, status = AvaliarPedidoService.executar(id_pedido, dados)
     return jsonify(resposta), status
+
+@bp_avaliacao.route('', methods=['GET'])
+@login_required
+def

@@ -294,6 +294,8 @@ async function removerProduto(id_produto) {
   }
 }
 
+
+
 // Alunos (só mestre)
 
 // O mestre não pode ser promovido nem excluído

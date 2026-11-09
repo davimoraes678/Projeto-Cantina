@@ -186,7 +186,6 @@ function novoProduto() {
   editandoProdutoId = null;
   document.getElementById("form-produto").reset();
   document.getElementById("modal-produto-titulo").textContent = "Novo produto";
-  document.getElementById("produto-imagem-previa").classList.add("d-none");
   bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
 }
 
@@ -200,24 +199,8 @@ function editarProduto(id_produto) {
   document.getElementById("produto-categoria").value = produto.categoria || "";
   document.getElementById("produto-ingredientes").value = produto.ingredientes || "";
   document.getElementById("modal-produto-titulo").textContent = "Editar produto";
-
-  // "?v=" evita mostrar a foto antiga guardada no navegador
-  mostrarPrevia(`${API_BASE_URL}/produtos/${id_produto}/imagem?v=${Date.now()}`);
   bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
 }
-
-// Sem foto, a prévia fica escondida
-function mostrarPrevia(endereco) {
-  const previa = document.getElementById("produto-imagem-previa");
-  previa.classList.add("d-none");
-  previa.onload = () => previa.classList.remove("d-none");
-  previa.src = endereco;
-}
-
-document.getElementById("imagem").addEventListener("change", () => {
-  const arquivo = document.getElementById("imagem").files[0];
-  if (arquivo) mostrarPrevia(URL.createObjectURL(arquivo));
-});
 
 // POST /produtos (novo) ou PUT /produtos/<id> (editar), depois envia a foto
 document.getElementById("form-produto").addEventListener("submit", async (e) => {

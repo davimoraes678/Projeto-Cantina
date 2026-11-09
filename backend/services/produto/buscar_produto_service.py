@@ -2,8 +2,6 @@ from backend.models.produto_model import Produto
 
 
 class BuscarProdutoService:
-    """Caso de uso: ver um produto pelo id."""
-
     @staticmethod
     def executar(id_produto):
         produto = Produto.buscar_por_id(id_produto)

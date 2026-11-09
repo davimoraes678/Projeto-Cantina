@@ -1,6 +1,6 @@
-# Projeto-Cantina
+# Cantina Real
 
-Sistema de pedidos da cantina do COTEMIG: o aluno se cadastra, faz login, monta um carrinho com os produtos e finaliza o pedido. A administração cadastra produtos (com imagem) e acompanha os pedidos.
+Sistema de pedidos da cantina do COTEMIG. O aluno vê o cardápio, monta o carrinho, paga com o saldo da carteira e retira o pedido no balcão com um código. A administração acompanha os pedidos e cuida do cardápio e dos alunos.
 
 ## Integrantes
 
@@ -13,158 +13,109 @@ Sistema de pedidos da cantina do COTEMIG: o aluno se cadastra, faz login, monta 
 | Felipe Ferreira da Fonseca | 12502537 |
 | Maria Eduarda Fidelis Correa | 12401595 |
 
-**Stack:** HTML, CSS e JavaScript puro no front-end; Python + Flask no back-end (API JSON); Flask-SQLAlchemy; Flask-Login; MySQL em produção e SQLite em desenvolvimento.
+## Tecnologias
 
-## Como rodar
+| Parte | Tecnologia |
+|---|---|
+| Front-end | HTML, CSS, JavaScript e Bootstrap 5.3 |
+| Back-end | Python, Flask (API JSON), Flask-SQLAlchemy e Flask-Login |
+| Banco | MySQL, com stored procedures (SQLite para testar sem MySQL) |
+| Servidor | AWS EC2 |
 
-```bash
-python -m venv venv
-# Windows: venv\Scripts\activate    |    Linux/Mac/Codespaces: source venv/bin/activate
-python -m pip install -r requirements.txt
-python app.py
-```
+## Funcionalidades
 
-Abra **http://127.0.0.1:5000** (no Codespaces, a URL da porta 5000). Sem login, você é levado para a tela de cadastro.
+Existem três perfis: **aluno**, **admin** e **mestre**. O primeiro cadastro do sistema vira mestre.
 
-**Configuração (opcional):** crie um `.env` na raiz. Sem ele, o projeto usa SQLite (`cantina.db`) e uma chave de desenvolvimento.
+**Aluno**
+- Cadastro, login e perfil (editar dados e excluir a conta)
+- Cardápio com filtro por categoria, faixa de preço e ordenação por nome ou preço
+- Detalhes do produto: foto, preço, descrição e estoque
+- Carrinho: adicionar, remover, ver o total e finalizar o pedido (confere saldo e estoque)
+- Combos mais pedidos e "Repetir último pedido"
+- Carteira: recarga de saldo
+- Meus pedidos: acompanhar o status, ver o código de retirada, "Pedir de novo" e avaliar com nota de 1 a 5
 
-```env
-# MySQL (se não definir, usa SQLite)
-DATABASE_URL=mysql+pymysql://usuario:senha@localhost/cantina_db?charset=utf8mb4
-# Chave que assina o cookie de login. Use um texto longo e aleatório.
-SECRET_KEY=troque-por-um-texto-aleatorio
-# Modo debug: mostra erros detalhados. O padrão do app.py é True; em produção use False.
-FLASK_DEBUG=True
-```
+**Admin**
+- Painel de pedidos que se atualiza sozinho: "Em preparo" → **Pronto** → **Entregar**
+- Cancelar pedido (devolve o saldo ao aluno e os produtos ao estoque)
+- Histórico de pedidos entregues e cancelados
 
-As tabelas são criadas automaticamente na primeira execução. Para recomeçar do zero no SQLite, apague o `cantina.db`.
+**Mestre** (tudo do admin, e mais)
+- Produtos: cadastrar, editar, excluir e enviar foto
+- Alunos: listar, tornar admin e excluir
 
-## Funcionalidades Implementadas
-
-Todas funcionam de ponta a ponta: **Tela → API Flask → Controller → Service → Model/Repository → Banco de dados**.
-Quem pode usar: **aluno** (qualquer usuário logado) · **admin** · **mestre** (o primeiro usuário cadastrado).
-
-| # | Funcionalidade | Quem | Tela | Rota | Service |
-|---|---|---|---|---|---|
-| 1 | Cadastrar aluno (o primeiro cadastro vira mestre) | todos | `cadastro.html` | `POST /api/alunos/registro` | `CriarAlunoService` |
-| 2 | Login | todos | `login.html` | `POST /api/alunos/login` | `LoginAlunoService` |
-| 3 | Logout | aluno | menu do usuário / `conta.html` | `POST /api/alunos/logout` | `LogoutAlunoService` |
-| 4 | Ver dados da conta | aluno | `conta.html` | `GET /api/alunos/atual` | `BuscarAlunoAtualService` |
-| 5 | Editar dados da conta | aluno | `conta.html` | `PUT /api/alunos/atual` | `AtualizarAlunoService` |
-| 6 | Excluir a própria conta | aluno | `conta.html` | `DELETE /api/alunos/atual` | `DeletarAlunoService` |
-| 7 | Listar alunos | mestre | `admin.html` | `GET /api/alunos` | `ListarAlunoService` |
-| 8 | Promover aluno a admin | mestre | `admin.html` | `PUT /api/alunos/<id>` | `PromoverAlunoService` |
-| 9 | Excluir aluno | mestre | `admin.html` | `DELETE /api/alunos/<id>` | `DeletarAlunoService` |
-| 10 | Cadastrar produto | mestre | `admin.html` | `POST /api/produtos` | `CriarProdutoService` |
-| 11 | Enviar foto do produto (reduzida para até 600×600) | mestre | `admin.html` | `POST /api/produtos/<id>/imagem` | `EnviarImagemProdutoService` (+ `BuscarImagemProdutoService` para exibir) |
-| 12 | Editar produto | mestre | `admin.html` | `PUT /api/produtos/<id>` | `AtualizarProdutoService` |
-| 13 | Excluir produto (pedidos antigos mantêm o nome) | mestre | `admin.html` | `DELETE /api/produtos/<id>` | `DeletarProdutoService` |
-| 14 | Ver o cardápio | aluno | `index.html` | `GET /api/produtos/buscar` | `FiltrarProdutosService` → `ListarProdutosService` |
-| 15 | Filtrar produtos por categoria | aluno | `index.html` | `GET /api/produtos/buscar?categoria=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_categoria`) |
-| 16 | Filtrar produtos por faixa de preço | aluno | `index.html` | `GET /api/produtos/buscar?preco_min=&preco_max=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_por_faixa_de_preco`) |
-| 17 | Ordenar produtos por nome ou preço | aluno | `index.html` | `GET /api/produtos/buscar?ordenar=` | `FiltrarProdutosService` → `ProdutoRepository` (`sp_produtos_ordenar_por_*`) |
-| 18 | Recarregar a carteira (saldo) | aluno | `carteira.html` | `POST /api/alunos/atual/recarga` | `RecarregarSaldoService` |
-| 19 | Adicionar produto ao carrinho (total em tempo real) | aluno | `index.html` | `POST /api/carrinho/itens` | `AdicionarItemCarrinhoService` (+ `VerCarrinhoService`) |
-| 20 | Remover item do carrinho | aluno | `index.html` | `DELETE /api/carrinho/itens/<id>` | `RemoverItemCarrinhoService` |
-| 21 | Finalizar pedido (confere e desconta saldo e estoque) | aluno | `index.html` | `POST /api/carrinho/finalizar` | `FinalizarPedidoService` |
-| 22 | Repetir último pedido | aluno | `index.html` | `POST /api/carrinho/repetir` | `RepetirUltimoPedidoService` → `PedidoRepository` (`sp_repetir_ultimo_pedido`) |
-| 23 | Combinações mais pedidas (e adicionar a dupla ao carrinho) | aluno | `index.html` | `GET /api/pedidos/combinacoes` | `CombinacoesMaisPedidasService` → `PedidoRepository` (`sp_combinacoes_mais_pedidas`) |
-| 24 | Painel de pedidos em andamento | admin, mestre | `admin.html` | `GET /api/pedidos` | `ListarPedidosService` |
-| 25 | Fechar pedido quando o aluno retira ("Entregar") | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/concluir` | `ConcluirPedidoService` |
-| 26 | Cancelar pedido (devolve o saldo ao aluno e o estoque) | admin, mestre | `admin.html` | `POST /api/pedidos/<id>/cancelar` | `CancelarPedidoService` |
-| 27 | Histórico de pedidos (entregues e cancelados) | admin, mestre | `admin.html` (aba Histórico) | `GET /api/pedidos` | `ListarPedidosService` |
-| 28 | Avaliar pedido entregue (nota de 1 a 5 e comentário) | aluno | `pedidos.html` (botão "Avaliar") | `POST /api/pedidos/<id>/avaliacao` | `AvaliarPedidoService` |
-| 29 | Meus pedidos: em andamento e histórico | aluno | `pedidos.html` | `GET /api/pedidos/meus` | `ListarMeusPedidosService` |
-| 30 | Pedir de novo um pedido antigo | aluno | `pedidos.html` | `POST /api/carrinho/repetir/<id>` | `RepetirPedidoService` |
-| 31 | Avisar que o pedido está pronto para retirar | admin, mestre | `admin.html` (botão "Pronto"); o aluno vê em `pedidos.html` e no cardápio | `POST /api/pedidos/<id>/pronto` | `MarcarProntoService` |
+Status de um pedido: `Pendente` (em preparo) → `Pronto` (pronto para retirar) → `Concluído` (entregue). Antes de ser entregue, o pedido pode ser `Cancelado`.
 
 ## Arquitetura
 
 ```mermaid
 flowchart LR
-    T["Tela<br/>(front-end/*.html + js da página)"] -->|"fetch → HTTP + JSON"| C["Controller<br/>(uma função por rota)"]
-    C --> S["Service<br/>(uma classe por caso de uso)"]
-    S --> M["Model<br/>(db.Model)"]
+    T["Tela<br/>(HTML + JS)"] -->|"fetch: HTTP + JSON"| C["Controller<br/>(rotas)"]
+    C --> S["Service<br/>(regras)"]
+    S --> M["Model<br/>(CRUD)"]
     S --> R["Repository<br/>(consultas especiais)"]
-    M --> DB[("MySQL / SQLite")]
+    M --> DB[("MySQL")]
     R -->|"CALL sp_..."| DB
 ```
 
-| Camada | Pasta | Responsabilidade |
+| Camada | Pasta | Papel |
 |---|---|---|
-| Controller | [`backend/controllers/`](backend/controllers/README.md) | Um arquivo por recurso (aluno, produto, carrinho, pedido, avaliação), com uma função por rota marcada com `@bp.route`. Recebe a requisição, lê os dados, chama o service e devolve JSON. Sem regra de negócio |
-| Service | [`backend/services/`](backend/services/README.md) | Uma classe por caso de uso, com o método `executar()` (ex.: `CriarProdutoService`, `FinalizarPedidoService`). Faz as validações e coordena o caso de uso |
-| Model | [`backend/models/`](backend/models/README.md) | Entidades do domínio, herdam de `db.Model`, com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()` e `buscar_por_id()` |
-| Repository | [`backend/repositories/`](backend/repositories/README.md) | Só as consultas não-CRUD, por **stored procedures** do MySQL (`CALL` fica só aqui): busca de produtos, repetir último pedido e combinações mais pedidas |
+| Controller | [`backend/controllers/`](backend/controllers/README.md) | Recebe a requisição, chama o service e devolve JSON |
+| Service | [`backend/services/`](backend/services/README.md) | Um caso de uso por classe, com as regras de negócio |
+| Model | [`backend/models/`](backend/models/README.md) | Uma classe por tabela, com o CRUD |
+| Repository | [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD, feitas por stored procedures |
 
-## Diagrama de classes
+Exemplo, o aluno finaliza o pedido:
 
-O diagrama de classes do domínio (Models, atributos, herança, composição e agregação) está em
-[`docs/diagrama-de-classes.md`](docs/diagrama-de-classes.md), com a imagem em
-[`docs/diagrama-de-classes.png`](docs/diagrama-de-classes.png).
+```
+cardapio.js  →  POST /api/carrinho/finalizar  →  item_pedido_controller  →  FinalizarPedidoService  →  Pedido / ItemPedido  →  banco
+```
 
-## Onde está cada coisa
+O diagrama de classes está em [`docs/diagrama-de-classes.md`](docs/diagrama-de-classes.md).
 
-Cada pasta tem um `README.md` explicando o que ela faz:
+## Stored procedures
+
+| Procedure | Usada em |
+|---|---|
+| `sp_produtos_por_categoria` | Filtro por categoria |
+| `sp_produtos_por_faixa_de_preco` | Filtro por preço |
+| `sp_produtos_ordenar_por_preco` / `sp_produtos_ordenar_por_nome` | Ordenação |
+| `sp_repetir_ultimo_pedido` | "Repetir último pedido" |
+| `sp_combinacoes_mais_pedidas` | Combos mais pedidos |
+
+Elas são criadas pelo [`backend/database/create-database.sql`](backend/database/README.md).
+
+## Como rodar
+
+```bash
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+Abra **http://127.0.0.1:5000**.
+
+Sem configuração, o projeto usa SQLite (`cantina.db`). Para usar o MySQL, rode o `create-database.sql` e crie um `.env` na raiz:
+
+```env
+DATABASE_URL=mysql+pymysql://usuario:senha@localhost/cantina_db?charset=utf8mb4
+SECRET_KEY=um-texto-longo-e-aleatorio
+FLASK_DEBUG=False
+```
+
+## Pastas
 
 | Pasta | O que tem |
 |---|---|
-| [`backend/`](backend/README.md) | A API: como as camadas se conectam, como o `app.py` monta o sistema e como funciona o login |
-| [`backend/controllers/`](backend/controllers/README.md) | As rotas da API (URLs, corpo, respostas) |
-| [`backend/services/`](backend/services/README.md) | Os casos de uso, um por classe, em pastas: `aluno/`, `produto/`, `carrinho/`, `pedido/`, `avaliacao/` |
-| [`backend/models/`](backend/models/README.md) | As tabelas do banco e como o carrinho é guardado |
-| [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD por stored procedures (busca de produtos, repetir pedido, combinações) |
-| [`backend/database/`](backend/database/README.md) | Script SQL do MySQL |
-| [`front-end/`](front-end/README.md) | As páginas e como elas se ligam à API |
-| [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página e o `comum.js`: padrões |
-| [`arquivos/`](arquivos/README.md) | Imagens dos produtos |
-| [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes e roteiro do vídeo de demonstração |
+| [`backend/`](backend/README.md) | A API: camadas, `app.py` e login |
+| [`backend/database/`](backend/database/README.md) | Script do MySQL (tabelas e procedures) |
+| [`front-end/`](front-end/README.md) | As páginas |
+| [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página |
+| [`arquivos/`](arquivos/README.md) | Fotos dos produtos |
+| [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes |
 
-Arquivos da raiz:
+## Limitações
 
-| Arquivo | O que faz |
-|---|---|
-| `app.py` | Ponto de entrada. Cria o app Flask, configura banco e login, registra as rotas e cria as tabelas. Detalhes em [`backend/README.md`](backend/README.md#como-o-apppy-monta-o-sistema) |
-| `requirements.txt` | Dependências Python (`pip install -r requirements.txt`) |
-| `.gitignore` | Impede que `__pycache__`, `.env` e o banco SQLite (`*.db`) vão para o git |
-
-## Como contribuir
-
-1. `git switch main && git pull`
-2. `git switch -c nome-da-tarefa`
-3. Faça as alterações e teste: rode `python app.py`, deixe o **console do navegador (F12)** aberto e olhe o **terminal do Flask** (erros 500 mostram o arquivo e a linha ali).
-4. `git commit -m "O que mudou e por quê"`
-5. `git push -u origin nome-da-tarefa` e abra um Pull Request para revisão antes de ir para a `main`.
-
-Se o git pedir identidade: `git config --global user.name "seu-usuario"` e `git config --global user.email "seu@email.com"`.
-
-**Ao mexer numa pasta, atualize o README dela.** Ex.: rota nova → [`backend/controllers/README.md`](backend/controllers/README.md).
-
-Para criar uma funcionalidade nova (model → service → controller → registrar → front), siga o passo a passo em [`backend/README.md`](backend/README.md#passo-a-passo-funcionalidade-nova).
-
-## Erros comuns
-
-Erros que já aconteceram neste projeto:
-
-| Sintoma | Causa | Como evitar |
-|---|---|---|
-| **Toda** consulta dá 500: `'Avaliacao' failed to locate a name` | Models não importados no `app.py` | Mantenha o import de todos os models |
-| Rota existe mas dá 404 | Controller não registrado em `backend/routes.py` | Registre todo blueprint novo |
-| `unexpected keyword argument 'id_aluno'` | A URL tem `<int:id_aluno>` e a função não recebe o parâmetro (ou o contrário) | Os nomes entre `< >` precisam ser parâmetros da função |
-| `NameError` num service | Uma linha que criava a variável foi apagada junto com outra mudança | Teste a rota depois de cada mudança |
-| `login_user` dá `NotImplementedError` | Falta `get_id()` no `Aluno` | Não remova o `get_id()` |
-| Página "401 Unauthorized" ao abrir `/` | `@login_required` numa rota que deveria redirecionar | Em páginas, use `if not current_user.is_authenticated: redirect(...)` |
-| Formulário recarrega com `?` na URL e nada acontece | O JS quebrou antes de ligar o formulário | F12 → corrija o primeiro erro vermelho |
-| `await is only valid in async functions` | `await` solto no arquivo | Só dentro de `async function` |
-| URL vira `/carrinho/[object Promise]` | Faltou `await` numa função `async` | `const x = await minhaFuncao()` |
-| Página sem CSS, links com 404 | Caminho relativo numa página aberta em `/` | Caminhos `/front-end/...` |
-| Login "não pega" | Página e API em endereços diferentes | `API_BASE_URL = "/api"` e abrir pela URL do Flask |
-| E-mail repetido dá 500 | Faltou checar duplicidade antes de salvar | Verifique e responda `409` |
-| Import não encontra o arquivo | Arquivo Python sem `.py` | Todo módulo termina em `.py` |
-
-## Limitações conhecidas
-
-- **Stored procedures só existem no MySQL.** Rodando com SQLite, cada método dos repositories faz a mesma consulta pelo ORM (mesmo resultado), então a busca de produtos, o "repetir último pedido" e as combinações funcionam nos dois bancos. Ao mudar o `create-database.sql`, rode o script de novo no MySQL.
-- **Preço promocional** não é aplicado; o item usa sempre `preco_atual`.
-- **Dividir conta (rateio):** a classe `RateioPagamento` e a tabela existem, mas ainda não há tela nem rota.
-- **Avaliação:** a janela aparece no navegador onde o pedido foi feito, ao abrir a cantina.
+- **Preço promocional:** o campo existe, mas o pedido usa sempre o `preco_atual`.
+- **Dividir conta (rateio):** a classe `RateioPagamento` e a tabela existem, mas ainda não têm tela nem rota.

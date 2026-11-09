@@ -1,17 +1,9 @@
-// =============================================================================
-// admin.js: administração (admin.html). Uma parte por aba:
-//   1. Pedidos e Histórico (admin e mestre)
-//   2. Produtos (só mestre)
-//   3. Alunos (só mestre)
-// =============================================================================
-
-let produtos = [];            // produtos carregados (o "Editar" pega os dados daqui)
-let editandoProdutoId = null; // null = a janela de produto está cadastrando; um id = editando
-let totalEmPreparo = null;    // quantos pedidos estavam em preparo (para avisar quando chega um novo)
+let produtos = [];
+let editandoProdutoId = null; // null = cadastrando; um id = editando
+let totalEmPreparo = null;    // para avisar quando chega pedido novo
 
 iniciar();
 
-// Ao abrir a página: carrega os pedidos e, para o mestre, produtos e alunos.
 async function iniciar() {
   carregarPedidos();
   const aluno = await alunoInf();
@@ -19,18 +11,12 @@ async function iniciar() {
     carregarProdutos();
     carregarAlunos();
   }
-  // O admin deixa esta tela aberta: os pedidos se atualizam sozinhos a cada 15 segundos
+  // Atualiza os pedidos a cada 15 segundos
   setInterval(carregarPedidos, 15000);
 }
 
-// =============================================================================
-// 1. PEDIDOS E HISTÓRICO
-// =============================================================================
+// Pedidos e histórico
 
-// Busca os pedidos (GET /pedidos). O back-end já manda separado em três listas:
-//   - preparo: em preparo (botão "Pronto")
-//   - prontos: prontos para retirar (botão "Entregar")
-//   - historico: entregues e cancelados, o mais novo primeiro
 async function carregarPedidos() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos`);
@@ -57,7 +43,7 @@ async function carregarPedidos() {
     document.getElementById("lista-prontos").innerHTML = htmlProntos;
     document.getElementById("lista-historico-admin").innerHTML = htmlHistorico;
 
-    // Números nas colunas, no menu e no título da aba do navegador ("(3) Administração")
+    // Contadores e título da aba ("(3) Administração")
     const Preparo = pedidos.preparo.length;
     const esperando = preparo + pedidos.prontos.length;
     document.getElementById("contador-preparo").textContent = preparo;
@@ -72,7 +58,6 @@ async function carregarPedidos() {
       document.title = "Administração - Cantina Real";
     }
 
-    // Chegou pedido novo desde a última atualização? Avisa.
     if (totalEmPreparo !== null && emPreparo > totalEmPreparo) {
       avisar("Novo pedido chegou!");
     }
@@ -82,9 +67,7 @@ async function carregarPedidos() {
   }
 }
 
-// Card de um pedido, com o código de retirada em destaque. O botão principal:
-//   Pendente -> "Pronto" (avisa o aluno que já pode retirar)
-//   Pronto   -> "Entregar" (o aluno retirou no balcão: fecha o pedido)
+// Pendente -> botão "Pronto"; Pronto -> botão "Entregar"
 function cardPedidoAdmin(pedido) {
   let itens = "";
   pedido.itens.forEach((item) => {
@@ -118,7 +101,6 @@ function cardPedidoAdmin(pedido) {
     </div>`;
 }
 
-// Linha do histórico: aluno, código, itens, status, total e data.
 function linhaHistorico(pedido) {
   let itens = "";
   pedido.itens.forEach((item) => {
@@ -142,25 +124,21 @@ function linhaHistorico(pedido) {
     </div>`;
 }
 
-// Botão "Pronto": POST /pedidos/<id>/pronto. O aluno vê "Pronto para retirar".
 async function marcarPronto(id_pedido) {
   await mudarPedido(id_pedido, "pronto", "Aluno avisado: pedido pronto");
 }
 
-// Botão "Entregar": POST /pedidos/<id>/concluir, quando o aluno retira no balcão.
 async function entregarPedido(id_pedido) {
   if (!confirm("Confirmar que o aluno retirou o pedido?")) return;
   await mudarPedido(id_pedido, "concluir", "Pedido entregue");
 }
 
-// Botão "Cancelar": POST /pedidos/<id>/cancelar. O valor volta para a carteira
-// do aluno e os produtos voltam para o estoque.
+// Cancelar devolve o saldo do aluno e o estoque
 async function cancelarPedido(id_pedido) {
   if (!confirm("Cancelar o pedido? O valor volta para a carteira do aluno.")) return;
   await mudarPedido(id_pedido, "cancelar", "Pedido cancelado");
 }
 
-// Chama a rota (pronto, concluir ou cancelar) e recarrega os pedidos.
 async function mudarPedido(id_pedido, acao, mensagem) {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/${id_pedido}/${acao}`, { method: "POST" });
@@ -176,11 +154,8 @@ async function mudarPedido(id_pedido, acao, mensagem) {
   }
 }
 
-// =============================================================================
-// 2. PRODUTOS (só mestre)
-// =============================================================================
+// Produtos (só mestre)
 
-// Busca os produtos (GET /produtos) e mostra uma linha por produto, com Editar e Excluir.
 async function carregarProdutos() {
   try {
     const res = await fetch(`${API_BASE_URL}/produtos`);
@@ -207,7 +182,6 @@ async function carregarProdutos() {
   }
 }
 
-// Botão "Novo produto": abre a janela vazia.
 function novoProduto() {
   editandoProdutoId = null;
   document.getElementById("form-produto").reset();
@@ -216,7 +190,6 @@ function novoProduto() {
   bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
 }
 
-// Botão "Editar": abre a janela preenchida com os dados do produto.
 function editarProduto(id_produto) {
   const produto = produtos.find((p) => p.id_produto === id_produto);
   editandoProdutoId = id_produto;
@@ -228,12 +201,12 @@ function editarProduto(id_produto) {
   document.getElementById("produto-ingredientes").value = produto.ingredientes || "";
   document.getElementById("modal-produto-titulo").textContent = "Editar produto";
 
-  // Prévia da foto atual ("?v=" + hora evita mostrar uma foto antiga guardada no navegador)
+  // "?v=" evita mostrar a foto antiga guardada no navegador
   mostrarPrevia(`${API_BASE_URL}/produtos/${id_produto}/imagem?v=${Date.now()}`);
   bootstrap.Modal.getOrCreateInstance(document.getElementById("modal-produto")).show();
 }
 
-// Mostra a foto na janela de produto. Se o produto não tiver foto, a prévia fica escondida.
+// Sem foto, a prévia fica escondida
 function mostrarPrevia(endereco) {
   const previa = document.getElementById("produto-imagem-previa");
   previa.classList.add("d-none");
@@ -241,14 +214,12 @@ function mostrarPrevia(endereco) {
   previa.src = endereco;
 }
 
-// Ao escolher uma foto no campo, mostra a prévia dela antes de salvar.
 document.getElementById("imagem").addEventListener("change", () => {
   const arquivo = document.getElementById("imagem").files[0];
   if (arquivo) mostrarPrevia(URL.createObjectURL(arquivo));
 });
 
-// "Salvar" da janela: POST /produtos (novo) ou PUT /produtos/<id> (editar).
-// Depois envia a foto, se foi escolhida uma.
+// POST /produtos (novo) ou PUT /produtos/<id> (editar), depois envia a foto
 document.getElementById("form-produto").addEventListener("submit", async (e) => {
   e.preventDefault();
   const corpo = {
@@ -259,7 +230,6 @@ document.getElementById("form-produto").addEventListener("submit", async (e) => 
     ingredientes: document.getElementById("produto-ingredientes").value,
   };
 
-  // Novo produto: POST. Editando: PUT.
   let url = `${API_BASE_URL}/produtos`;
   let metodo = "POST";
   if (editandoProdutoId) {
@@ -279,8 +249,7 @@ document.getElementById("form-produto").addEventListener("submit", async (e) => 
       return;
     }
 
-    // Se a foto falhar, a janela continua aberta em modo "editar": salvar de novo
-    // tenta só a foto, sem cadastrar o produto duas vezes.
+    // Se a foto falhar, a janela fica em modo "editar" para não cadastrar o produto duas vezes
     editandoProdutoId = produtoSalvo.id_produto;
     const fotoDeuCerto = await enviarImagem(produtoSalvo.id_produto);
     if (!fotoDeuCerto) return;
@@ -293,9 +262,7 @@ document.getElementById("form-produto").addEventListener("submit", async (e) => 
   }
 });
 
-// Envia a foto escolhida para POST /produtos/<id>/imagem. Arquivo vai como
-// FormData (formulário com arquivo), não como JSON.
-// Devolve true se deu certo (ou se nenhuma foto foi escolhida).
+// A foto vai como FormData, não como JSON. Sem foto escolhida, devolve true
 async function enviarImagem(id_produto) {
   const arquivo = document.getElementById("imagem").files[0];
   if (!arquivo) return true;
@@ -311,7 +278,6 @@ async function enviarImagem(id_produto) {
   return true;
 }
 
-// Botão "Excluir": DELETE /produtos/<id>. Os pedidos antigos continuam com o nome do produto.
 async function removerProduto(id_produto) {
   if (!confirm(`Excluir ${produto.nome} do cardápio?`)) return;
   try {
@@ -328,12 +294,9 @@ async function removerProduto(id_produto) {
   }
 }
 
-// =============================================================================
-// 3. ALUNOS (só mestre)
-// =============================================================================
+// Alunos (só mestre)
 
-// Busca os alunos (GET /alunos) e mostra uma linha por aluno.
-// O mestre não pode ser promovido nem excluído.
+// O mestre não pode ser promovido nem excluído
 async function carregarAlunos() {
   try {
     const res = await fetch(`${API_BASE_URL}/alunos`);
@@ -365,7 +328,6 @@ async function carregarAlunos() {
   }
 }
 
-// Botão "Tornar admin": PUT /alunos/<id> com { funcao: "admin" }.
 async function promoverAluno(id_aluno) {
   if (!confirm("Tornar este aluno admin? Ele poderá entregar e cancelar pedidos.")) return;
   try {
@@ -385,7 +347,6 @@ async function promoverAluno(id_aluno) {
   }
 }
 
-// Botão "Excluir": DELETE /alunos/<id>. Os pedidos do aluno continuam no histórico.
 async function excluirAluno(id_aluno) {
   if (!confirm("Deseja realmente excluir este aluno?")) return;
   try {

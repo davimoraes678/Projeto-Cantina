@@ -2,12 +2,6 @@ from backend.models.pedido_model import Pedido
 
 
 class MarcarProntoService:
-    """Caso de uso: avisar que o pedido está pronto para ser retirado (admin/mestre).
-
-    O aluno vê "Pronto para retirar" em Meus pedidos. Quando ele pegar o pedido
-    no balcão, o admin fecha o pedido com o ConcluirPedidoService.
-    """
-
     @staticmethod
     def executar(id_pedido):
         pedido = Pedido.buscar_por_id(id_pedido)

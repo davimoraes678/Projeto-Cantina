@@ -1,13 +1,11 @@
 # backend/services/
 
-Os **casos de uso** do sistema. **Cada caso de uso é uma classe**, com um único método `executar()`, num arquivo próprio. Os [controllers](../controllers/README.md) chamam os services; os services fazem as validações e usam os [models](../models/README.md) (CRUD) ou os [repositories](../repositories/README.md) (consultas especiais).
+Os **casos de uso** do sistema. Cada um é uma classe num arquivo próprio, com o método `executar()`. Os [controllers](../controllers/README.md) chamam os services, e os services usam os [models](../models/README.md) (CRUD) ou os [repositories](../repositories/README.md) (consultas especiais).
 
-Todo `executar()` devolve uma tupla **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)` ou `(pedido.to_dict(), 201)`. Os services não usam `request` nem `jsonify`; isso é papel do controller.
+Todo `executar()` devolve **`(dicionário, código_http)`**, por exemplo `({"erro": "Produto não encontrado"}, 404)`.
 
 ```python
 class FinalizarPedidoService:
-    """Caso de uso: fechar o carrinho como pedido, descontando estoque e saldo."""
-
     @staticmethod
     def executar():
         ...
@@ -16,11 +14,9 @@ class FinalizarPedidoService:
 
 ## `aluno/` — conta, login e carteira
 
-Detalhes em [`aluno/README.md`](aluno/README.md).
-
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
-| `criar_aluno_service.py` | `CriarAlunoService` | Cadastrar aluno (o primeiro vira mestre) e já logar |
+| `criar_aluno_service.py` | `CriarAlunoService` | Cadastrar aluno (o primeiro vira mestre), salvar o hash da senha e já logar |
 | `login_aluno_service.py` | `LoginAlunoService` | Entrar com e-mail e senha |
 | `logout_aluno_service.py` | `LogoutAlunoService` | Sair |
 | `buscar_aluno_atual_service.py` | `BuscarAlunoAtualService` | Ver os dados do aluno logado |
@@ -74,7 +70,4 @@ O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido`
 |---|---|---|
 | `avaliar_pedido_service.py` | `AvaliarPedidoService` | Avaliar um pedido: só o dono, só pedido concluído, nota de 1 a 5, uma vez só |
 
-## Fora daqui
-
-- **Login e permissões** (`user_loader`, `admin_required`, `master_required`): [`backend/autenticacao.py`](../autenticacao.py).
-- **Funções de apoio das imagens** (nome do arquivo, salvar, renomear): [`backend/services/produto/imagem.py`](produto/imagem.py). O nome do arquivo vem do nome do produto: "Suco de Laranja" → `arquivos/suco-de-laranja-imagem.png`.
+O `produto/imagem.py` tem as funções das fotos (nome do arquivo, salvar e renomear), usadas pelos services de produto.

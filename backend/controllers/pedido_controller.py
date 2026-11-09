@@ -10,8 +10,7 @@ from backend.services.pedido.listar_meus_pedidos_service import ListarMeusPedido
 from backend.services.pedido.listar_pedidos_service import ListarPedidosService
 from backend.services.pedido.marcar_pronto_service import MarcarProntoService
 
-# Rotas do recurso Pedido: lê a requisição, chama o service e devolve JSON.
-# URLs do recurso: /api/pedidos/...
+# /api/pedidos
 bp_pedido = Blueprint('pedidos', __name__, url_prefix='/api/pedidos')
 
 

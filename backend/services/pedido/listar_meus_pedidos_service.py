@@ -4,13 +4,6 @@ from backend.models.pedido_model import Pedido
 
 
 class ListarMeusPedidosService:
-    """Caso de uso: o aluno logado vê os próprios pedidos (tela "Meus pedidos").
-
-    Devolve duas listas, o mais recente primeiro:
-      - andamento: "Pendente" e "Pronto"
-      - historico: "Concluído" e "Cancelado"
-    """
-
     @staticmethod
     def executar():
         pedidos = (Pedido.query

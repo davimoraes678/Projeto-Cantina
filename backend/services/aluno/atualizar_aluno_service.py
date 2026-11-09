@@ -2,9 +2,8 @@ from flask_login import current_user
 from werkzeug.security import generate_password_hash
 
 
+# Senha vazia mantém a atual
 class AtualizarAlunoService:
-    """Caso de uso: editar os dados do aluno logado (senha vazia mantém a atual)."""
-
     @staticmethod
     def executar(dados):
         senha = dados.get('senha')

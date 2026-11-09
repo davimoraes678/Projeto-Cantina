@@ -6,8 +6,6 @@ from backend.models.produto_model import Produto
 
 
 class AdicionarItemCarrinhoService:
-    """Caso de uso: colocar um produto no carrinho do aluno logado."""
-
     @staticmethod
     def executar(dados):
         produto = Produto.buscar_por_id(dados.get('id_produto'))
@@ -21,14 +19,13 @@ class AdicionarItemCarrinhoService:
         if quantidade < 1:
             return {"erro": "Quantidade inválida"}, 400
         
-        # Se o produto já está no carrinho, só soma a quantidade
+        # Já está no carrinho: soma a quantidade
         carrinho = ItemPedido.buscar_carrinho(current_user.id_aluno)
         item = next((i for i in carrinho if i.id_produto == produto.id_produto), None)
         if item:
             item.quantidade += quantidade
         else:
-            # Item sem pedido e com dono = item no carrinho.
-            # Guarda o nome e o preço do produto neste momento (o histórico não muda se o produto mudar)
+            # Guarda nome e preço de agora
             db.session.add(ItemPedido(
                 id_aluno=current_user.id_aluno,
                 id_produto=produto.id_produto,

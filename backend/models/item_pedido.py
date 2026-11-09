@@ -1,24 +1,17 @@
 from backend.extensions import db
 
+# Item do carrinho (id_pedido vazio) ou de um pedido
 class ItemPedido(db.Model):
-    """Um produto (com quantidade e preço) no carrinho ou em um pedido.
-
-    O carrinho não é uma tabela: são os itens que ainda não têm pedido.
-      - no carrinho:     id_aluno = dono do carrinho, id_pedido = None
-      - depois de finalizar: id_pedido = pedido criado, id_aluno = None
-    """
     __tablename__ = "itens_pedido"
 
     id_item_pedido = db.Column(db.Integer, primary_key=True)
     quantidade = db.Column(db.Integer, nullable=False, default=1)
     preco_unitario_cobrado = db.Column(db.Float, nullable=False)
-    # Vazio enquanto o item está no carrinho
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), nullable=True)
-    # Dono do carrinho; vazio depois que o item passa para um pedido
     id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno', ondelete='CASCADE'), nullable=True)
-    # nullable=True: permite apagar o produto sem apagar/travar o item do pedido já feito.
+    # Vazio se o produto for excluído
     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=True)
-    # "Foto" do nome do produto no momento do pedido. Usada quando o produto é excluído depois.
+    # Nome salvo no pedido, usado se o produto for excluído
     nome_produto = db.Column(db.String(100), nullable=True)
 
     def salvar(self):
@@ -46,12 +39,10 @@ class ItemPedido(db.Model):
 
     @staticmethod
     def buscar_carrinho(id_aluno):
-        # Os itens no carrinho do aluno (lista vazia se ele ainda não adicionou nada)
         return ItemPedido.query.filter_by(id_aluno=id_aluno, id_pedido=None).all()
 
     @staticmethod
     def carrinho_to_dict(id_aluno):
-        # O carrinho no formato que o front-end usa: itens, total e quantidade de unidades
         itens = ItemPedido.buscar_carrinho(id_aluno)
         return {
             'id_aluno': id_aluno,
@@ -68,6 +59,5 @@ class ItemPedido(db.Model):
             'subtotal': round(self.quantidade * self.preco_unitario_cobrado, 2),
             'id_pedido': self.id_pedido,
             'id_produto': self.id_produto,
-            # Se o produto ainda existir usa o nome atual; senão usa a "foto" salva na criação do pedido.
             'produto_nome': self.produto.nome if self.produto else (self.nome_produto or 'Produto removido')
         }

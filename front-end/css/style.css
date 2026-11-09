@@ -1,14 +1,11 @@
-/* Cantina Real: só as cores da cantina por cima do Bootstrap 5.3.
-   Layout, espaçamentos e componentes (inclusive a barra de baixo do celular)
-   vêm das classes do próprio Bootstrap. */
+/* Cores da cantina por cima do Bootstrap */
 
 :root {
     --cantina-vermelho: #aa0e1b;
     --cantina-vermelho-escuro: #870b15;
     --cantina-amarelo: #f3c719;
 
-    /* Cores do Bootstrap trocadas pelas da cantina: text-primary, bg-primary,
-       links e o fundo das páginas */
+    /* primary, links e fundo com as cores da cantina */
     --bs-primary-rgb: 170, 14, 27;
     --bs-link-color-rgb: 170, 14, 27;
     --bs-link-hover-color-rgb: 135, 11, 21;
@@ -23,16 +20,14 @@
     color: var(--cantina-amarelo);
 }
 
-/* Ícones: SVG copiado de https://fonts.google.com/icons e colado direto no HTML,
-   com class="icone" e fill="currentColor" (o ícone fica da cor do texto em volta).
-   A classe deixa o ícone um pouco maior que o texto ao lado e alinhado com ele. */
+/* Ícones SVG do Google Fonts, alinhados ao texto */
 .icone {
     width: 1.25em;
     height: 1.25em;
     vertical-align: -.25em;
 }
 
-/* Botões "primary" e "outline-primary" em vermelho em vez de azul */
+/* Botões primary em vermelho */
 .btn-primary {
     --bs-btn-bg: var(--cantina-vermelho);
     --bs-btn-border-color: var(--cantina-vermelho);
@@ -55,7 +50,7 @@
     --bs-btn-focus-shadow-rgb: 170, 14, 27;
 }
 
-/* Abas (nav-pills) e links da barra de baixo em vermelho */
+/* Abas e barra de baixo em vermelho */
 .nav-pills {
     --bs-nav-pills-link-active-bg: var(--cantina-vermelho);
 }
@@ -79,13 +74,11 @@
     box-shadow: 0 0 0 .25rem rgba(170, 14, 27, .2);
 }
 
-/* Card de produto do cardápio: tocar abre a janela de detalhes (mãozinha no mouse) */
 .card-produto {
     cursor: pointer;
 }
 
-/* Teclado: quem navega com Tab vê bem onde está (contorno amarelo).
-   :focus-visible só aparece no teclado, não no clique do mouse. */
+/* Contorno amarelo ao navegar com Tab */
 .btn:focus-visible,
 .nav-link:focus-visible,
 .list-group-item:focus-visible,
@@ -95,17 +88,14 @@ a:focus-visible {
     box-shadow: none;
 }
 
-/* Administração no computador: tudo um pouco maior, para ler de longe no balcão.
-   Como o Bootstrap mede quase tudo em rem, aumentar a fonte do <html> aumenta
-   textos, botões e espaçamentos juntos. */
+/* Admin no computador: tudo um pouco maior */
 @media (min-width: 992px) {
     html.pagina-admin {
         font-size: 17px;
     }
 }
 
-/* Celulares pequenos (até 389px): esconde o nome "Cantina Real" ao lado da
-   logo, para a barra de cima (logo, saldo e carrinho) caber na tela. */
+/* Celular pequeno: esconde o nome ao lado da logo */
 @media (max-width: 389px) {
     .navbar-brand span {
         display: none;

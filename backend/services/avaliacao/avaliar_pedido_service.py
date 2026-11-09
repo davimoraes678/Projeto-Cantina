@@ -5,12 +5,10 @@ from backend.models.pedido_model import Pedido
 
 
 class AvaliarPedidoService:
-    """Caso de uso: o aluno dá nota (1 a 5) e um comentário opcional para o pedido."""
-
     @staticmethod
     def executar(id_pedido, dados):
         pedido = Pedido.buscar_por_id(id_pedido)
-        # Só o dono do pedido avalia, e uma vez só (a tabela aceita uma avaliação por pedido)
+        # Só o dono avalia, uma vez por pedido
         if not pedido or pedido.id_aluno != current_user.id_aluno:
             return {"erro": "Pedido não encontrado"}, 404
         if pedido.status != "Concluído":

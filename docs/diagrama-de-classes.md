@@ -1,9 +1,6 @@
 # Diagrama de classes do domínio
 
-As classes abaixo são as **Models** de `backend/models/`. Cada uma é uma tabela do banco
-(script em `backend/database/create-database.sql`). A imagem está em
-[`diagrama-de-classes.png`](diagrama-de-classes.png); o mesmo diagrama em Mermaid
-(que o GitHub desenha sozinho) está logo abaixo.
+As classes são os models de `backend/models/`, e cada uma é uma tabela do banco. A imagem está em [`diagrama-de-classes.png`](diagrama-de-classes.png).
 
 ```mermaid
 classDiagram
@@ -50,6 +47,7 @@ classDiagram
 
     class Pedido {
         +int id_pedido
+        +str codigo
         +datetime data_hora_criacao
         +str status
         +float valor_total
@@ -59,7 +57,7 @@ classDiagram
         +str nome_aluno
         +calcular_total() float
         +salvar()
-        +atualizar(status, data_hora_retirada, horario_agendado_retirada)
+        +atualizar(status, codigo, data_hora_retirada, ...)
         +deletar()
         +listar_todos()$
         +buscar_por_id(id_pedido)$
@@ -152,8 +150,9 @@ classDiagram
 | `Aluno` → `ItemPedido` | **Associação** | O carrinho: itens com `id_aluno` preenchido e sem pedido. Ao finalizar, `id_aluno` fica vazio; ao excluir o aluno, o carrinho dele é apagado |
 | `Aluno` → `RateioPagamento` | **Agregação** | `id_aluno` aceita nulo |
 
-**Carrinho:** não é uma classe à parte. É um `Pedido` com `status = "Carrinho"`; ao finalizar,
-o status vira `"Pendente"`. Status possíveis: `Carrinho`, `Pendente`, `Concluído`, `Cancelado`.
+**Carrinho:** não é uma classe à parte. São os `ItemPedido` com `id_aluno` preenchido e sem pedido.
+Ao finalizar, o `Pedido` é criado e os itens passam para ele. Status de um pedido: `Pendente`, `Pronto`,
+`Concluído` e `Cancelado`.
 
 **RateioPagamento:** a classe e a tabela existem (pensadas para o requisito "dividir conta"),
 mas ainda não há tela nem rota para ela.

@@ -2,8 +2,6 @@ from backend.models.produto_model import Produto
 
 
 class CriarProdutoService:
-    """Caso de uso: cadastrar produto (só o mestre)."""
-
     @staticmethod
     def executar(dados):
         if not dados.get('nome') or dados.get('preco_atual') is None:

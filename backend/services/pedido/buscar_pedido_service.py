@@ -4,8 +4,6 @@ from backend.models.pedido_model import Pedido
 
 
 class BuscarPedidoService:
-    """Caso de uso: ver um pedido (o dono do pedido, ou admin/mestre)."""
-
     @staticmethod
     def executar(id_pedido):
         pedido = Pedido.buscar_por_id(id_pedido)

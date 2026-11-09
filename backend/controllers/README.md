@@ -1,6 +1,6 @@
 # backend/controllers/
 
-Os controllers recebem as **requisições HTTP**. Há um arquivo por recurso (Model) do sistema, com **uma função por rota**. A função lê a requisição, chama o [service](../services/README.md) do caso de uso e devolve JSON. **Nenhuma regra de negócio fica aqui.**
+Um arquivo por recurso, com **uma função por rota**. A função lê a requisição, chama o [service](../services/README.md) e devolve JSON. Nenhuma regra de negócio fica aqui.
 
 | Arquivo | Blueprint | Recurso (Model) | Prefixo |
 |---|---|---|---|
@@ -13,19 +13,17 @@ Os controllers recebem as **requisições HTTP**. Há um arquivo por recurso (Mo
 ## Como é um controller
 
 ```python
-bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')   # todas as URLs começam com /api/produtos
+bp_produto = Blueprint('produtos', __name__, url_prefix='/api/produtos')
 
 @bp_produto.route('', methods=['POST'])    # POST /api/produtos
-@master_required                           # permissão (backend/autenticacao.py)
+@master_required                           # só o mestre
 def criar():
-    dados = request.get_json(silent=True) or {}             # 1. lê a requisição
-    resposta, status = CriarProdutoService.executar(dados)  # 2. chama o service
-    return jsonify(resposta), status                        # 3. devolve JSON
+    dados = request.get_json(silent=True) or {}
+    resposta, status = CriarProdutoService.executar(dados)
+    return jsonify(resposta), status
 ```
 
-O `@bp_produto.route(...)` em cima da função diz **qual URL e qual método HTTP** chamam aquela função. O `url_prefix` do Blueprint é juntado na frente: `''` vira `/api/produtos` e `'/<int:id_produto>'` vira `/api/produtos/5`.
-
-O `Blueprint` de cada arquivo é registrado em [`backend/routes.py`](../routes.py). Permissões: `@login_required` (qualquer logado), `@admin_required` (admin ou mestre), `@master_required` (só mestre).
+O `@bp_produto.route(...)` diz qual URL e qual método chamam a função, e o `url_prefix` vai na frente. Permissões: `@login_required` (qualquer logado), `@admin_required` (admin ou mestre) e `@master_required` (só mestre). Cada Blueprint é registrado em [`backend/routes.py`](../routes.py).
 
 ## Referência das rotas
 
@@ -61,7 +59,7 @@ Formato de um aluno: `{ "id_aluno": 1, "nome": "Ana", "email": "ana@email.com", 
 | `POST` | `/<id>/imagem` | Upload `multipart/form-data`, campo `imagem`. PNG, JPG ou WEBP até 5 MB |
 | `GET` | `/<id>/imagem` | Devolve a imagem (PNG), ou `404` |
 
-Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "ingredientes", "status", "imagem" }`. O `ingredientes` é a descrição mostrada na janela de detalhes do cardápio. Categorias usadas no front: `Bebida`, `Lanche` (exibido como "Salgado") e `Doce`.
+Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "ingredientes", "status", "imagem" }`. O `ingredientes` é a descrição mostrada na janela de detalhes do cardápio. Categorias usadas no front: `Salgado`, `Bebida` e `Doce`.
 
 ### `item_pedido_controller.py` — `/api/carrinho` (todas exigem login)
 
@@ -108,7 +106,7 @@ Formato de um pedido (`/finalizar` e as rotas de `/api/pedidos`):
 }
 ```
 
-- `codigo`: o código de retirada (ex.: `"4K9P"`). Pedidos sem código mostram o número (`"#3"`).
+- `codigo`: o código de retirada (ex.: `"4K9P"`).
 - `status_texto`: o status como aparece na tela: `Pendente` → "Em preparo", `Pronto` → "Pronto para retirar", `Concluído` → "Entregue", `Cancelado` → "Cancelado".
 
 ### `pedido_controller.py` — `/api/pedidos`
@@ -130,12 +128,3 @@ Status de um pedido: `Pendente` (criado ao finalizar o carrinho) → `Pronto` (a
 | Método | Rota | | Corpo | Respostas |
 |---|---|---|---|---|
 | `POST` | `/<id>/avaliacao` | login | `{nota, comentario?}` | `201` · `400` pedido não concluído, já avaliado ou nota fora de 1 a 5 · `404` pedido de outro aluno |
-
-## Ao criar uma rota
-
-- Crie uma **função no controller** com `@bp.route('/caminho', methods=['GET'])` em cima. A função só lê a requisição e chama um service.
-- A permissão vem logo abaixo do `@bp.route` (`@login_required`, `@admin_required` ou `@master_required`). A ordem importa: o `@bp.route` fica sempre em cima.
-- Os nomes entre `< >` na URL precisam ser parâmetros da função (`/<int:id_aluno>` → `def promover(id_aluno)`), senão dá `TypeError`.
-- Dentro de um mesmo controller, as funções precisam ter **nomes diferentes** (o Flask usa o nome para identificar a rota).
-- Leia o corpo com `request.get_json(silent=True) or {}`, que não quebra se o corpo vier vazio.
-- Controller novo: registre o blueprint em `routes.py` e acrescente as rotas nesta página. O `GET /api` lista as rotas sozinho.

@@ -1,30 +1,20 @@
 # front-end/js/
 
-O JavaScript do site: **um arquivo por página**, mais o `comum.js`, que todas usam.
+Um arquivo por página, mais o `comum.js`, que todas usam.
 
 | Arquivo | Página | O que faz |
 |---|---|---|
-| `comum.js` | todas | `API_BASE_URL`, `alunoInf()` (nome, saldo etc. do aluno logado), `funcaoPorAluno()` (mostra o que é de admin/mestre), botões Sair, `avisar()` (aviso verde), `formatarPreco()` e `escaparTexto()` |
-| `login.js` | `login.html` e `cadastro.html` | Envia o login e o cadastro |
-| `cardapio.js` | `index.html` | Produtos, janela de detalhes, categorias e filtros; combos; carrinho (adicionar, remover, repetir, finalizar); aviso de pedido em andamento |
-| `pedidos.js` | `pedidos.html` | Meus pedidos: em andamento e histórico; "Pedir de novo"; avaliação |
+| `comum.js` | todas | `alunoInf()` (dados do aluno logado), `funcaoPorAluno()` (mostra o que é de admin e mestre), botão Sair, `avisar()`, `formatarPreco()` e `escaparTexto()` |
+| `login.js` | `login.html` e `cadastro.html` | Login e cadastro |
+| `cardapio.js` | `index.html` | Produtos, detalhes, filtros, combos, carrinho e aviso de pedido em andamento |
+| `pedidos.js` | `pedidos.html` | Meus pedidos, "Pedir de novo" e avaliação |
 | `carteira.js` | `carteira.html` | Recarga de saldo |
-| `conta.js` | `conta.html` | Editar dados e remover a conta |
-| `admin.js` | `admin.html` | Pedidos (pronto, entregar, cancelar) e histórico; produtos (novo, editar, excluir, foto); alunos (tornar admin, excluir) |
+| `conta.js` | `conta.html` | Editar dados e excluir a conta |
+| `admin.js` | `admin.html` | Pedidos (pronto, entregar, cancelar), histórico, produtos e alunos |
 
-## Como uma página carrega o JavaScript
+Cada página carrega, no fim do `<body>`, o Bootstrap, o `comum.js` e o arquivo dela, todos com `defer`, que roda os arquivos na ordem depois que o HTML carregou.
 
-No fim do `<body>`, sempre nesta ordem:
-
-```html
-<script src="https://cdn.jsdelivr.net/.../bootstrap.bundle.min.js" defer></script>
-<script src="/front-end/js/comum.js" defer></script>
-<script src="/front-end/js/cardapio.js" defer></script>
-```
-
-Com `defer`, os arquivos rodam **depois** que o HTML terminou de ser lido e **na ordem em que aparecem**. Por isso o arquivo da página já pode usar os elementos do HTML, o Bootstrap e as funções do `comum.js`.
-
-## O padrão de uma chamada à API
+## Uma chamada à API
 
 Toda função que fala com o back-end segue o mesmo modelo:
 
@@ -32,62 +22,48 @@ Toda função que fala com o back-end segue o mesmo modelo:
 async function removerItemDoCarrinho(id_item_pedido) {
   try {
     const res = await fetch(`${API_BASE_URL}/carrinho/itens/${id_item_pedido}`, { method: "DELETE" });
-    const dados = await res.json();          // lê a resposta (JSON) como objeto
-    if (!res.ok) {                           // deu errado (o back-end respondeu com erro)
+    const dados = await res.json();
+    if (!res.ok) {
       alert(dados.erro || "Não foi possível remover o item.");
       return;
     }
-    renderizarCarrinho(dados);               // deu certo: usa a resposta
+    renderizarCarrinho(dados);
   } catch (erro) {
-    console.error("Erro ao remover item:", erro);   // erro de rede: aparece no console (F12)
+    console.error("Erro ao remover item:", erro);
   }
 }
 ```
 
-- `res.ok` é `true` quando o back-end respondeu com sucesso (2xx).
-- Quando dá errado, o back-end manda `{ "erro": "mensagem" }`, que aparece num `alert`. Quando dá certo, algumas ações mostram o aviso verde com `avisar("...")`.
-- Para enviar dados (POST/PUT), a chamada leva `headers: { "Content-Type": "application/json" }` e `body: JSON.stringify({...})`.
-- A foto do produto é a exceção: vai como `FormData` (formulário com arquivo), não como JSON (`enviarImagem` no `admin.js`).
+- `res.ok` é `true` quando o back-end respondeu com sucesso.
+- Em caso de erro, o back-end manda `{ "erro": "mensagem" }`, que aparece num `alert`. Em caso de sucesso, o `avisar("...")` mostra um aviso verde.
+- Para enviar dados, a chamada leva `headers: { "Content-Type": "application/json" }` e `body: JSON.stringify({...})`. A foto do produto é a exceção: vai como `FormData`.
 
-## O padrão de uma lista na tela
-
-A API devolve uma lista, o `forEach` junta o HTML de cada item numa variável, e no fim ela vai para a tela:
+## Uma lista na tela
 
 ```js
 let html = "";
 produtos.forEach((produto) => {
-  html += cardProduto(produto);   // junta o texto (ainda não mexe na tela)
+  html += cardProduto(produto);
 });
-lista.innerHTML = html;           // escreve na tela uma vez só
+lista.innerHTML = html;
 ```
 
-- Juntar numa variável e escrever **uma vez só** é mais rápido do que fazer `lista.innerHTML +=` dentro do `forEach`: a cada `+=`, o navegador apaga e redesenha a lista inteira (inclusive as fotos).
-- Texto que veio do usuário (nome, e-mail, nome do produto) passa pelo `escaparTexto()` antes de entrar no HTML.
-- Os botões de cada item chamam uma função com o **id**: `onclick="editarProduto(5)"`. A função acha o resto dos dados na lista que já foi carregada, com `produtos.find(...)`.
+- O HTML é montado numa variável e vai para a tela uma vez só, o que é mais rápido do que usar `innerHTML +=` dentro do `forEach`.
+- Texto digitado pelo usuário passa pelo `escaparTexto()` antes de entrar no HTML.
+- Os botões chamam uma função com o id (`onclick="editarProduto(5)"`), e a função acha o produto na lista já carregada com `produtos.find(...)`.
 
-## Dados do aluno nas páginas
+## Dados do aluno
 
-O `alunoInf()` do `comum.js` preenche os elementos pelas classes:
+O `alunoInf()` preenche os elementos pelas classes `nome-aluno`, `email-aluno`, `saldo-aluno` e `funcao-aluno`. Exemplo: `<span class="saldo-aluno">R$ 0,00</span>` mostra o saldo.
 
-| Classe no HTML | Mostra |
-|---|---|
-| `nome-aluno` | Davi Moraes |
-| `email-aluno` | davi@... |
-| `saldo-aluno` | R$ 136,50 |
-| `funcao-aluno` | mestre |
-
-Exemplo: `<span class="saldo-aluno">R$ 0,00</span>` mostra o saldo. Pode haver vários na mesma página (no topo e no carrinho, por exemplo).
-
-## API usada por cada página
+## Rotas usadas por página
 
 | Página | Rotas |
 |---|---|
 | login / cadastro | `POST /alunos/login`, `POST /alunos/registro` |
-| todas (comum.js) | `GET /alunos/atual`, `POST /alunos/logout` |
+| todas | `GET /alunos/atual`, `POST /alunos/logout` |
 | cardápio | `GET /produtos/buscar`, `GET /pedidos/combinacoes`, `GET /carrinho`, `POST /carrinho/itens`, `DELETE /carrinho/itens/<id>`, `POST /carrinho/repetir`, `POST /carrinho/finalizar`, `GET /pedidos/meus` |
 | meus pedidos | `GET /pedidos/meus`, `POST /carrinho/repetir/<id>`, `POST /pedidos/<id>/avaliacao` |
 | carteira | `POST /alunos/atual/recarga` |
 | perfil | `PUT /alunos/atual`, `DELETE /alunos/atual` |
-| admin | `GET /pedidos`, `POST /pedidos/<id>/pronto`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar`, `GET` `POST` `PUT` `DELETE /produtos`, `POST /produtos/<id>/imagem`, `GET /alunos`, `PUT` `DELETE /alunos/<id>` |
-
-> **Atenção:** um erro de sintaxe num arquivo `.js` faz aquela página parar de funcionar. Depois de mexer, abra o console do navegador (F12) e confira se não há erros em vermelho.
+| admin | `GET /pedidos`, `POST /pedidos/<id>/pronto`, `POST /pedidos/<id>/concluir`, `POST /pedidos/<id>/cancelar`, `/produtos` (GET, POST, PUT, DELETE), `POST /produtos/<id>/imagem`, `GET /alunos`, `PUT` e `DELETE /alunos/<id>` |

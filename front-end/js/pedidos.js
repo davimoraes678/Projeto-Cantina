@@ -111,7 +111,7 @@ function abrirAvaliacao(id_pedido) {
 
 document.getElementById("form-avaliacao").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const nota = Number(document.getElementById("avaliacao-nota").value);
+  const nota = document.getElementById("avaliacao-nota").value;
   const comentario = document.getElementById("avaliacao-comentario").value;
 
   try {

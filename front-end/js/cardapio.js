@@ -338,6 +338,14 @@ async function verificarPedidoAndamento() {
     }
     const pedido = pedidos.andamento[0];
     document.getElementById("aviso-pedido-texto").textContent = `Pedido ${pedido.codigo}: ${pedido.status_texto}`;
+    const avisoPedido = document.getElementById("aviso-pedido");
+    const ball = document.getElementById("ball")
+    if (pedido.status === "Pronto") {
+      aviso.classList.remove("alert-warning");
+      aviso.classList.add("alert-success");
+      ball.classList.remove("text-warning");
+      ball.classList.add("text-success");
+    }
     aviso.classList.remove("d-none");
   } catch (erro) {
     console.error("Erro ao verificar pedidos:", erro);

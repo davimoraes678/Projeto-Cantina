@@ -106,13 +106,13 @@ FLASK_DEBUG=False
 
 ## Pastas
 
-| Pasta | O que tem |
+| Pasta | O que tem em cada pasta|
 |---|---|
 | [`backend/`](backend/README.md) | A API: camadas, `app.py` e login |
 | [`backend/database/`](backend/database/README.md) | Script do MySQL (tabelas e procedures) |
 | [`front-end/`](front-end/README.md) | As páginas |
 | [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página |
-| [`arquivos/`](arquivos/README.md) | Fotos dos produtos |
+| [`backend/imagens-produtos`](front-end/assets/imagens-produtos/README.md) | Fotos dos produtos |
 | [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes |
 
 ## Limitações

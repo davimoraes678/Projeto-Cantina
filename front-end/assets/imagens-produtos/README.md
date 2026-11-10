@@ -1,4 +1,4 @@
-# arquivos/
+# front-end/assets/imagens-produtos/
 
 Fotos dos produtos, enviadas pela tela de administração.
 

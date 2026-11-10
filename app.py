@@ -21,7 +21,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///cantina.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    app.config["ARQUIVOS_DIR"] = os.path.join(app.root_path, "arquivos")
+    app.config["IMAGENS_PRODUTOS_DIR"] = os.path.join(app.root_path, "front-end", "assets", "imagens-produtos")
     app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "chave-desenvolvimento")
 

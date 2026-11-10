@@ -17,7 +17,7 @@ def nome_imagem(nome):
 
 
 def caminho_imagem(nome):
-    return Path(current_app.config["ARQUIVOS_DIR"]) / nome_imagem(nome)
+    return Path(current_app.config["IMAGENS_PRODUTOS_DIR"]) / nome_imagem(nome)
 
 
 def verificar_nome_disponivel(produto, nome):

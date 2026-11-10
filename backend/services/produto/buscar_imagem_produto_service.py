@@ -16,6 +16,6 @@ class BuscarImagemProdutoService:
             nome = nome_imagem(produto.nome)
         except ValueError:
             return {"erro": "Produto sem imagem"}, 404
-        if not (Path(current_app.config["ARQUIVOS_DIR"]) / nome).is_file():
+        if not (Path(current_app.config["IMAGENS_PRODUTOS_DIR"]) / nome).is_file():
             return {"erro": "Produto sem imagem"}, 404
         return {"arquivo": nome}, 200

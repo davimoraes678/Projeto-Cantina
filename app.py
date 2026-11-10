@@ -61,7 +61,7 @@ def create_app():
             return redirect('/front-end/cadastro.html')
         return send_from_directory(FRONTEND_DIR, "index.html")
 
-    
+
     @app.get('/api')
     @login_required
     def api_info():

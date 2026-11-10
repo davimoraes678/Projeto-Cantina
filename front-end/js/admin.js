@@ -10,6 +10,7 @@ async function iniciar() {
   if (aluno && aluno.funcao === "mestre") {
     carregarProdutos();
     carregarAlunos();
+    carregarAvaliacoes();
   }
   // Atualiza os pedidos a cada 15 segundos
   setInterval(carregarPedidos, 15000);
@@ -286,19 +287,18 @@ async function carregarAvaliacoes() {
     let ratehtml = "";
 
     avaliacoes.forEach((avaliacao) => {
+      const data = new Date(avaliacao.data_avaliacao + "Z").toLocaleDateString("pt-BR");
       ratehtml += `
-        <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
-          <div class="flex-grow-1">
-            <div class="fw-semibold">ID: ${escaparTexto(avaliacao.id_avaliacao)}</div>
-            <div class="fw-bold text-warning">Nota: ${escaparTexto(avaliacao.nota)} ★</div>
-            <div class="mt-1">
-              <span class="badge rounded-pill text-bg-light border text-capitalize">
-                ${escaparTexto(avaliacao.comentario)}
-              </span>
-            </div>
+        <div class="list-group-item py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Pedido #${avaliacao.id_pedido}</span>
+            <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
           </div>
+          <p class="mb-1">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
+          <small class="text-body-secondary">${data}</small>
         </div>`;
     });
+    if (ratehtml === "" || avaliacoes.comentario === "") ratehtml = `<p class="text-body-secondary">Nenhum pedido avaliado</p>`
 
     document.getElementById("lista-avaliacoes").innerHTML = ratehtml;
   } catch (erro) {

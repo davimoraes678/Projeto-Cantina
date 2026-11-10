@@ -75,6 +75,6 @@ def ver_imagem(id_produto):
     if status != 200:
         return jsonify(resposta), status
     # Devolve o arquivo da imagem
-    arquivo = send_from_directory(current_app.config["ARQUIVOS_DIR"], resposta["arquivo"])
+    arquivo = send_from_directory(current_app.config["IMAGENS_PRODUTOS_DIR"], resposta["arquivo"])
     arquivo.headers["Cache-Control"] = "no-cache"
     return arquivo

@@ -163,12 +163,10 @@ async function carregarCombinacoes() {
 
     let html = "";
     combos.forEach((combo) => {
-      const primeiro = combo.produtos[0];
-      const segundo = combo.produtos[1];
       html += `
         <button class="btn btn-outline-primary rounded-pill text-nowrap" type="button"
-                onclick="adicionarCombinacao(${primeiro.id_produto}, ${segundo.id_produto})">
-          + ${escaparTexto(primeiro.nome)} + ${escaparTexto(segundo.nome)}
+                onclick="adicionarCombinacao(${combo.id_produto_1}, ${combo.id_produto_2})">
+          1x ${escaparTexto(combo.nome_1)} + 1x ${escaparTexto(combo.nome_2)}
         </button>`;
     });
     document.getElementById("lista-combos").innerHTML = html;

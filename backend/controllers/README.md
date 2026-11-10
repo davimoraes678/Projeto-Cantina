@@ -115,7 +115,7 @@ Formato de um pedido (`/finalizar` e as rotas de `/api/pedidos`):
 |---|---|---|---|
 | `GET` | `` (raiz) | admin ou mestre | Os pedidos, já separados para a tela do admin: `{preparo: [...], prontos: [...], historico: [...]}`. `preparo` e `prontos` do mais antigo para o mais novo; `historico` (entregues e cancelados) do mais novo para o mais antigo |
 | `GET` | `/meus` | login | Os pedidos do aluno logado, já separados: `{andamento: [...], historico: [...]}` (em preparo e prontos / entregues e cancelados), o mais recente primeiro |
-| `GET` | `/combinacoes` | login | As 3 duplas de produtos mais pedidas juntas: `[{produtos: [{id_produto, nome}, ...], vezes}]` |
+| `GET` | `/combinacoes` | login | As 3 duplas de produtos mais pedidas juntas: `[{id_produto_1, nome_1, id_produto_2, nome_2, vezes}]`. Só funciona no MySQL (usa a procedure) |
 | `GET` | `/<id>` | login | Um pedido (só o dono ou admin/mestre; senão `404`) |
 | `POST` | `/<id>/pronto` | admin ou mestre | Marca como `"Pronto"` (o aluno vê "Pronto para retirar") · `400` se não estiver `Pendente` |
 | `POST` | `/<id>/concluir` | admin ou mestre | Marca como `"Concluído"` (o aluno retirou; aparece como "Entregue") e grava a hora em `data_hora_retirada` · `400` se já estiver concluído ou cancelado |

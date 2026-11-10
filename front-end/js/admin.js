@@ -282,23 +282,32 @@ async function carregarAvaliacoes() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/avaliacao`);
     if (!res.ok) return;
-
     const avaliacoes = await res.json();
+
     let ratehtml = "";
 
     avaliacoes.forEach((avaliacao) => {
       const data = new Date(avaliacao.data_avaliacao + "Z").toLocaleDateString("pt-BR");
+
+      let itens = "";
+      avaliacao.itens.forEach((item) => {
+        itens += `${item.quantidade}x ${escaparTexto(item.produto_nome)}<br>`;
+      });
+
       ratehtml += `
-        <div class="list-group-item py-3">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-semibold">Pedido #${avaliacao.id_pedido}</span>
-            <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
+        <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
+          <div>
+            <div class="fw-semibold">Pedido #${avaliacao.id_pedido}</div>
+            <small class="text-body-secondary">${itens}</small>
+            <p class="fst-italic mt-2 mb-0">•  ${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
           </div>
-          <p class="mb-1">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
-          <small class="text-body-secondary">${data}</small>
+          <div class="text-end text-nowrap">
+            <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
+            <div><small class="text-body-secondary">${data}</small></div>
+          </div>
         </div>`;
     });
-    if (ratehtml === "" || avaliacoes.comentario === "") ratehtml = `<p class="text-body-secondary">Nenhum pedido avaliado</p>`
+    if (ratehtml === "") ratehtml = `<p class="text-body-secondary">Nenhum pedido avaliado</p>`
 
     document.getElementById("lista-avaliacoes").innerHTML = ratehtml;
   } catch (erro) {

@@ -40,5 +40,6 @@ class Avaliacao(db.Model):
             'nota': self.nota,
             'comentario': self.comentario,
             'data_avaliacao': self.data_avaliacao.isoformat() if self.data_avaliacao else None,
-            'id_pedido': self.id_pedido
+            'id_pedido': self.id_pedido,
+            'itens': [item.to_dict() for item in self.pedido.itens]
         }

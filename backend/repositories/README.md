@@ -29,7 +29,7 @@ def buscar_por_categoria(categoria):
 ```
 
 - **No MySQL**, a consulta é a stored procedure. As procedures são criadas pelo [`create-database.sql`](../database/README.md).
-- **Em outro banco** (SQLite), as procedures não existem, então o mesmo método faz a consulta equivalente pelo ORM. Por isso o site funciona nos dois bancos. A exceção é o `combinacoes_mais_pedidas()`, que só chama a procedure e precisa do MySQL.
+- **Em outro banco** (SQLite), as procedures não existem, então o mesmo método faz a consulta equivalente pelo ORM. Por isso o site funciona nos dois bancos. No `combinacoes_mais_pedidas()`, sem MySQL roda a mesma consulta da procedure em SQL puro.
 - O **service** só chama o repository e usa o resultado; ele não sabe qual banco está em uso.
 
 ## Os métodos e as procedures

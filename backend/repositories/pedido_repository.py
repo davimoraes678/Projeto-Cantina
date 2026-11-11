@@ -27,7 +27,27 @@ class PedidoRepository:
 
     @staticmethod
     def combinacoes_mais_pedidas():
-        sql = text("CALL sp_combinacoes_mais_pedidas()")
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_combinacoes_mais_pedidas()")
+        else:
+            # Sem MySQL (SQLite) não há procedure: mesma consulta da sp_combinacoes_mais_pedidas
+            sql = text("""
+                SELECT a.id_produto AS id_produto_1, pa.nome AS nome_1,
+                       b.id_produto AS id_produto_2, pb.nome AS nome_2,
+                       COUNT(DISTINCT a.id_pedido) AS vezes
+                FROM itens_pedido a
+                JOIN itens_pedido b ON b.id_pedido = a.id_pedido AND b.id_produto > a.id_produto
+                JOIN pedido p ON p.id_pedido = a.id_pedido
+                JOIN produto pa ON pa.id_produto = a.id_produto
+                JOIN produto pb ON pb.id_produto = b.id_produto
+                WHERE p.status <> 'Cancelado'
+                GROUP BY a.id_produto, pa.nome, b.id_produto, pb.nome
+                ORDER BY vezes DESC, a.id_produto, b.id_produto
+                LIMIT 3
+            """)
+
         resultado = db.session.execute(sql)
         linhas = resultado.mappings().all()
         resultado.close()

@@ -343,6 +343,11 @@ async function verificarPedidoAndamento() {
       aviso.classList.add("alert-success");
       ball.classList.remove("text-warning");
       ball.classList.add("text-success");
+    } else {
+      aviso.classList.remove("alert-success");
+      aviso.classList.add("alert-warning");
+      ball.classList.remove("text-success");
+      ball.classList.add("text-warning");
     }
     aviso.classList.remove("d-none");
   } catch (erro) {

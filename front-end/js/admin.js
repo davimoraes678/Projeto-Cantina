@@ -45,9 +45,9 @@ async function carregarPedidos() {
     document.getElementById("lista-historico-admin").innerHTML = htmlHistorico;
 
     // Contadores e título da aba ("(3) Administração")
-    const Preparo = pedidos.preparo.length;
-    const esperando = preparo + pedidos.prontos.length;
-    document.getElementById("contador-preparo").textContent = preparo;
+    const emPreparo = pedidos.preparo.length;
+    const esperando = emPreparo + pedidos.prontos.length;
+    document.getElementById("contador-preparo").textContent = emPreparo;
     document.getElementById("contador-prontos").textContent = pedidos.prontos.length;
     const contador = document.getElementById("contador-pedidos-admin");
     contador.textContent = esperando;
@@ -263,6 +263,7 @@ async function enviarImagem(id_produto) {
 }
 
 async function removerProduto(id_produto) {
+  const produto = produtos.find((p) => p.id_produto === id_produto);
   if (!confirm(`Excluir ${produto.nome} do cardápio?`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/produtos/${id_produto}`, { method: "DELETE" });

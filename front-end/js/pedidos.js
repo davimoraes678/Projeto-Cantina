@@ -1,4 +1,6 @@
 let pedidoAvaliando = null;
+let historico = [];
+let limiteHistorico = 10; // "Ver mais" soma 10
 
 alunoInf();
 carregarMeusPedidos();
@@ -17,15 +19,10 @@ async function carregarMeusPedidos() {
     pedidos.andamento.forEach((pedido) => {
       htmlAndamento += cardPedido(pedido);
     });
-    let htmlHistorico = "";
-    pedidos.historico.forEach((pedido) => {
-      htmlHistorico += cardPedido(pedido);
-    });
-
     if (htmlAndamento === "") htmlAndamento = `<p class="text-center text-body-secondary py-5">Nenhum pedido em andamento.</p>`;
-    if (htmlHistorico === "") htmlHistorico = `<p class="text-center text-body-secondary py-5">Nenhum pedido finalizado ainda.</p>`;
     document.getElementById("lista-andamento").innerHTML = htmlAndamento;
-    document.getElementById("lista-historico").innerHTML = htmlHistorico;
+    historico = pedidos.historico;
+    mostrarHistorico();
 
     // Número na aba "Em andamento"
     const contador = document.getElementById("contador-andamento");
@@ -38,6 +35,26 @@ async function carregarMeusPedidos() {
   } catch (erro) {
     console.error("Erro ao carregar pedidos:", erro);
   }
+}
+
+// Busca por código ou produto, e mostra até o limite
+function mostrarHistorico() {
+  const busca = paraBusca(document.getElementById("busca-historico").value);
+  const encontrados = historico.filter((pedido) => {
+    let texto = pedido.codigo;
+    pedido.itens.forEach((item) => {
+      texto += " " + item.produto_nome;
+    });
+    return paraBusca(texto).includes(busca);
+  });
+
+  let html = "";
+  encontrados.slice(0, limiteHistorico).forEach((pedido) => {
+    html += cardPedido(pedido);
+  });
+  if (html === "") html = `<p class="text-center text-body-secondary py-5">Nenhum pedido encontrado.</p>`;
+  document.getElementById("lista-historico").innerHTML = html;
+  document.getElementById("mais-historico").classList.toggle("d-none", encontrados.length <= limiteHistorico);
 }
 
 function cardPedido(pedido) {

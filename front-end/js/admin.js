@@ -1,6 +1,15 @@
 let produtos = [];
+let historico = [];
+let alunos = [];
+let avaliacoes = [];
 let editandoProdutoId = null; // null = cadastrando; um id = editando
 let totalEmPreparo = null;    // para avisar quando chega pedido novo
+
+// Quantos itens cada lista mostra ("Ver mais" soma 10)
+let limiteHistorico = 10;
+let limiteProdutos = 10;
+let limiteAlunos = 10;
+let limiteAvaliacoes = 10;
 
 iniciar();
 
@@ -32,17 +41,12 @@ async function carregarPedidos() {
     pedidos.prontos.forEach((pedido) => {
       htmlProntos += cardPedidoAdmin(pedido);
     });
-    let htmlHistorico = "";
-    pedidos.historico.forEach((pedido) => {
-      htmlHistorico += linhaHistorico(pedido);
-    });
-
     if (htmlemPreparo === "") htmlemPreparo = `<p class="text-body-secondary">Nenhum pedido em preparo.</p>`;
     if (htmlProntos === "") htmlProntos = `<p class="text-body-secondary">Nenhum pedido esperando retirada.</p>`;
-    if (htmlHistorico === "") htmlHistorico = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido finalizado.</p>`;
     document.getElementById("lista-preparo").innerHTML = htmlemPreparo;
     document.getElementById("lista-prontos").innerHTML = htmlProntos;
-    document.getElementById("lista-historico-admin").innerHTML = htmlHistorico;
+    historico = pedidos.historico;
+    mostrarHistorico();
 
     // Contadores e título da aba ("(3) Administração")
     const emPreparo = pedidos.preparo.length;
@@ -66,6 +70,26 @@ async function carregarPedidos() {
   } catch (erro) {
     console.error("Erro ao carregar pedidos:", erro);
   }
+}
+
+// Busca por aluno, código ou produto, e mostra até o limite
+function mostrarHistorico() {
+  const busca = paraBusca(document.getElementById("busca-historico").value);
+  const encontrados = historico.filter((pedido) => {
+    let texto = pedido.aluno_nome + " " + pedido.codigo;
+    pedido.itens.forEach((item) => {
+      texto += " " + item.produto_nome;
+    });
+    return paraBusca(texto).includes(busca);
+  });
+
+  let html = "";
+  encontrados.slice(0, limiteHistorico).forEach((pedido) => {
+    html += linhaHistorico(pedido);
+  });
+  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum pedido encontrado.</p>`;
+  document.getElementById("lista-historico-admin").innerHTML = html;
+  document.getElementById("mais-historico").classList.toggle("d-none", encontrados.length <= limiteHistorico);
 }
 
 // Pendente -> botão "Pronto"; Pronto -> botão "Entregar"
@@ -162,29 +186,38 @@ async function carregarProdutos() {
     const res = await fetch(`${API_BASE_URL}/produtos`);
     if (!res.ok) return;
     produtos = await res.json();
-
-    let html = "";
-    produtos.forEach((produto) => {
-      let foto = `<div class="flex-shrink-0" style="width: 48px; height: 48px"></div>`;
-      if (produto.imagem) {
-        foto = `<img src="${API_BASE_URL}/produtos/${produto.id_produto}/imagem?v=${produto.imagem}" alt="" width="48" height="48"
-                     class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy">`;
-      }
-      html += `
-        <div class="list-group-item d-flex align-items-center gap-3 py-2">
-          ${foto}
-          <div class="flex-grow-1">
-            <div class="fw-semibold">${escaparTexto(produto.nome)}</div>
-            <small class="text-body-secondary">${escaparTexto(produto.categoria || "")} · ${formatarPreco(produto.preco_atual)} · ${produto.quantidade_estoque} em estoque</small>
-          </div>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="editarProduto(${produto.id_produto})">Editar</button>
-          <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="removerProduto(${produto.id_produto})">Excluir</button>
-        </div>`;
-    });
-    document.getElementById("lista-produtos-admin").innerHTML = html;
+    mostrarProdutos();
   } catch (erro) {
     console.error("Erro ao carregar produtos:", erro);
   }
+}
+
+// Busca por nome ou categoria, e mostra até o limite
+function mostrarProdutos() {
+  const busca = paraBusca(document.getElementById("busca-produtos").value);
+  const encontrados = produtos.filter((produto) => paraBusca(produto.nome + " " + produto.categoria).includes(busca));
+
+  let html = "";
+  encontrados.slice(0, limiteProdutos).forEach((produto) => {
+    let foto = `<div class="flex-shrink-0" style="width: 48px; height: 48px"></div>`;
+    if (produto.imagem) {
+      foto = `<img src="${API_BASE_URL}/produtos/${produto.id_produto}/imagem?v=${produto.imagem}" alt="" width="48" height="48"
+                   class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy">`;
+    }
+    html += `
+      <div class="list-group-item d-flex align-items-center gap-3 py-2">
+        ${foto}
+        <div class="flex-grow-1">
+          <div class="fw-semibold">${escaparTexto(produto.nome)}</div>
+          <small class="text-body-secondary">${escaparTexto(produto.categoria || "")} · ${formatarPreco(produto.preco_atual)} · ${produto.quantidade_estoque} em estoque</small>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="editarProduto(${produto.id_produto})">Editar</button>
+        <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="removerProduto(${produto.id_produto})">Excluir</button>
+      </div>`;
+  });
+  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum produto encontrado.</p>`;
+  document.getElementById("lista-produtos-admin").innerHTML = html;
+  document.getElementById("mais-produtos").classList.toggle("d-none", encontrados.length <= limiteProdutos);
 }
 
 function novoProduto() {
@@ -287,37 +320,49 @@ async function carregarAvaliacoes() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/avaliacao`);
     if (!res.ok) return;
-    const avaliacoes = await res.json();
-
-    let ratehtml = "";
-
-    avaliacoes.forEach((avaliacao) => {
-      const data = new Date(avaliacao.data_avaliacao + "Z").toLocaleDateString("pt-BR");
-
-      let itens = "";
-      avaliacao.itens.forEach((item) => {
-        itens += `${item.quantidade}x ${escaparTexto(item.produto_nome)}<br>`;
-      });
-
-      ratehtml += `
-        <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
-          <div>
-            <div class="fw-semibold">Pedido #${avaliacao.id_pedido}</div>
-            <small class="text-body-secondary">${itens}</small>
-            <p class="fst-italic mt-2 mb-0">•  ${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
-          </div>
-          <div class="text-end text-nowrap">
-            <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
-            <div><small class="text-body-secondary">${data}</small></div>
-          </div>
-        </div>`;
-    });
-    if (ratehtml === "") ratehtml = `<p class="text-body-secondary">Nenhum pedido avaliado</p>`
-
-    document.getElementById("lista-avaliacoes").innerHTML = ratehtml;
+    avaliacoes = await res.json();
+    mostrarAvaliacoes();
   } catch (erro) {
     console.error("Erro ao carregar avaliações:", erro);
   }
+}
+
+// Busca por número do pedido, produto ou comentário, e mostra até o limite
+function mostrarAvaliacoes() {
+  const busca = paraBusca(document.getElementById("busca-avaliacoes").value);
+  const encontradas = avaliacoes.filter((avaliacao) => {
+    let texto = "#" + avaliacao.id_pedido + " " + avaliacao.comentario;
+    avaliacao.itens.forEach((item) => {
+      texto += " " + item.produto_nome;
+    });
+    return paraBusca(texto).includes(busca);
+  });
+
+  let ratehtml = "";
+  encontradas.slice(0, limiteAvaliacoes).forEach((avaliacao) => {
+    const data = new Date(avaliacao.data_avaliacao + "Z").toLocaleDateString("pt-BR");
+
+    let itens = "";
+    avaliacao.itens.forEach((item) => {
+      itens += `${item.quantidade}x ${escaparTexto(item.produto_nome)}<br>`;
+    });
+
+    ratehtml += `
+      <div class="list-group-item d-flex justify-content-between align-items-start gap-3 py-3">
+        <div>
+          <div class="fw-semibold">Pedido #${avaliacao.id_pedido}</div>
+          <small class="text-body-secondary">${itens}</small>
+          <p class="fst-italic mt-2 mb-0">•  ${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
+        </div>
+        <div class="text-end text-nowrap">
+          <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
+          <div><small class="text-body-secondary">${data}</small></div>
+        </div>
+      </div>`;
+  });
+  if (ratehtml === "") ratehtml = `<p class="text-center text-body-secondary py-4 mb-0">Nenhuma avaliação encontrada.</p>`;
+  document.getElementById("lista-avaliacoes").innerHTML = ratehtml;
+  document.getElementById("mais-avaliacoes").classList.toggle("d-none", encontradas.length <= limiteAvaliacoes);
 }
 
 // Alunos (só mestre)
@@ -327,31 +372,40 @@ async function carregarAlunos() {
   try {
     const res = await fetch(`${API_BASE_URL}/alunos`);
     if (!res.ok) return;
-    const alunos = await res.json();
-
-    let html = "";
-    alunos.forEach((aluno) => {
-      let botoes = "";
-      if (aluno.funcao === "aluno") {
-        botoes += `<button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="promoverAluno(${aluno.id_aluno})">Tornar admin</button>`;
-      }
-      if (aluno.funcao !== "mestre") {
-        botoes += ` <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>`;
-      }
-      html += `
-        <div class="list-group-item d-flex flex-wrap align-items-center gap-2 py-2">
-          <div class="flex-grow-1">
-            <div class="fw-semibold">${escaparTexto(aluno.nome)}
-              <span class="badge rounded-pill text-bg-light border text-capitalize">${aluno.funcao}</span></div>
-            <small class="text-body-secondary">${escaparTexto(aluno.email)} · ${formatarPreco(aluno.saldo)}</small>
-          </div>
-          ${botoes}
-        </div>`;
-    });
-    document.getElementById("lista-alunos").innerHTML = html;
+    alunos = await res.json();
+    mostrarAlunos();
   } catch (erro) {
     console.error("Erro ao carregar alunos:", erro);
   }
+}
+
+// Busca por nome ou e-mail, e mostra até o limite
+function mostrarAlunos() {
+  const busca = paraBusca(document.getElementById("busca-alunos").value);
+  const encontrados = alunos.filter((aluno) => paraBusca(aluno.nome + " " + aluno.email).includes(busca));
+
+  let html = "";
+  encontrados.slice(0, limiteAlunos).forEach((aluno) => {
+    let botoes = "";
+    if (aluno.funcao === "aluno") {
+      botoes += `<button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" onclick="promoverAluno(${aluno.id_aluno})">Tornar admin</button>`;
+    }
+    if (aluno.funcao !== "mestre") {
+      botoes += ` <button class="btn btn-sm btn-outline-danger rounded-pill" type="button" onclick="excluirAluno(${aluno.id_aluno})">Excluir</button>`;
+    }
+    html += `
+      <div class="list-group-item d-flex flex-wrap align-items-center gap-2 py-2">
+        <div class="flex-grow-1">
+          <div class="fw-semibold">${escaparTexto(aluno.nome)}
+            <span class="badge rounded-pill text-bg-light border text-capitalize">${aluno.funcao}</span></div>
+          <small class="text-body-secondary">${escaparTexto(aluno.email)} · ${formatarPreco(aluno.saldo)}</small>
+        </div>
+        ${botoes}
+      </div>`;
+  });
+  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhum aluno encontrado.</p>`;
+  document.getElementById("lista-alunos").innerHTML = html;
+  document.getElementById("mais-alunos").classList.toggle("d-none", encontrados.length <= limiteAlunos);
 }
 
 async function promoverAluno(id_aluno) {

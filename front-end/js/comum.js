@@ -50,6 +50,11 @@ function avisar(mensagem) {
   bootstrap.Toast.getOrCreateInstance(document.getElementById("aviso")).show();
 }
 
+// Busca: "Água" -> "agua" (sem maiúsculas e sem acentos)
+function paraBusca(texto) {
+  return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
 // 12.5 -> "R$ 12,50"
 function formatarPreco(valor) {
   return "R$ " + Number(valor).toFixed(2).replace(".", ",");

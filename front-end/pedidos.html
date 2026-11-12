@@ -54,7 +54,11 @@
 
         <div class="tab-content">
             <div class="tab-pane fade show active" id="aba-andamento"><div id="lista-andamento"></div></div>
-            <div class="tab-pane fade" id="aba-historico"><div id="lista-historico"></div></div>
+            <div class="tab-pane fade" id="aba-historico">
+                <input class="form-control rounded-pill mb-3" type="search" id="busca-historico" placeholder="Buscar por código ou produto" oninput="limiteHistorico = 10; mostrarHistorico()">
+                <div id="lista-historico"></div>
+                <button class="btn btn-light border rounded-pill w-100 mt-3 d-none" type="button" id="mais-historico" onclick="limiteHistorico += 10; mostrarHistorico()">Ver mais</button>
+            </div>
         </div>
 
         <div class="d-lg-none py-5"></div>

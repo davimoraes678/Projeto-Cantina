@@ -151,53 +151,27 @@ END $
 
 -- Consultas não CRUD
 
+-- As procedures abaixo leem das views do views.sql (rode ele depois deste arquivo,
+-- ou só inicie o app, que cria as views sozinho)
+
 DROP PROCEDURE IF EXISTS sp_repetir_ultimo_pedido $
 CREATE PROCEDURE sp_repetir_ultimo_pedido (IN p_id_aluno INT)
 BEGIN
-    SELECT
-        id_produto,
-        quantidade
-    FROM
-        itens_pedido
-    WHERE
-        id_produto IS NOT NULL
-        AND id_pedido = (
-            SELECT id_pedido
-            FROM pedido
-            WHERE id_aluno = p_id_aluno
-            ORDER BY id_pedido DESC
-            LIMIT 1
-        );
+    SELECT id_produto, quantidade
+    FROM vw_itens_ultimo_pedido
+    WHERE id_aluno = p_id_aluno;
 END $
 
--- As 3 duplas de produtos mais pedidas juntas.
--- b.id_produto > a.id_produto evita contar Coxinha+Refri e Refri+Coxinha duas vezes
 DROP PROCEDURE IF EXISTS sp_combinacoes_mais_pedidas $
 CREATE PROCEDURE sp_combinacoes_mais_pedidas ()
 BEGIN
-    SELECT
-        a.id_produto AS id_produto_1,
-        pa.nome AS nome_1,
-        b.id_produto AS id_produto_2,
-        pb.nome AS nome_2,
-        COUNT(DISTINCT a.id_pedido) AS vezes
-    FROM
-        itens_pedido a
-    JOIN
-        itens_pedido b ON b.id_pedido = a.id_pedido AND b.id_produto > a.id_produto
-    JOIN
-        pedido p ON p.id_pedido = a.id_pedido
-    JOIN
-        produto pa ON pa.id_produto = a.id_produto
-    JOIN
-        produto pb ON pb.id_produto = b.id_produto
-    WHERE
-        p.status <> 'Cancelado'
-    GROUP BY
-        a.id_produto, pa.nome, b.id_produto, pb.nome
-    ORDER BY
-        vezes DESC, a.id_produto, b.id_produto
-    LIMIT 3;
+    SELECT * FROM vw_combinacoes_mais_pedidas;
+END $
+
+DROP PROCEDURE IF EXISTS sp_listar_avaliacoes $
+CREATE PROCEDURE sp_listar_avaliacoes ()
+BEGIN
+    SELECT * FROM vw_avaliacoes;
 END $
 
 DELIMITER ;

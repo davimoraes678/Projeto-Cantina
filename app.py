@@ -1,4 +1,5 @@
 import os
+from sqlalchemy import text
 from flask import Flask, jsonify, send_from_directory, redirect, request
 from dotenv import load_dotenv
 from backend.routes import register_routes
@@ -8,6 +9,20 @@ from backend.models import aluno_model, produto_model, pedido_model, item_pedido
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "front-end")
+
+
+# Roda o backend/database/views.sql (as views funcionam no SQLite e no MySQL)
+def criar_views():
+    with open(os.path.join(BASE_DIR, "backend", "database", "views.sql"), encoding="utf-8") as arquivo:
+        comandos = arquivo.read().split(";")
+    for comando in comandos:
+        if comando.strip():
+            try:
+                db.session.execute(text(comando))
+                db.session.commit()
+            except Exception:
+                # Outro processo do servidor pode ter criado a view ao mesmo tempo
+                db.session.rollback()
 
 
 def create_app():
@@ -74,6 +89,7 @@ def create_app():
         })
     with app.app_context():
         db.create_all()
+        criar_views()
 
     return app
 

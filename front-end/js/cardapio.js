@@ -13,6 +13,9 @@ function iniciar() {
   verificarPedidoAndamento();
   verificarAvaliacao();
 
+  // Atualiza o aviso do pedido a cada 15 segundos
+  setInterval(verificarPedidoAndamento, 15000);
+
   // Veio do "Pedir de novo" (/#carrinho)
   if (window.location.hash === "#carrinho") {
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("carrinho")).show();

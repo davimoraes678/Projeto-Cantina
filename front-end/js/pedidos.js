@@ -3,6 +3,9 @@ let pedidoAvaliando = null;
 alunoInf();
 carregarMeusPedidos();
 
+// Atualiza os pedidos a cada 15 segundos
+setInterval(carregarMeusPedidos, 15000);
+
 // O back-end manda { andamento, historico }
 async function carregarMeusPedidos() {
   try {

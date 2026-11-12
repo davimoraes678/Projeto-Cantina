@@ -14,8 +14,18 @@ def create_app():
 
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/front-end")
+    
+    #Altere o tipo do banco: "mysql ou sqlite" 
+    tipoBanco = "mysql"
+    
+    bancoFormat = {
+        "mysql": "mysql+pymysql://root:@localhost:3306/cantina_db",
+        "sqlite": "sqlite:///cantina.db"
+    }
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", bancoFormat[tipoBanco])
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///cantina.db")
+
+        
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     app.config["IMAGENS_PRODUTOS_DIR"] = os.path.join(app.root_path, "front-end", "assets", "imagens-produtos")

@@ -1,4 +1,5 @@
 from backend.extensions import db
+from backend.services.produto.imagem import caminho_imagem
 
 class Produto(db.Model):
     __tablename__ = "produto"
@@ -61,5 +62,12 @@ class Produto(db.Model):
             'categoria': self.categoria,
             'ingredientes': self.ingredientes,
             'status': self.status,
-            'imagem': self.imagem
+            'imagem': self.versao_imagem()
         }
+
+    # Data da foto (muda quando a foto é trocada) ou None se o produto não tiver foto
+    def versao_imagem(self):
+        arquivo = caminho_imagem(self.nome)
+        if not arquivo.is_file():
+            return None
+        return arquivo.stat().st_mtime_ns

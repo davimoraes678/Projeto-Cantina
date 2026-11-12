@@ -76,5 +76,9 @@ def ver_imagem(id_produto):
         return jsonify(resposta), status
     # Devolve o arquivo da imagem
     arquivo = send_from_directory(current_app.config["IMAGENS_PRODUTOS_DIR"], resposta["arquivo"])
-    arquivo.headers["Cache-Control"] = "no-cache"
+    # Com "?v=", o endereço muda quando a foto muda: o navegador pode guardar a foto
+    if request.args.get("v"):
+        arquivo.headers["Cache-Control"] = "public, max-age=31536000"
+    else:
+        arquivo.headers["Cache-Control"] = "no-cache"
     return arquivo

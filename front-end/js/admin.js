@@ -165,10 +165,14 @@ async function carregarProdutos() {
 
     let html = "";
     produtos.forEach((produto) => {
+      let foto = `<div class="flex-shrink-0" style="width: 48px; height: 48px"></div>`;
+      if (produto.imagem) {
+        foto = `<img src="${API_BASE_URL}/produtos/${produto.id_produto}/imagem?v=${produto.imagem}" alt="" width="48" height="48"
+                     class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy">`;
+      }
       html += `
         <div class="list-group-item d-flex align-items-center gap-3 py-2">
-          <img src="${API_BASE_URL}/produtos/${produto.id_produto}/imagem" alt="" width="48" height="48"
-               class="rounded object-fit-contain bg-body-tertiary flex-shrink-0" loading="lazy" onerror="this.style.visibility='hidden'">
+          ${foto}
           <div class="flex-grow-1">
             <div class="fw-semibold">${escaparTexto(produto.nome)}</div>
             <small class="text-body-secondary">${escaparTexto(produto.categoria || "")} · ${formatarPreco(produto.preco_atual)} · ${produto.quantidade_estoque} em estoque</small>

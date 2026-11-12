@@ -18,7 +18,6 @@ def avaliar(id_pedido):
     return jsonify(resposta), status
 
 @bp_avaliacao.route('/avaliacao', methods=['GET'])
-@login_required
 @master_required
 def listar():
     resposta, status = ListarAvaliacaoService.executar()

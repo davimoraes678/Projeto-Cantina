@@ -35,7 +35,7 @@ class FinalizarPedidoService:
 | `buscar_produto_service.py` | `BuscarProdutoService` | Ver um produto pelo id |
 | `atualizar_produto_service.py` | `AtualizarProdutoService` | Editar produto (só os campos enviados); ao trocar o nome, renomeia a imagem |
 | `deletar_produto_service.py` | `DeletarProdutoService` | Excluir produto; antes, copia o nome para os itens de pedidos antigos e solta o vínculo |
-| `filtrar_produtos_service.py` | `FiltrarProdutosService` | Buscar por categoria, faixa de preço ou ordenar, pelo `ProdutoRepository` (procedure no MySQL, ORM nos outros bancos). Só o primeiro critério preenchido é aplicado: categoria, depois faixa de preço, depois ordenação |
+| `filtrar_produtos_service.py` | `FiltrarProdutosService` | Buscar por categoria, faixa de preço ou ordenar, pelo `ProdutoRepository` (procedure no MySQL, ORM nos outros bancos). A procedure faz o primeiro filtro, e os outros são aplicados em cima do resultado, então os filtros se combinam |
 | `enviar_imagem_produto_service.py` | `EnviarImagemProdutoService` | Salvar a foto do produto (PNG, JPG ou WEBP até 5 MB, reduzida para até 600×600) |
 | `buscar_imagem_produto_service.py` | `BuscarImagemProdutoService` | Achar o arquivo da foto (o controller é quem envia o arquivo) |
 

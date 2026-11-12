@@ -59,7 +59,7 @@ Formato de um aluno: `{ "id_aluno": 1, "nome": "Ana", "email": "ana@email.com", 
 | `POST` | `/<id>/imagem` | Upload `multipart/form-data`, campo `imagem`. PNG, JPG ou WEBP até 5 MB |
 | `GET` | `/<id>/imagem` | Devolve a imagem (PNG), ou `404` |
 
-Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "ingredientes", "status", "imagem" }`. O `ingredientes` é a descrição mostrada na janela de detalhes do cardápio. Categorias usadas no front: `Salgado`, `Bebida` e `Doce`.
+Formato: `{ "id_produto", "nome", "quantidade_estoque", "preco_atual", "preco_promocional", "categoria", "ingredientes", "status", "imagem" }`. O `imagem` é a versão da foto (um número que muda quando a foto é trocada) ou `null` se o produto não tiver foto. O `ingredientes` é a descrição mostrada na janela de detalhes do cardápio. Categorias usadas no front: `Salgado`, `Bebida` e `Doce`.
 
 ### `item_pedido_controller.py` — `/api/carrinho` (todas exigem login)
 
@@ -128,3 +128,4 @@ Status de um pedido: `Pendente` (criado ao finalizar o carrinho) → `Pronto` (a
 | Método | Rota | | Corpo | Respostas |
 |---|---|---|---|---|
 | `POST` | `/<id>/avaliacao` | login | `{nota, comentario?}` | `201` · `400` pedido não concluído, já avaliado ou nota fora de 1 a 5 · `404` pedido de outro aluno |
+| `GET` | `/avaliacao` | só mestre | — | `200` lista de avaliações, com os itens de cada pedido |

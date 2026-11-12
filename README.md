@@ -19,7 +19,7 @@ Sistema de pedidos da cantina do COTEMIG. O aluno vê o cardápio, monta o carri
 |---|---|
 | Front-end | HTML, CSS, JavaScript e Bootstrap 5.3 |
 | Back-end | Python, Flask (API JSON), Flask-SQLAlchemy e Flask-Login |
-| Banco | MySQL, com stored procedures (SQLite para testar sem MySQL) |
+| Banco | SQLite. O projeto também roda em MySQL, com stored procedures |
 | Servidor | AWS EC2 |
 
 ## Funcionalidades
@@ -96,23 +96,30 @@ python app.py
 
 Abra **http://127.0.0.1:5000**.
 
+No servidor (Linux), use o Gunicorn em vez do `python app.py`:
+
+```bash
+gunicorn -w 2 -b 0.0.0.0:5000 app:app
+```
+
 Sem configuração, o projeto usa SQLite (`cantina.db`). Para usar o MySQL, rode o `create-database.sql` e crie um `.env` na raiz:
 
 ```env
 DATABASE_URL=mysql+pymysql://usuario:senha@localhost/cantina_db?charset=utf8mb4
 SECRET_KEY=um-texto-longo-e-aleatorio
-FLASK_DEBUG=False
 ```
+
+O modo debug vem desligado. Para ligar no seu computador, acrescente `FLASK_DEBUG=True` no `.env`.
 
 ## Pastas
 
-| Pasta | O que tem em cada pasta|
+| Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/README.md) | A API: camadas, `app.py` e login |
 | [`backend/database/`](backend/database/README.md) | Script do MySQL (tabelas e procedures) |
 | [`front-end/`](front-end/README.md) | As páginas |
 | [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página |
-| [`backend/imagens-produtos`](front-end/assets/imagens-produtos/README.md) | Fotos dos produtos |
+| [`front-end/assets/imagens-produtos/`](front-end/assets/imagens-produtos/README.md) | Fotos dos produtos |
 | [`docs/`](docs/diagrama-de-classes.md) | Diagrama de classes |
 
 ## Limitações

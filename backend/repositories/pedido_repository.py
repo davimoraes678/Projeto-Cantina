@@ -4,7 +4,7 @@ from backend.extensions import db
 from backend.models.pedido_model import Pedido
 
 
-# Consultas por stored procedure
+# No MySQL chama a procedure; em outro banco (SQLite) faz a mesma consulta sem procedure
 class PedidoRepository:
     @staticmethod
     def itens_do_ultimo_pedido(id_aluno):

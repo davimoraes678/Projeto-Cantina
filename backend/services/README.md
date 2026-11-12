@@ -50,7 +50,7 @@ O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido`
 | `remover_item_carrinho_service.py` | `RemoverItemCarrinhoService` | Remover item (só se for do carrinho **do aluno logado**) |
 | `finalizar_pedido_service.py` | `FinalizarPedidoService` | Conferir estoque e saldo; se tudo der, descontar os dois, criar o pedido `"Pendente"` e passar os itens do carrinho para ele |
 | `repetir_pedido_service.py` | `RepetirPedidoService` | "Pedir de novo": confere se o pedido é do aluno e adiciona os itens dele com o `AdicionarItemCarrinhoService` (pula produtos excluídos) |
-| `repetir_ultimo_pedido_service.py` | `RepetirUltimoPedidoService` | Pegar os itens do último pedido (procedure `sp_repetir_ultimo_pedido` pelo `PedidoRepository`; fora do MySQL, pelo ORM) e adicioná-los com o `AdicionarItemCarrinhoService` |
+| `repetir_ultimo_pedido_service.py` | `RepetirUltimoPedidoService` | Pegar os itens do último pedido (pelo `PedidoRepository`: procedure `sp_repetir_ultimo_pedido` no MySQL, view `vw_itens_ultimo_pedido` no SQLite) e adicioná-los com o `AdicionarItemCarrinhoService` |
 
 ## `pedido/` — pedidos feitos
 
@@ -62,12 +62,13 @@ O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido`
 | `concluir_pedido_service.py` | `ConcluirPedidoService` | Marcar como `"Concluído"` quando o aluno retira no balcão (vai para o histórico como "Entregue") |
 | `cancelar_pedido_service.py` | `CancelarPedidoService` | Marcar como `"Cancelado"`, **devolvendo o valor para a carteira do aluno e os produtos para o estoque** |
 | `listar_meus_pedidos_service.py` | `ListarMeusPedidosService` | Os pedidos do aluno logado já separados em `andamento` e `historico`, o mais recente primeiro (página "Meus pedidos") |
-| `combinacoes_mais_pedidas_service.py` | `CombinacoesMaisPedidasService` | As 3 duplas de produtos mais pedidas juntas (procedure `sp_combinacoes_mais_pedidas`, só no MySQL) |
+| `combinacoes_mais_pedidas_service.py` | `CombinacoesMaisPedidasService` | As 3 duplas de produtos mais pedidas juntas (procedure `sp_combinacoes_mais_pedidas` no MySQL, view `vw_combinacoes_mais_pedidas` no SQLite) |
 
 ## `avaliacao/`
 
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
 | `avaliar_pedido_service.py` | `AvaliarPedidoService` | Avaliar um pedido: só o dono, só pedido concluído, nota de 1 a 5, uma vez só |
+| `listar_avaliacao_service.py` | `ListarAvaliacaoService` | Listar as avaliações para o mestre, pelo `AvaliacaoRepository` (procedure `sp_listar_avaliacoes` no MySQL, view `vw_avaliacoes` no SQLite) |
 
 O `produto/imagem.py` tem as funções das fotos (nome do arquivo, salvar e renomear), usadas pelos services de produto.

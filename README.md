@@ -63,7 +63,7 @@ flowchart LR
 | Controller | [`backend/controllers/`](backend/controllers/README.md) | Recebe a requisição, chama o service e devolve JSON |
 | Service | [`backend/services/`](backend/services/README.md) | Um caso de uso por classe, com as regras de negócio |
 | Model | [`backend/models/`](backend/models/README.md) | Uma classe por tabela, com o CRUD |
-| Repository | [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD, feitas por stored procedures |
+| Repository | [`backend/repositories/`](backend/repositories/README.md) | Consultas não-CRUD, feitas por views e stored procedures |
 
 Exemplo, o aluno finaliza o pedido:
 
@@ -73,17 +73,20 @@ cardapio.js  →  POST /api/carrinho/finalizar  →  item_pedido_controller  →
 
 O diagrama de classes está em [`docs/diagrama-de-classes.md`](docs/diagrama-de-classes.md).
 
-## Stored procedures
+## Views e stored procedures
 
-| Procedure | Usada em |
-|---|---|
-| `sp_produtos_por_categoria` | Filtro por categoria |
-| `sp_produtos_por_faixa_de_preco` | Filtro por preço |
-| `sp_produtos_ordenar_por_preco` / `sp_produtos_ordenar_por_nome` | Ordenação |
-| `sp_repetir_ultimo_pedido` | "Repetir último pedido" |
-| `sp_combinacoes_mais_pedidas` | Combos mais pedidos |
+As consultas especiais ficam nos arquivos `.sql` de [`backend/database/`](backend/database/README.md):
 
-Elas são criadas pelo [`backend/database/create-database.sql`](backend/database/README.md).
+| Consulta | View (SQLite e MySQL) | Procedure (MySQL) |
+|---|---|---|
+| Filtro por categoria | | `sp_produtos_por_categoria` |
+| Filtro por preço | | `sp_produtos_por_faixa_de_preco` |
+| Ordenação | | `sp_produtos_ordenar_por_preco` / `sp_produtos_ordenar_por_nome` |
+| "Repetir último pedido" | `vw_itens_ultimo_pedido` | `sp_repetir_ultimo_pedido` |
+| Combos mais pedidos | `vw_combinacoes_mais_pedidas` | `sp_combinacoes_mais_pedidas` |
+| Avaliações (admin) | `vw_avaliacoes` | `sp_listar_avaliacoes` |
+
+As views ficam no `views.sql`, que o app roda sozinho ao iniciar. No MySQL, as procedures leem dessas views.
 
 ## Como rodar
 
@@ -116,7 +119,7 @@ O modo debug vem desligado. Para ligar no seu computador, acrescente `FLASK_DEBU
 | Pasta | O que tem |
 |---|---|
 | [`backend/`](backend/README.md) | A API: camadas, `app.py` e login |
-| [`backend/database/`](backend/database/README.md) | Script do MySQL (tabelas e procedures) |
+| [`backend/database/`](backend/database/README.md) | Scripts SQL: tabelas e procedures (MySQL) e views (SQLite e MySQL) |
 | [`front-end/`](front-end/README.md) | As páginas |
 | [`front-end/js/`](front-end/js/README.md) | Um JavaScript por página |
 | [`front-end/assets/imagens-produtos/`](front-end/assets/imagens-produtos/README.md) | Fotos dos produtos |

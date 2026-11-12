@@ -10,8 +10,8 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**. Quem monta as t
 | [`controllers/`](controllers/README.md) | As rotas da API |
 | [`services/`](services/README.md) | Os casos de uso, um por classe |
 | [`models/`](models/README.md) | As tabelas do banco |
-| [`repositories/`](repositories/README.md) | Consultas não-CRUD por stored procedures |
-| [`database/`](database/README.md) | Script SQL do MySQL |
+| [`repositories/`](repositories/README.md) | Consultas não-CRUD por views e stored procedures |
+| [`database/`](database/README.md) | Scripts SQL: tabelas e procedures (MySQL) e views (SQLite e MySQL) |
 
 ## Camadas
 
@@ -20,7 +20,7 @@ A API do sistema, feita em Flask. Ela recebe e devolve **JSON**. Quem monta as t
 | **Controller** | Liga a URL a uma função, lê a requisição, aplica a permissão, chama o service e devolve JSON | Regra de negócio |
 | **Service** | Valida e executa o caso de uso. Devolve `(dicionário, código_http)` | Não usa `request` nem `jsonify` |
 | **Model** | Uma classe por tabela, com `salvar()`, `atualizar()`, `deletar()`, `listar_todos()`, `buscar_por_id()` e `to_dict()` | Regra de negócio |
-| **Repository** | Chama as stored procedures (`CALL sp_...`) | CRUD simples |
+| **Repository** | Chama as stored procedures (`CALL sp_...`) no MySQL e lê as views no SQLite | CRUD simples |
 
 Exemplo completo, a avaliação de um pedido:
 
@@ -63,7 +63,7 @@ O `create_app()`, na raiz do projeto:
 2. Liga o banco e o login, e registra os controllers.
 3. Protege as páginas: sem login, a pessoa vai para o cadastro, e o `admin.html` só abre para admin e mestre.
 4. Cria `/`, que entrega o cardápio, e `/api`, que lista as rotas.
-5. Cria as tabelas que ainda não existem (`db.create_all()`).
+5. Cria as tabelas que ainda não existem (`db.create_all()`) e as views do `backend/database/views.sql`.
 
 O `app.py` importa **todos** os models, mesmo os sem rota. Sem isso, o SQLAlchemy não acha as classes dos relacionamentos e toda consulta dá erro 500.
 

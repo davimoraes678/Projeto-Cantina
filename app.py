@@ -1,6 +1,5 @@
 import os
 from flask import Flask, jsonify, send_from_directory, redirect, request
-from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.routes import register_routes
 from backend.extensions import db, lm, login_required, login_user, current_user
@@ -15,8 +14,6 @@ def create_app():
 
     load_dotenv()
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/front-end")
-
-    CORS(app)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///cantina.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -83,5 +80,5 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    debug = os.getenv("FLASK_DEBUG", "True") == "True"
+    debug = os.getenv("FLASK_DEBUG", "False") == "True"
     app.run(debug=debug, host="0.0.0.0", port=5000)

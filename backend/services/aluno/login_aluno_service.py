@@ -10,7 +10,7 @@ class LoginAlunoService:
         senha = dados.get("senha")
         if not email or not senha:
             return {"erro": "Email e senha são obrigatórios"}, 400
-        aluno = Aluno.query.filter_by(email=email).first()
+        aluno = Aluno.buscar_por_email(email)
         if not aluno or not check_password_hash(aluno.senha, senha):
             return {"erro": "Email ou senha inválidos"}, 401
         login_user(aluno)

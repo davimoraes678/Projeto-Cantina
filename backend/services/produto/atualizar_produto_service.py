@@ -10,6 +10,14 @@ class AtualizarProdutoService:
         if not produto:
             return {"erro": "Produto não encontrado"}, 404
 
+        try:
+            if dados.get('preco_atual') is not None and float(dados['preco_atual']) <= 0:
+                return {"erro": "O preço precisa ser maior que zero"}, 400
+            if dados.get('quantidade_estoque') is not None and int(dados['quantidade_estoque']) < 0:
+                return {"erro": "O estoque não pode ser negativo"}, 400
+        except (TypeError, ValueError):
+            return {"erro": "Preço e estoque precisam ser números"}, 400
+
         # Renomeou o produto: renomeia a imagem
         if dados.get('nome'):
             try:

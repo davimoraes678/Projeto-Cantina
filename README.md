@@ -29,7 +29,8 @@ Existem três perfis: **aluno**, **admin** e **mestre**. O primeiro cadastro do 
 **Aluno**
 - Cadastro, login e perfil (editar dados e excluir a conta)
 - Cardápio com filtro por categoria, faixa de preço e ordenação por nome ou preço
-- Detalhes do produto: foto, preço, descrição e estoque
+- Detalhes do produto: foto, preço, descrição, estoque e as avaliações de quem já pediu
+- Principais avaliações no fim do cardápio, com a média e as notas de cada produto
 - Carrinho: adicionar, remover, ver o total e finalizar o pedido (confere saldo e estoque)
 - Combos mais pedidos e "Repetir último pedido"
 - Carteira: recarga de saldo

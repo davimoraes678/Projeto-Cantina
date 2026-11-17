@@ -102,6 +102,19 @@
         <!-- Produtos (montados pelo cardapio.js) -->
         <div id="lista-produtos" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 g-md-3"></div>
 
+        <!-- Principais avaliações (montadas pelo cardapio.js) -->
+        <section id="secao-avaliacoes" class="mt-5 d-none">
+            <h2 class="h5 fw-bold mb-1">Principais avaliações</h2>
+            <p class="text-body-secondary mb-3">Escolha um produto para ver o que os alunos dizem sobre ele</p>
+            <div id="filtro-avaliacoes" class="d-flex gap-2 overflow-x-auto flex-nowrap pb-1 mb-3"></div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-warning-subtle p-4" id="resumo-avaliacoes"></div>
+                    <div class="col-md-8 bg-white px-4 py-2" id="lista-principais"></div>
+                </div>
+            </div>
+        </section>
+
         <div class="d-lg-none py-5"></div>
     </main>
 
@@ -141,6 +154,8 @@
                         <button class="btn btn-primary rounded-pill flex-grow-1" type="button" onclick="adicionarDoModal()">Adicionar</button>
                     </div>
                 </div>
+                <!-- Avaliações deste produto (montadas pelo cardapio.js) -->
+                <div class="border-top p-4 fundo-cantina" id="detalhe-avaliacoes"></div>
             </div>
         </div>
     </div>

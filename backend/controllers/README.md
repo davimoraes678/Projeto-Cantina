@@ -128,4 +128,4 @@ Status de um pedido: `Pendente` (criado ao finalizar o carrinho) → `Pronto` (a
 | Método | Rota | | Corpo | Respostas |
 |---|---|---|---|---|
 | `POST` | `/<id>/avaliacao` | login | `{nota, comentario?}` | `201` · `400` pedido não concluído, já avaliado ou nota fora de 1 a 5 · `404` pedido de outro aluno |
-| `GET` | `/avaliacao` | só mestre | — | `200` lista de avaliações, com os itens de cada pedido |
+| `GET` | `/avaliacao` | login | — | `200` lista de avaliações, as principais primeiro (com comentário, depois as mais novas). Cada uma tem `nota`, `comentario`, `data_avaliacao`, `itens` do pedido, `aluno_nome` (curto, ex.: "Marina S.") e `icon` (a inicial). Usada no cardápio e no admin |

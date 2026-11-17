@@ -69,5 +69,6 @@ O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido`
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
 | `avaliar_pedido_service.py` | `AvaliarPedidoService` | Avaliar um pedido: só o dono, só pedido concluído, nota de 1 a 5, uma vez só |
+| `listar_avaliacao_service.py` | `ListarAvaliacaoService` | Listar as avaliações, as principais primeiro: com comentário, e depois as mais novas |
 
 O `produto/imagem.py` tem as funções das fotos (nome do arquivo, salvar e renomear), usadas pelos services de produto.

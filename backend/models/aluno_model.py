@@ -57,6 +57,7 @@ class Aluno(UserMixin, db.Model):
         return {
             'id_aluno': self.id_aluno,
             'nome': self.nome,
+            'icon': self.nome[0].upper() if nome else '?',
             'email': self.email,
             'saldo': self.saldo,
             'funcao': self.funcao

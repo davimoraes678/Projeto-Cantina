@@ -366,6 +366,12 @@ async function verificarPedidoAndamento() {
 // Avaliação
 
 // Se o último pedido já foi concluído, abre a janela de avaliação
+
+const button = document.getElementById("avaliacao-close");
+button.addEventListener("click", () => {
+  localStorage.removeItem("pedidoParaAvaliar");
+});
+
 async function verificarAvaliacao() {
   const id = localStorage.getItem("pedidoParaAvaliar");
   if (!id) return;

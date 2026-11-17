@@ -8,6 +8,7 @@ class Avaliacao(db.Model):
     nota = db.Column(db.Integer, nullable=False)
     comentario = db.Column(db.String(500), nullable=True)
     data_avaliacao = db.Column(db.DateTime, default=datetime.utcnow)
+    relevancia = db.Column(db.Integer, nullable=True)
 
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), unique=True, nullable=False)
 
@@ -41,5 +42,6 @@ class Avaliacao(db.Model):
             'comentario': self.comentario,
             'data_avaliacao': self.data_avaliacao.isoformat() if self.data_avaliacao else None,
             'id_pedido': self.id_pedido,
-            'itens': [item.to_dict() for item in self.pedido.itens]
+            'itens': [item.to_dict() for item in self.pedido.itens],
+            'relevancia': self.relevancia
         }

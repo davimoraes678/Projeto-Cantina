@@ -7,7 +7,7 @@ from backend.services.produto.buscar_produto_service import BuscarProdutoService
 from backend.services.produto.criar_produto_service import CriarProdutoService
 from backend.services.produto.deletar_produto_service import DeletarProdutoService
 from backend.services.produto.enviar_imagem_produto_service import EnviarImagemProdutoService
-from backend.services.produto.filtrar_produtos_service import FiltrarProdutosService
+from backend.services.produto.filtros_produtos_service import FiltrarPorCategoriaService, FiltrarPorPrecoService, OrdenarProdutosService
 from backend.services.produto.listar_produtos_service import ListarProdutosService
 
 # /api/produtos
@@ -28,16 +28,21 @@ def criar():
     return jsonify(resposta), status
 
 
-@bp_produto.route('/buscar', methods=['GET'])
-def filtrar():
-    # ?categoria=Bebida  ?preco_min=2&preco_max=10  ?ordenar=preco|nome
-    filtros = {
-        'categoria': request.args.get('categoria') or None,
-        'preco_min': request.args.get('preco_min', type=float),
-        'preco_max': request.args.get('preco_max', type=float),
-        'ordenar': request.args.get('ordenar') or None,
-    }
-    resposta, status = FiltrarProdutosService.executar(filtros)
+@bp_produto.route('/categoria/<categoria>', methods=['GET'])
+def filtrar_por_categoria(categoria):
+    resposta, status = FiltrarPorCategoriaService.executar(categoria)
+    return jsonify(resposta), status
+
+
+@bp_produto.route('/preco/<preco_min>/<preco_max>', methods=['GET'])
+def filtrar_por_preco(preco_min, preco_max):
+    resposta, status = FiltrarPorPrecoService.executar(preco_min, preco_max)
+    return jsonify(resposta), status
+
+
+@bp_produto.route('/ordenar/<campo>', methods=['GET'])
+def ordenar(campo):
+    resposta, status = OrdenarProdutosService.executar(campo)
     return jsonify(resposta), status
 
 

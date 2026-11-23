@@ -35,13 +35,14 @@ async function carregarProdutos() {
   const precoMax = document.getElementById("busca-preco-max").value;
   const ordenar = document.getElementById("busca-ordenar").value;
 
-  const params = new URLSearchParams();
-  if (categoriaAtual) params.set("categoria", categoriaAtual);
-  if (precoMin) params.set("preco_min", precoMin);
-  if (precoMax) params.set("preco_max", precoMax);
-  if (ordenar) params.set("ordenar", ordenar);
+  // Cada filtro tem a sua rota; só o primeiro preenchido vale
+  let url = `${API_BASE_URL}/produtos`;
+  if (categoriaAtual) url += `/categoria/${encodeURIComponent(categoriaAtual)}`;
+  else if (precoMin || precoMax) url += `/preco/${precoMin || 0}/${precoMax || 999999}`;
+  else if (ordenar) url += `/ordenar/${ordenar}`;
 
   try {
+    const res = await fetch(url);
     const res = await fetch(`${API_BASE_URL}/produtos/buscar?${params.toString()}`);
     const dados = await res.json();
     if (!res.ok) {

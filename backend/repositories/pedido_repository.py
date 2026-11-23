@@ -25,20 +25,6 @@ class PedidoRepository:
         return [{"id_produto": item.id_produto, "quantidade": item.quantidade}
                 for item in ultimo.itens if item.id_produto]
 
-    @staticmethod
-    def ordenar_por_relvancia(preco_min, preco_max):
-        banco = db.session.get_bind().dialect.name
-
-        if banco == "mysql":
-            sql = text("CALL sp_ordenar_por_relevancia()")
-            resultado = db.session.execute(sql, {"minimo": preco_min, "maximo": preco_max})
-            linhas = resultado.mappings().all()
-            resultado.close()
-
-            return [Avaliacao(**dict(linha)) for linha in linhas]
-
-        return Avaliacao.query.filter(Avaliacao.preco_atual.order_by(relevancia.desc())).all()
-
     def filtrar_por_produto(produto):
         banco = db.session.get_bind().dialect.name
 

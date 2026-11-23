@@ -202,3 +202,25 @@ END $
 
 DELIMITER ;
 
+drop procedure if exists sp_avaliacoes_por_produto;
+delimiter $
+create procedure sp_avaliacoes_por_produto(in p_produto varchar(100))
+begin
+	select 
+		nota,
+        comentario,
+        data_avaliacao,
+        pedido.id_pedido,
+        nome_produto
+	from 
+		avaliacao
+        join pedido using (id_pedido)
+        join itens_pedido using (id_pedido)
+	where
+		 pedido.id_pedido in (
+            select id_pedido 
+            from itens_pedido 
+            where nome_produto = p_produto
+        );
+end $
+delimiter ;

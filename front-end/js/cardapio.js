@@ -2,8 +2,8 @@ let categoriaAtual = "";
 let produtos = [];
 let produtoAberto = null; // id do produto aberto na janela de detalhes
 let pedidoAvaliando = null;
-let avaliacoes = [];                // avaliações de todos os pedidos, as principais primeiro
-let produtoAvaliacoes = 0;          // produto escolhido em "Principais avaliações" (0 = todos)
+let avaliacoes = {};                // avaliações filtradas por produto: { "Coxinha": [...], "Suco": [...] }
+let produtoAvaliacoes = "";         // produto escolhido em "Principais avaliações"
 let verTodasPrincipais = false;     // "Ver todas as avaliações" da seção
 let verTodasDetalhe = false;        // "Ver todas as avaliações" da janela do produto
 
@@ -43,7 +43,6 @@ async function carregarProdutos() {
 
   try {
     const res = await fetch(url);
-    const res = await fetch(`${API_BASE_URL}/produtos/buscar?${params.toString()}`);
     const dados = await res.json();
     if (!res.ok) {
       alert(dados.erro || "Não foi possível carregar o cardápio.");
@@ -440,10 +439,9 @@ async function carregarAvaliacoes() {
   }
 }
 
-// Avaliações dos pedidos que tiveram o produto (0 = todas)
-function avaliacoesDoProduto(id_produto) {
-  if (!id_produto) return avaliacoes;
-  return avaliacoes.filter((avaliacao) => avaliacao.itens.some((item) => item.id_produto === id_produto));
+// Avaliações de um produto
+function avaliacoesDoProduto(nome) {
+  return avaliacoes[nome] || [];
 }
 
 // Média das notas: 4.666 -> "4,7"
@@ -496,27 +494,20 @@ function cardAvaliacao(avaliacao, etiqueta, classe) {
 // Seção do fim do cardápio: botões dos produtos, resumo das notas e as principais avaliações
 function mostrarPrincipais() {
   const secao = document.getElementById("secao-avaliacoes");
-  if (avaliacoes.length === 0) {
+  const nomes = Object.keys(avaliacoes);
+  if (nomes.length === 0) {
     secao.classList.add("d-none");
     return;
   }
   secao.classList.remove("d-none");
 
-  // Botões: "Todos" e cada produto que já foi avaliado, do mais avaliado para o menos
-  const vezes = {};
-  const nomes = {};
-  avaliacoes.forEach((avaliacao) => {
-    avaliacao.itens.forEach((item) => {
-      if (!item.id_produto) return;
-      vezes[item.id_produto] = (vezes[item.id_produto] || 0) + 1;
-      nomes[item.id_produto] = item.produto_nome;
-    });
-  });
-  const ids = Object.keys(vezes).map(Number).sort((a, b) => vezes[b] - vezes[a]);
+  // Começa mostrando o primeiro produto
+  if (!produtoAvaliacoes) produtoAvaliacoes = nomes[0];
 
-  let botoes = botaoAvaliacoes(0, "Todos");
-  ids.forEach((id) => {
-    botoes += botaoAvaliacoes(id, nomes[id]);
+  // Um botão para cada produto
+  let botoes = "";
+  nomes.forEach((nome) => {
+    botoes += botaoAvaliacoes(nome);
   });
   document.getElementById("filtro-avaliacoes").innerHTML = botoes;
 
@@ -534,14 +525,14 @@ function mostrarPrincipais() {
   document.getElementById("ver-todas-principais").classList.toggle("d-none", lista.length <= limite);
 }
 
-function botaoAvaliacoes(id_produto, texto) {
+function botaoAvaliacoes(nome) {
   let cor = "btn-light border";
-  if (id_produto === produtoAvaliacoes) cor = "btn-primary";
-  return `<button class="btn ${cor} rounded-pill text-nowrap" type="button" onclick="escolherProdutoAvaliacoes(${id_produto})">${escaparTexto(texto)}</button>`;
+  if (nome === produtoAvaliacoes) cor = "btn-primary";
+  return `<button class="btn ${cor} rounded-pill text-nowrap" type="button" onclick="escolherProdutoAvaliacoes('${escaparTexto(nome)}')">${escaparTexto(nome)}</button>`;
 }
 
-function escolherProdutoAvaliacoes(id_produto) {
-  produtoAvaliacoes = id_produto;
+function escolherProdutoAvaliacoes(nome) {
+  produtoAvaliacoes = nome;
   verTodasPrincipais = false;
   mostrarPrincipais();
 }
@@ -578,7 +569,7 @@ function resumoNotas(lista) {
 // Janela do produto: avaliações dos pedidos que tiveram esse produto
 function mostrarAvaliacoesProduto() {
   const produto = produtos.find((p) => p.id_produto === produtoAberto);
-  const lista = avaliacoesDoProduto(produtoAberto);
+  const lista = avaliacoesDoProduto(produto.nome);
   const area = document.getElementById("detalhe-avaliacoes");
 
   if (lista.length === 0) {
@@ -591,7 +582,7 @@ function mostrarAvaliacoesProduto() {
   const limite = verTodasDetalhe ? lista.length : 3;
   lista.slice(0, limite).forEach((avaliacao) => {
     // Os outros produtos do mesmo pedido
-    const outros = avaliacao.itens.filter((item) => item.id_produto !== produtoAberto).map((item) => item.produto_nome);
+    const outros = avaliacao.itens.filter((item) => item.produto_nome !== produto.nome).map((item) => item.produto_nome);
     let etiqueta = "";
     if (outros.length > 0) etiqueta = "Pedido também com: " + outros.join(", ");
     html += cardAvaliacao(avaliacao, etiqueta, "bg-white rounded-4 shadow-sm p-3 mb-2");

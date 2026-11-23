@@ -8,9 +8,11 @@ class Avaliacao(db.Model):
     nota = db.Column(db.Integer, nullable=False)
     comentario = db.Column(db.String(500), nullable=True)
     data_avaliacao = db.Column(db.DateTime, default=datetime.utcnow)
-    relevancia = db.Column(db.Integer, nullable=True, default=1)
 
+    id_aluno = db.Column(db.Integer, db.ForeignKey('aluno.id_aluno'), nullable=True)
     id_pedido = db.Column(db.Integer, db.ForeignKey('pedido.id_pedido'), unique=True, nullable=False)
+
+    nome_aluno = db.Column(db.String(100), nullable=True)
 
     def salvar(self):
         db.session.add(self)
@@ -30,6 +32,9 @@ class Avaliacao(db.Model):
     @staticmethod
     def listar_todos():
         return Avaliacao.query.all()
+    
+    def listar_produtos():
+        return [item.to_dict() for item in self.pedido.itens]
 
     @staticmethod
     def buscar_por_id(id_avaliacao):
@@ -37,7 +42,7 @@ class Avaliacao(db.Model):
 
 
     def nome_aluno(self):
-        nome = self.aluno.nome
+        nome = self.pedido.aluno
         dividir = nome.split()[0]
         return dividir
 
@@ -49,7 +54,6 @@ class Avaliacao(db.Model):
             'data_avaliacao': self.data_avaliacao.isoformat() if self.data_avaliacao else None,
             'id_pedido': self.id_pedido,
             'itens': [item.to_dict() for item in self.pedido.itens],
-            'relevancia': self.relevancia,
             'aluno_nome': self.nome_aluno(),
             'icon': self.nome_aluno()[0].upper()
         }

@@ -320,7 +320,17 @@ async function carregarAvaliacoes() {
   try {
     const res = await fetch(`${API_BASE_URL}/pedidos/avaliacao`);
     if (!res.ok) return;
-    avaliacoes = await res.json();
+    const avaliacoesPorProduto = await res.json();
+
+    // Junta os grupos numa lista só.
+    // Um pedido com Coxinha e Suco está nos 2 grupos, então pula a avaliação repetida
+    avaliacoes = [];
+    Object.keys(avaliacoesPorProduto).forEach((produto) => {
+      avaliacoesPorProduto[produto].forEach((avaliacao) => {
+        const repetida = avaliacoes.some((outra) => outra.id_avaliacao === avaliacao.id_avaliacao);
+        if (!repetida) avaliacoes.push(avaliacao);
+      });
+    });
     mostrarAvaliacoes();
   } catch (erro) {
     console.error("Erro ao carregar avaliações:", erro);

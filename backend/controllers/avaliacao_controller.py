@@ -3,6 +3,7 @@ from flask_login import login_required
 
 from backend.services.avaliacao.avaliar_pedido_service import AvaliarPedidoService
 from backend.services.avaliacao.listar_avaliacao_service import ListarAvaliacaoService
+from backend.services.avaliacao.filtrar_avaliacao_service import FiltrarPorCategoriaService
 
 
 # /api/pedidos/<id>/avaliacao
@@ -20,5 +21,5 @@ def avaliar(id_pedido):
 @bp_avaliacao.route('/avaliacao', methods=['GET'])
 @login_required
 def listar():
-    resposta, status = ListarAvaliacaoService.executar()
+    resposta, status = FiltrarPorCategoriaService.executar()
     return jsonify(resposta), status

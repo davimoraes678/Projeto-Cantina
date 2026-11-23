@@ -13,6 +13,7 @@ def chave_nome(produto):
 class FiltrarPorCategoriaService:
     @staticmethod
     def executar(categoria):
+        
         produtos = ProdutoRepository.buscar_por_categoria(categoria)
         return [produto.to_dict() for produto in produtos], 200
 

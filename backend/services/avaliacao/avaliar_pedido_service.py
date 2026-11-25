@@ -22,6 +22,7 @@ class AvaliarPedidoService:
         if not 1 <= nota <= 5:
             return {"erro": "A nota deve ser de 1 a 5"}, 400
 
-        avaliacao = Avaliacao(id_pedido=id_pedido, nota=nota, comentario=dados.get('comentario'))
+        avaliacao = Avaliacao(id_pedido=id_pedido, nota=nota, comentario=dados.get('comentario'),
+                                id_aluno=current_user.id_aluno, nome_aluno=current_user.nome)
         avaliacao.salvar()
         return avaliacao.to_dict(), 201

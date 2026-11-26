@@ -41,9 +41,6 @@ class Avaliacao(db.Model):
         return Avaliacao.query.get(id_avaliacao)
 
 
-    def primeiro_nome(self):
-        nome = self.nome_aluno or self.pedido.nome_aluno or "Aluno"
-        return nome.split()[0]
 
     def to_dict(self):
         return {
@@ -52,7 +49,5 @@ class Avaliacao(db.Model):
             'comentario': self.comentario,
             'data_avaliacao': self.data_avaliacao.isoformat() if self.data_avaliacao else None,
             'id_pedido': self.id_pedido,
-            'itens': [item.to_dict() for item in self.pedido.itens],
-            'aluno_nome': self.primeiro_nome(),
-            'icon': self.primeiro_nome()[0].upper()
+            'itens': [item.to_dict() for item in self.pedido.itens]
         }

@@ -463,10 +463,7 @@ function mostrarAvaliacoesCardapio() {
   lista.forEach((avaliacao) => {
     html += `
       <div class="list-group-item py-3">
-        <div class="d-flex justify-content-between">
-          <span class="fw-semibold">${escaparTexto(avaliacao.aluno_nome)}</span>
-          <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
-        </div>
+        <span class="badge rounded-pill text-bg-warning mb-1">${avaliacao.nota} ★</span>
         <p class="mb-0">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
       </div>`;
   });

@@ -13,6 +13,9 @@ function iniciar() {
   verificarPedidoAndamento();
   verificarAvaliacao();
 
+  // Atualiza o aviso do pedido a cada 15 segundos
+  setInterval(verificarPedidoAndamento, 15000);
+
   // Veio do "Pedir de novo" (/#carrinho)
   if (window.location.hash === "#carrinho") {
     bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("carrinho")).show();
@@ -27,14 +30,14 @@ async function carregarProdutos() {
   const precoMax = document.getElementById("busca-preco-max").value;
   const ordenar = document.getElementById("busca-ordenar").value;
 
-  const params = new URLSearchParams();
-  if (categoriaAtual) params.set("categoria", categoriaAtual);
-  if (precoMin) params.set("preco_min", precoMin);
-  if (precoMax) params.set("preco_max", precoMax);
-  if (ordenar) params.set("ordenar", ordenar);
+  // Cada filtro tem a sua rota; só o primeiro preenchido vale
+  let url = `${API_BASE_URL}/produtos`;
+  if (categoriaAtual) url += `/categoria/${encodeURIComponent(categoriaAtual)}`;
+  else if (precoMin || precoMax) url += `/preco/${precoMin || 0}/${precoMax || 999999}`;
+  else if (ordenar) url += `/ordenar/${ordenar}`;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/produtos/buscar?${params.toString()}`);
+    const res = await fetch(url);
     const dados = await res.json();
     if (!res.ok) {
       alert(dados.erro || "Não foi possível carregar o cardápio.");
@@ -73,12 +76,15 @@ function cardProduto(produto) {
       </div>`;
   }
 
+  let foto = "";
+  if (produto.imagem) {
+    foto = `<img src="${API_BASE_URL}/produtos/${id}/imagem?v=${produto.imagem}" alt="" class="object-fit-contain p-2" loading="lazy">`;
+  }
+
   return `
     <div class="col">
       <div class="card card-produto h-100 border-0 shadow-sm rounded-4" onclick="abrirProduto(${id})">
-        <div class="ratio ratio-4x3 rounded-top-4">
-          <img src="${API_BASE_URL}/produtos/${id}/imagem" alt="" class="object-fit-contain p-2" loading="lazy" onerror="this.remove()">
-        </div>
+        <div class="ratio ratio-4x3 rounded-top-4">${foto}</div>
         <div class="card-body p-2 p-md-3 d-flex flex-column">
           <small class="text-body-secondary">${escaparTexto(produto.categoria || "")}</small>
           <h3 class="h6 fw-semibold mb-1">${escaparTexto(produto.nome)}</h3>
@@ -106,11 +112,14 @@ function abrirProduto(id_produto) {
   const produto = produtos.find((p) => p.id_produto === id_produto);
   produtoAberto = id_produto;
 
-  // Sem foto: o onerror esconde a área
+  // Sem foto: esconde a área
   const foto = document.getElementById("detalhe-foto");
-  foto.classList.remove("d-none");
-  foto.innerHTML = `<img src="${API_BASE_URL}/produtos/${id_produto}/imagem" alt="" class="object-fit-contain p-3"
-                       onerror="this.parentElement.classList.add('d-none')">`;
+  if (produto.imagem) {
+    foto.innerHTML = `<img src="${API_BASE_URL}/produtos/${id_produto}/imagem?v=${produto.imagem}" alt="" class="object-fit-contain p-3">`;
+    foto.classList.remove("d-none");
+  } else {
+    foto.classList.add("d-none");
+  }
 
   document.getElementById("detalhe-categoria").textContent = produto.categoria || "";
   document.getElementById("detalhe-nome").textContent = produto.nome;
@@ -336,7 +345,6 @@ async function verificarPedidoAndamento() {
     }
     const pedido = pedidos.andamento[0];
     document.getElementById("aviso-pedido-texto").textContent = `Pedido ${pedido.codigo}: ${pedido.status_texto}`;
-    const avisoPedido = document.getElementById("aviso-pedido");
     const ball = document.getElementById("ball")
     if (pedido.status === "Pronto") {
       aviso.classList.remove("alert-warning");
@@ -358,6 +366,12 @@ async function verificarPedidoAndamento() {
 // Avaliação
 
 // Se o último pedido já foi concluído, abre a janela de avaliação
+
+const button = document.getElementById("avaliacao-close");
+button.addEventListener("click", () => {
+  localStorage.removeItem("pedidoParaAvaliar");
+});
+
 async function verificarAvaliacao() {
   const id = localStorage.getItem("pedidoParaAvaliar");
   if (!id) return;

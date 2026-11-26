@@ -35,7 +35,7 @@ class FinalizarPedidoService:
 | `buscar_produto_service.py` | `BuscarProdutoService` | Ver um produto pelo id |
 | `atualizar_produto_service.py` | `AtualizarProdutoService` | Editar produto (só os campos enviados); ao trocar o nome, renomeia a imagem |
 | `deletar_produto_service.py` | `DeletarProdutoService` | Excluir produto; antes, copia o nome para os itens de pedidos antigos e solta o vínculo |
-| `filtrar_produtos_service.py` | `FiltrarProdutosService` | Buscar por categoria, faixa de preço ou ordenar, pelo `ProdutoRepository` (procedure no MySQL, ORM nos outros bancos). Só o primeiro critério preenchido é aplicado: categoria, depois faixa de preço, depois ordenação |
+| `filtrar_produtos_service.py` | `FiltrarProdutosService` | Buscar por categoria, faixa de preço ou ordenar, pelo `ProdutoRepository` (procedure no MySQL, ORM nos outros bancos). A procedure faz o primeiro filtro, e os outros são aplicados em cima do resultado, então os filtros se combinam |
 | `enviar_imagem_produto_service.py` | `EnviarImagemProdutoService` | Salvar a foto do produto (PNG, JPG ou WEBP até 5 MB, reduzida para até 600×600) |
 | `buscar_imagem_produto_service.py` | `BuscarImagemProdutoService` | Achar o arquivo da foto (o controller é quem envia o arquivo) |
 
@@ -69,5 +69,6 @@ O carrinho são os `ItemPedido` do aluno que ainda não têm pedido (`id_pedido`
 | Arquivo | Classe | Caso de uso |
 |---|---|---|
 | `avaliar_pedido_service.py` | `AvaliarPedidoService` | Avaliar um pedido: só o dono, só pedido concluído, nota de 1 a 5, uma vez só |
+| `listar_avaliacao_service.py` | `ListarAvaliacaoService` | Listar as avaliações, as principais primeiro: com comentário, e depois as mais novas |
 
 O `produto/imagem.py` tem as funções das fotos (nome do arquivo, salvar e renomear), usadas pelos services de produto.

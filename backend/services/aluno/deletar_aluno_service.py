@@ -2,6 +2,7 @@ from flask_login import current_user
 from backend.extensions import db
 from backend.models.aluno_model import Aluno
 from backend.models.item_pedido import ItemPedido
+from backend.models.avaliacao_model import Avaliacao
 
 class DeletarAlunoService:
     @staticmethod
@@ -12,7 +13,9 @@ class DeletarAlunoService:
             return {"erro": "Aluno não encontrado"}, 404
         if id_aluno and aluno.id_aluno == current_user.id_aluno:
             return {"erro": "Para excluir a sua própria conta, use \"Remover minha conta\" em Minha Conta"}, 400
-
+        # Mantem as avaliações com o nome do aluno
+        for avaliacao in Avaliacao.query.filter_by(id_aluno=aluno.id_aluno).all():
+            avaliacao.id_aluno = None
         try:
             # Mantém os pedidos com o nome do aluno
             for pedido in aluno.pedido:

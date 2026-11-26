@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from backend.extensions import db
 from flask_login import UserMixin
 
@@ -42,6 +44,11 @@ class Aluno(UserMixin, db.Model):
     def buscar_por_id(id_aluno):
         return Aluno.query.get(id_aluno)
 
+    # Sem diferenciar maiúsculas: "Ana@Escola.com" e "ana@escola.com" são o mesmo e-mail
+    @staticmethod
+    def buscar_por_email(email):
+        return Aluno.query.filter(func.lower(Aluno.email) == email.strip().lower()).first()
+
     @property
     def is_admin(self):
         return self.funcao in ("admin", "mestre")
@@ -50,6 +57,7 @@ class Aluno(UserMixin, db.Model):
         return {
             'id_aluno': self.id_aluno,
             'nome': self.nome,
+            'icon': self.nome[0].upper() if self.nome else '?',
             'email': self.email,
             'saldo': self.saldo,
             'funcao': self.funcao

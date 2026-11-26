@@ -4,7 +4,7 @@ from backend.extensions import db
 from backend.models.pedido_model import Pedido
 
 
-# Consultas por stored procedure
+# No MySQL chama a procedure; em outro banco (SQLite) faz a mesma consulta sem procedure
 class PedidoRepository:
     @staticmethod
     def itens_do_ultimo_pedido(id_aluno):
@@ -24,6 +24,19 @@ class PedidoRepository:
         # Pula produtos excluídos
         return [{"id_produto": item.id_produto, "quantidade": item.quantidade}
                 for item in ultimo.itens if item.id_produto]
+
+    def filtrar_por_produto(produto):
+        banco = db.session.get_bind().dialect.name
+
+        if banco == "mysql":
+            sql = text("CALL sp_avaliacoes_por_produto(:produto)")
+            resultado = db.session.execute(sql, {"produto": produto})
+            linhas = resultado.mappings().all()
+            resultado.close()
+
+            return [Produto(**dict(linha)) for linha in linhas]
+
+        return Produto.query.filter_by(produto=produto).all()
 
     @staticmethod
     def combinacoes_mais_pedidas():

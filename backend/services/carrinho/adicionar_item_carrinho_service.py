@@ -22,6 +22,14 @@ class AdicionarItemCarrinhoService:
         # Já está no carrinho: soma a quantidade
         carrinho = ItemPedido.buscar_carrinho(current_user.id_aluno)
         item = next((i for i in carrinho if i.id_produto == produto.id_produto), None)
+
+        # Não deixa o carrinho passar do estoque
+        no_carrinho = item.quantidade if item else 0
+        if no_carrinho + quantidade > produto.quantidade_estoque:
+            if produto.quantidade_estoque == 0:
+                return {"erro": f"{produto.nome} está esgotado"}, 400
+            return {"erro": f"Só há {produto.quantidade_estoque} unidade(s) de {produto.nome} em estoque"}, 400
+
         if item:
             item.quantidade += quantidade
         else:

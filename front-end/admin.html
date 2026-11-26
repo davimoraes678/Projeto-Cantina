@@ -93,22 +93,30 @@
                     </div>
                     <div class="tab-pane fade" id="aba-historico">
                         <h2 class="h5 fw-bold mb-3">Histórico</h2>
+                        <input class="form-control rounded-pill mb-3" type="search" id="busca-historico" placeholder="Buscar por aluno, código ou produto" oninput="limiteHistorico = 10; mostrarHistorico()">
                         <div class="list-group shadow-sm rounded-4" id="lista-historico-admin"></div>
+                        <button class="btn btn-light border rounded-pill w-100 mt-3 d-none" type="button" id="mais-historico" onclick="limiteHistorico += 10; mostrarHistorico()">Ver mais</button>
                     </div>
                     <div class="tab-pane fade" id="aba-produtos">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h2 class="h5 fw-bold mb-0">Produtos</h2>
                             <button class="btn btn-primary rounded-pill" type="button" onclick="novoProduto()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="icone " fill="currentColor"><path d="M450-450H200v-60h250v-250h60v250h250v60H510v250h-60v-250Z"/></svg> Novo produto</button>
                         </div>
+                        <input class="form-control rounded-pill mb-3" type="search" id="busca-produtos" placeholder="Buscar por nome ou categoria" oninput="limiteProdutos = 10; mostrarProdutos()">
                         <div class="list-group shadow-sm rounded-4" id="lista-produtos-admin"></div>
+                        <button class="btn btn-light border rounded-pill w-100 mt-3 d-none" type="button" id="mais-produtos" onclick="limiteProdutos += 10; mostrarProdutos()">Ver mais</button>
                     </div>
                     <div class="tab-pane fade" id="aba-alunos">
                         <h2 class="h5 fw-bold mb-3">Alunos</h2>
+                        <input class="form-control rounded-pill mb-3" type="search" id="busca-alunos" placeholder="Buscar por nome ou e-mail" oninput="limiteAlunos = 10; mostrarAlunos()">
                         <div class="list-group shadow-sm rounded-4" id="lista-alunos"></div>
+                        <button class="btn btn-light border rounded-pill w-100 mt-3 d-none" type="button" id="mais-alunos" onclick="limiteAlunos += 10; mostrarAlunos()">Ver mais</button>
                     </div>
                     <div class="tab-pane fade" id="aba-avaliacoes">
                         <h2 class="h5 fw-bold mb-3">Avaliações</h2>
+                        <input class="form-control rounded-pill mb-3" type="search" id="busca-avaliacoes" placeholder="Buscar por pedido, produto ou comentário" oninput="limiteAvaliacoes = 10; mostrarAvaliacoes()">
                         <div class="list-group shadow-sm rounded-4" id="lista-avaliacoes"></div>
+                        <button class="btn btn-light border rounded-pill w-100 mt-3 d-none" type="button" id="mais-avaliacoes" onclick="limiteAvaliacoes += 10; mostrarAvaliacoes()">Ver mais</button>
                     </div>
                 </div>
             </div>

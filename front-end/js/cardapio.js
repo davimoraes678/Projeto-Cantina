@@ -5,6 +5,7 @@ let pedidoAvaliando = null;
 let todasAvaliacoes = [];          // todas as avaliações (botão "Todos")
 let avaliacoesPorProduto = {};     // { "Coxinha": [...], "Suco": [...] }
 let produtoAvaliacoes = "";        // botão escolhido ("" = Todos)
+let notaAvaliacoes = 0;            // nota escolhida (0 = todas)
 
 iniciar();
 
@@ -448,6 +449,16 @@ function mostrarAvaliacoesCardapio() {
   let lista = todasAvaliacoes;
   if (produtoAvaliacoes !== "") lista = avaliacoesPorProduto[produtoAvaliacoes];
 
+  // Botões das notas: Todas as notas, 5 ★, 4 ★, 3 ★, 2 ★, 1 ★
+  let botoesNota = botaoNota(0, "Todas as notas");
+  for (let nota = 5; nota >= 1; nota--) {
+    botoesNota += botaoNota(nota, `${nota} ★`);
+  }
+  document.getElementById("botoes-notas").innerHTML = botoesNota;
+
+  // Só a nota escolhida
+  if (notaAvaliacoes !== 0) lista = lista.filter((avaliacao) => avaliacao.nota === notaAvaliacoes);
+
   let html = "";
   lista.forEach((avaliacao) => {
     html += `
@@ -459,7 +470,7 @@ function mostrarAvaliacoesCardapio() {
         <p class="mb-0">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
       </div>`;
   });
-  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhuma avaliação ainda.</p>`;
+  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhuma avaliação encontrada.</p>`;
   document.getElementById("lista-avaliacoes-cardapio").innerHTML = html;
 }
 
@@ -473,5 +484,17 @@ function botaoAvaliacao(nome, texto) {
 
 function escolherAvaliacoes(nome) {
   produtoAvaliacoes = nome;
+  notaAvaliacoes = 0;
+  mostrarAvaliacoesCardapio();
+}
+
+function botaoNota(nota, texto) {
+  let cor = "btn-light border";
+  if (nota === notaAvaliacoes) cor = "btn-warning";
+  return `<button class="btn btn-sm ${cor} rounded-pill text-nowrap" type="button" onclick="escolherNota(${nota})">${texto}</button>`;
+}
+
+function escolherNota(nota) {
+  notaAvaliacoes = nota;
   mostrarAvaliacoesCardapio();
 }

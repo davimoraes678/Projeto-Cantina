@@ -2,6 +2,9 @@ let categoriaAtual = "";
 let produtos = [];
 let produtoAberto = null; // id do produto aberto na janela de detalhes
 let pedidoAvaliando = null;
+let todasAvaliacoes = [];          // todas as avaliações (botão "Todos")
+let avaliacoesPorProduto = {};     // { "Coxinha": [...], "Suco": [...] }
+let produtoAvaliacoes = "";        // botão escolhido ("" = Todos)
 
 iniciar();
 
@@ -12,6 +15,7 @@ function iniciar() {
   carregarCarrinho();
   verificarPedidoAndamento();
   verificarAvaliacao();
+  carregarAvaliacoesCardapio();
 
   // Atualiza o aviso do pedido a cada 15 segundos
   setInterval(verificarPedidoAndamento, 15000);
@@ -416,3 +420,58 @@ document.getElementById("form-avaliacao").addEventListener("submit", async (e) =
     console.error("Erro ao avaliar:", erro);
   }
 });
+
+// Avaliações no fim do cardápio
+
+async function carregarAvaliacoesCardapio() {
+  try {
+    const resTodas = await fetch(`${API_BASE_URL}/pedidos/avaliacao/todos`);
+    const resProdutos = await fetch(`${API_BASE_URL}/pedidos/avaliacao`);
+    if (!resTodas.ok || !resProdutos.ok) return;
+    todasAvaliacoes = await resTodas.json();
+    avaliacoesPorProduto = await resProdutos.json();
+    mostrarAvaliacoesCardapio();
+  } catch (erro) {
+    console.error("Erro ao carregar avaliações:", erro);
+  }
+}
+
+function mostrarAvaliacoesCardapio() {
+  // Botões: "Todos" e um para cada produto
+  let botoes = botaoAvaliacao("", "Todos");
+  Object.keys(avaliacoesPorProduto).forEach((nome) => {
+    botoes += botaoAvaliacao(nome, nome);
+  });
+  document.getElementById("botoes-avaliacoes").innerHTML = botoes;
+
+  // Avaliações do botão escolhido
+  let lista = todasAvaliacoes;
+  if (produtoAvaliacoes !== "") lista = avaliacoesPorProduto[produtoAvaliacoes];
+
+  let html = "";
+  lista.forEach((avaliacao) => {
+    html += `
+      <div class="list-group-item py-3">
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">${escaparTexto(avaliacao.aluno_nome)}</span>
+          <span class="badge rounded-pill text-bg-warning">${avaliacao.nota} ★</span>
+        </div>
+        <p class="mb-0">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
+      </div>`;
+  });
+  if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhuma avaliação ainda.</p>`;
+  document.getElementById("lista-avaliacoes-cardapio").innerHTML = html;
+}
+
+// O nome vai no data-produto para não quebrar com apóstrofo ("Pão d'água")
+function botaoAvaliacao(nome, texto) {
+  let cor = "btn-light border";
+  if (nome === produtoAvaliacoes) cor = "btn-primary";
+  return `<button class="btn ${cor} rounded-pill text-nowrap" type="button" data-produto="${escaparTexto(nome)}"
+                  onclick="escolherAvaliacoes(this.dataset.produto)">${escaparTexto(texto)}</button>`;
+}
+
+function escolherAvaliacoes(nome) {
+  produtoAvaliacoes = nome;
+  mostrarAvaliacoesCardapio();
+}

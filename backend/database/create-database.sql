@@ -59,7 +59,10 @@ CREATE TABLE IF NOT EXISTS avaliacao (
     nota INT NOT NULL,
     comentario VARCHAR(500),
     data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_aluno INT,
     id_pedido INT NOT NULL UNIQUE,
+    nome_aluno VARCHAR(100),
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_aluno),
     FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 

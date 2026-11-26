@@ -6,3 +6,4 @@ class ListarAvaliacaoService:
     @staticmethod
     def executar():
         return [avaliacao.to_dict() for avaliacao in Avaliacao.listar_todos()], 200
+

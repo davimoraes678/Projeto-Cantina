@@ -9,6 +9,11 @@ from backend.services.avaliacao.filtrar_avaliacao_service import FiltrarPorCateg
 # /api/pedidos/<id>/avaliacao
 bp_avaliacao = Blueprint('avaliacoes', __name__, url_prefix='/api/pedidos')
 
+@bp_avaliacao.route('/avaliacao/todos', methods=['GET'])
+@login_required
+def listar_todas():
+    resposta, status = ListarAvaliacaoService.executar()
+    return jsonify(resposta), status
 
 @bp_avaliacao.route('/<int:id_pedido>/avaliacao', methods=['POST'])
 @login_required

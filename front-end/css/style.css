@@ -91,18 +91,3 @@
         display: none;
     }
 }
-
-/* Avaliações: estrelas douradas, inicial do aluno num círculo e fundo da janela do produto */
-.estrelas {
-    color: #c08a00;
-}
-
-.avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    background-color: #f6dfe1;
-}
-
-.fundo-cantina {
-    background-color: var(--bs-body-bg);
-}

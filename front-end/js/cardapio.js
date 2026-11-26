@@ -461,10 +461,23 @@ function mostrarAvaliacoesCardapio() {
 
   let html = "";
   lista.forEach((avaliacao) => {
+    // Etiqueta: no "Todos", todos os produtos do pedido; num produto, só os outros
+    let produtos = avaliacao.itens.map((item) => item.produto_nome);
+    let etiqueta = produtos.join(", ");
+    if (produtoAvaliacoes !== "") {
+      const outros = produtos.filter((nome) => nome !== produtoAvaliacoes);
+      etiqueta = "";
+      if (outros.length > 0) etiqueta = "Pedido também com: " + outros.join(", ");
+    }
+
+    let selo = "";
+    if (etiqueta) selo = `<span class="badge rounded-pill text-bg-light border mt-2">${escaparTexto(etiqueta)}</span>`;
+
     html += `
       <div class="list-group-item py-3">
         <span class="badge rounded-pill text-bg-warning mb-1">${avaliacao.nota} ★</span>
         <p class="mb-0">${escaparTexto(avaliacao.comentario || "Sem comentário")}</p>
+        ${selo}
       </div>`;
   });
   if (html === "") html = `<p class="text-center text-body-secondary py-4 mb-0">Nenhuma avaliação encontrada.</p>`;
